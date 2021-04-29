@@ -3,7 +3,7 @@
 
 #include "supercontainer.h"
 
-enum ampl {t1, t2};
+enum ampl {t1, t2, r1, r2};
 
 template<typename T=double>
 class amplitudes : public supercontainer<T> {
