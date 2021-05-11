@@ -64,7 +64,9 @@ int main(int argc, char const *argv[])
   std::vector<container<2>> vr1;
   std::unique_ptr<problem_eom> problem_es;
   for (size_t ir = 0; ir < nroots; ir++) {
+
     container r1(hamiltonian.m2get(f_ov).get_space());
+    bbo::zero(r1);
     libtensor::block_tensor_wr_ctrl<2, double> ctrl(r1);
     libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
     for (libtensor::orbit_list<2, double>::iterator it = ol.begin();

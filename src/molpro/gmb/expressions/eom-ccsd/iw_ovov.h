@@ -22,11 +22,12 @@ container<4,double> eom_ccsd_iw_ovov(
 
     libtensor::letter i,j,m,n,a,b,e,f;
 
-    iw_ovov(j|a|i|b) = i_ovov(j|a|i|b)
-                     + contract(m, t1(m|a), i_ooov(m|j|i|b))
-                     - contract(e, t1(i|e), i_ovvv(j|a|b|e))
-                     + contract(m|e, 
-                        0.5 * t2(i|m|a|e) + t1(i|e) * t1(m|a), i_oovv(m|j|e|b));
+    iw_ovov(i|a|j|b) = i_ovov(i|a|j|b)
+                     - contract(e, t1(i|e), i_ovvv(j|b|a|e))
+                     - contract(m|e, t2(i|m|b|e), i_oovv(j|m|a|e))
+                     + contract(m, 
+                        contract(e, t1(i|e), i_oovv(j|m|a|e))
+                         - i_ooov(j|m|i|a), t1(m|b));
     return iw_ovov;
 
 }

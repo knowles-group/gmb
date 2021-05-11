@@ -5,12 +5,12 @@
 #include "../../container.h"
 
 /**
- * @brief Action to be applied to CCSD T1 amplitudes.
+ * @brief Action to be applied to CCSD T1s.
  * 
  */
 container<2,double> ccsd_t1(
-    container<2, double> &t1,      ///< CCSD T1 amplitude
-    container<4, double> &t2,      ///< CCSD T2 amplitude
+    container<2, double> &t1,      ///< CCSD T1
+    container<4, double> &t2,      ///< CCSD T2
     container<2, double> &f_ov,    ///< fock matrix - ov block
     container<2, double> &if_oo,   ///< intermediate - oo block
     container<2, double> &if_ov,   ///< intermediate - ov block

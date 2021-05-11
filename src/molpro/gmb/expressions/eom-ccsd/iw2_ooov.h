@@ -9,7 +9,7 @@
  * 
  */
 container<4,double> eom_ccsd_iw2_ooov(
-    container<2, double> &t1,       ///< CCSD T1 amplitude
+    container<2, double> &t1,       ///< CCSD T1
     container<4, double> &i_ooov,   ///> anti-symmetrized integral <ij||ka>
     container<4, double> &i_oovv    ///> anti-symmetrized integral <ij||ab>
 

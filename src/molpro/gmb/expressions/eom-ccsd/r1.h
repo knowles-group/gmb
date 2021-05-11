@@ -5,12 +5,12 @@
 #include "../../container.h"
 
 /**
- * @brief Action to be applied to EOMEE-CCSD R1 amplitudes.
+ * @brief Action to be applied to EOMEE-CCSD R1s.
  * 
  */
 container<2,double> eom_ccsd_r1(
-    container<2, double> &r1,      ///< EOM-CCSD R1 amplitude
-    container<4, double> &r2,      ///< EOM-CCSD R2 amplitude
+    container<2, double> &r1,      ///< EOM-CCSD R1
+    container<4, double> &r2,      ///< EOM-CCSD R2
     container<2, double> &if_oo,   ///< intermediate - oo block
     container<2, double> &if_ov,   ///< intermediate - ov block
     container<2, double> &if_vv,   ///< intermediate - vv block
@@ -27,9 +27,9 @@ container<2,double> eom_ccsd_r1(
     r1_new(i|a) = contract(e, r1(i|e), if_vv(a|e))
                 - contract(m, r1(m|a), if_oo(m|i))
                 + contract(e|m, r2(i|m|a|e), if_ov(m|e))
-                - contract(e|m, r1(m|e), iw_ovov(m|a|i|e))  
-                - 0.5 * contract(e|f|m, r2(i|m|e|f), iw2_ovvv(m|a|e|f))
+                - contract(e|m, r1(m|e), iw_ovov(i|e|m|a))  
                 - 0.5 * contract(e|m|n, r2(m|n|a|e), iw2_ooov(m|n|i|e))
+                - 0.5 * contract(e|f|m, r2(i|m|e|f), iw2_ovvv(m|a|e|f))
                 ;
 
     return r1_new;

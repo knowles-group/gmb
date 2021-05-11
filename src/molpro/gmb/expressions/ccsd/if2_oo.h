@@ -7,10 +7,10 @@
 /**
  * @brief F_oo intermediate 
  * 
- * Needed to calculate CCSD T2 amplitudes
+ * Needed to calculate CCSD T2s
  */
 container<2,double> ccsd_if2_oo(
-    container<2, double> &t1,     ///< CCSD T1 amplitude
+    container<2, double> &t1,     ///< CCSD T1
     container<4, double> &t2,     ///< CCSD T2 intermediate
     container<2, double> &f_oo,   ///< fock matrix - oo block
     container<2, double> &f_ov,   ///< fock matrix - ov block

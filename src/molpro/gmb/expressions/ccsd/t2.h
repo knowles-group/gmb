@@ -5,12 +5,12 @@
 #include "../../container.h"
 
 /**
- * @brief Action to be applied to CCSD T2 amplitudes.
+ * @brief Action to be applied to CCSD T2s.
  * 
  */
 container<4,double> ccsd_t2 (
-    container<2, double> &t1,      ///< CCSD T1 amplitude
-    container<4, double> &t2,      ///< CCSD T2 amplitude
+    container<2, double> &t1,      ///< CCSD T1
+    container<4, double> &t2,      ///< CCSD T2
     container<4, double> &tau,     ///< tau intermediate
     container<2, double> &if_oo,   ///< intermediate - oo block
     container<2, double> &if_vv,   ///< intermediate - vv block

@@ -9,8 +9,8 @@
  * 
  */
 container<2,double> ccsd_if_vv(
-    container<2, double> &t1,         ///< CCSD T1 amplitude
-    container<4, double> &t2,         ///< CCSD T2 amplitude
+    container<2, double> &t1,         ///< CCSD T1
+    container<4, double> &t2,         ///< CCSD T2
     container<2, double> &f_ov,       ///< fock matrix - ov block
     container<2, double> &f_vv,       ///< fock matrix - vv block
     container<4, double> &i_oovv,     ///> anti-symmetrized integral <ij||ab>
