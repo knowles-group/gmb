@@ -20,14 +20,9 @@ public:
 
   virtual ~problem_eom() {}
 
-  void energy(container_t x) {
-    // if (x.get_m2().find("t1") == x.get_m2().end())
-    //   m_energy = 0.25 * x.m4get("t2").dot(m_ham.m4get("i_oovv"));
-    // else
-    //   m_energy = energy_ccsd(x.m2get("t1"), x.m4get("t2"), m_ham.m2get("f_ov"), m_ham.m4get("i_oovv"));
-  }
+  // void energy(container_t x) {}
 
-  std::vector<double> get_energy() const {return m_energy;}  
+  // std::vector<double> get_energy() const {return m_energy;}  
 
   friend
   std::ostream& operator<<(std::ostream& s, const problem_eom& problem) ;

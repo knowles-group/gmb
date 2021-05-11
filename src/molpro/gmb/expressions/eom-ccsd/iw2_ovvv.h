@@ -9,7 +9,7 @@
  * 
  */
 container<4,double> eom_ccsd_iw2_ovvv(
-    container<2, double> &t1,       ///< CCSD T1 amplitude
+    container<2, double> &t1,       ///< CCSD T1
     container<4, double> &i_oovv,   ///> anti-symmetrized integral <ij||ab>
     container<4, double> &i_ovvv    ///> anti-symmetrized integral <ia||bc>
 
@@ -20,7 +20,7 @@ container<4,double> eom_ccsd_iw2_ovvv(
     libtensor::letter i,j,m,n,a,b,c,e,f;
 
     iw_ovvv(i|c|b|a) = i_ovvv(i|c|b|a)
-                     - contract(m, t1(m|c), i_oovv(m|i|a|b));
+                       - contract(m, t1(m|c), i_oovv(m|i|a|b));
     return iw_ovvv;
 
 }

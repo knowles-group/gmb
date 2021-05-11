@@ -10,7 +10,7 @@
  * 
  */
 container<4,double> eom_ccsd_iw_oooo(
-    container<2, double> &t1,      ///< CCSD T1 amplitude
+    container<2, double> &t1,      ///< CCSD T1
     container<4, double> &tau,     ///< tau intermediate
     container<4, double> &i_oooo,  ///> anti-symmetrized integral <ij||kl>
     container<4, double> &i_ooov,  ///> anti-symmetrized integral <ij||ka>
@@ -20,12 +20,12 @@ container<4,double> eom_ccsd_iw_oooo(
 
     container<4, double> iw_oooo(i_oooo.get_space());
 
-    libtensor::letter i,j,m,n,a,b,e,f;
+    libtensor::letter i,j,k,l,e,f;
 
-    iw_oooo(m|n|i|j) = i_oooo(m|n|i|j)
+    iw_oooo(i|j|k|l) = i_oooo(i|j|k|l)
                      + asymm(i, j, 
-                        contract(e, t1(j|e), i_ooov(m|n|i|e)))
-                     + 0.5 * contract(e|f, tau(i|j|e|f), i_oovv(m|n|e|f));
+                        contract(e, t1(j|e), i_ooov(k|l|i|e)))
+                     + 0.5 * contract(e|f, tau(i|j|e|f), i_oovv(k|l|e|f));
 
     return iw_oooo;
 
