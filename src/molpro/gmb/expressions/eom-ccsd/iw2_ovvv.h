@@ -17,10 +17,11 @@ container<4,double> eom_ccsd_iw2_ovvv(
 
     container<4, double> iw_ovvv(i_ovvv.get_space());
 
-    libtensor::letter i,j,m,n,a,b,c,e,f;
+    libtensor::letter a,b,c,i,m;
 
     iw_ovvv(i|c|b|a) = i_ovvv(i|c|b|a)
                        - contract(m, t1(m|c), i_oovv(m|i|a|b));
+                
     return iw_ovvv;
 
 }

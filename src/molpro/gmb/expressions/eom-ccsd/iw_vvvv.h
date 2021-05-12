@@ -19,9 +19,9 @@ container<4,double> eom_ccsd_iw_vvvv(
 
     container<4, double> iw_vvvv(i_vvvv.get_space());
 
-    libtensor::letter i,j,m,n,a,b,c,d;
+    libtensor::letter m,n,a,b,c,d;
 
-    iw_vvvv(a|b|c|d) = i_vvvv(a|b|c|d)
+    iw_vvvv(c|d|a|b) = i_vvvv(c|d|a|b)
                      + asymm(c, d, 
                        contract(m, t1(m|d), i_ovvv(m|c|a|b)))
                      + 0.5 * contract(m|n, tau(m|n|c|d), i_oovv(m|n|a|b));
