@@ -16,8 +16,8 @@ public:
                     const std::vector<value_t> &shift) const override {
     for (int k = 0; k < g.size(); k++) {
       auto &a = g[k].get();     
-      auto t2_new = update_t2(m_ham.m2get(f_oo), m_ham.m2get(f_vv), a.m4get("t2"));
-      a.set("t2", t2_new);
+      auto t2_new = update_t2(m_ham.m2get(f_oo), m_ham.m2get(f_vv), a.m4get(t2));
+      a.set(t2, t2_new);
     }
   }
 
@@ -25,9 +25,9 @@ public:
   value_t residual(const container_t &v, container_t &a) const override {
     value_t value = 0;
     auto &ccv = const_cast<container_t&> (v);    
-    auto t2_new = action_ccd(ccv.m4get("t2"), m_ham.m2get(f_oo), m_ham.m2get(f_vv), 
+    auto t2_new = action_ccd(ccv.m4get(t2), m_ham.m2get(f_oo), m_ham.m2get(f_vv), 
                   m_ham.m4get(i_oooo), m_ham.m4get(i_oovv), m_ham.m4get(i_ovov), m_ham.m4get(i_vvvv));
-    a.set("t2", t2_new);
+    a.set(t2, t2_new);
     return value;
   }
 

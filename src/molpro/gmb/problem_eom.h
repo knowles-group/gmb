@@ -7,7 +7,7 @@
 #include "expressions/ccsd/ccsd.h"
 
 
-class problem_eom : public molpro::linalg::itsolv::Problem<supercontainer<>> {
+class problem_eom : public molpro::linalg::itsolv::Problem<amplitudes<>> {
 protected:
   std::vector<double> m_energy; ///> energy
   mutable hamiltonian<> m_ham; ///> Hamiltonian
