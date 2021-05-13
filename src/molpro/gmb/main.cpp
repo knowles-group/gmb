@@ -22,7 +22,7 @@ int main(int argc, char const *argv[]) {
   filename = {argv[0]};
   if (filename.find_last_of("/") != std::string::npos)
     filename.resize(filename.find_last_of("/"));
-  filename += "/" + test_case + ".fcidump";
+  filename += "/"+test_case+".fcidump";
   auto start = std::chrono::system_clock::now();
 
   hamiltonian<> hamiltonian;
@@ -57,7 +57,7 @@ int main(int argc, char const *argv[]) {
   std::cout << method_gs << " energy: " << std::setprecision(8) << problem->get_energy()<< "\n";
 
   #if 1// Excited State
-  std::cout << std::endl << method_es<< "\n";
+  std::cout << "\n" << method_es<< "\n";
   size_t nroots(4);
 
   std::vector<amplitudes<>> v_rampl(nroots);
@@ -69,7 +69,9 @@ int main(int argc, char const *argv[]) {
   auto residuals_es = v_rampl;
   solver_es->set_n_roots(nroots);
   solver_es->solve(v_rampl, residuals_es, *problem_es, true);
-#endif
+  problem_es->set_energy(solver_es->eigenvalues());
+
+  #endif
 
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end - start;

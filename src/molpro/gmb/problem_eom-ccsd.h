@@ -22,7 +22,7 @@ public:
   }
 
   void init() {
-    std::cout << "Computing intermediates\n";
+    std::cout << "Computing intermediates...\n";
     auto tau = ccsd_tau(m_tampl.m2get(t1), m_tampl.m4get(t2));
     auto if_oo = eom_ccsd_if_oo(m_tampl.m2get(t1), m_tampl.m4get(t2), m_ham.m2get(f_oo), m_ham.m2get(f_ov),
                    m_ham.m4get(i_ooov), m_ham.m4get(i_oovv));    
@@ -69,7 +69,6 @@ public:
   void precondition(const VecRef<container_t>& residual, 
                     const std::vector<value_t>& shift, 
                     const container_t& diagonals) const override {
-    std::cout << "precond\n";
     for (int k = 0; k < residual.size(); k++) {
       auto &a = residual[k].get();   
       auto &d = const_cast<container_t&> (diagonals);  
@@ -83,7 +82,6 @@ public:
   }
 
   void action(const CVecRef<container_t> &parameters, const VecRef<container_t> &actions) const override {
-    std::cout << "action\n";
     for (int k = 0; k < parameters.size(); k++) {
       auto &ccp = const_cast<container_t&> (parameters[k].get());     
       auto &a = actions[k].get();  
