@@ -50,7 +50,7 @@ int main(int argc, char const *argv[]) {
   auto solver = molpro::linalg::itsolv::create_NonLinearEquations<amplitudes<>>("DIIS");
 
   auto residual = *ptampl;
-  solver->set_verbosity(molpro::linalg::itsolv::Verbosity::None);
+  // solver->set_verbosity(molpro::linalg::itsolv::Verbosity::None);
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);
   problem->energy(*ptampl);
@@ -58,7 +58,7 @@ int main(int argc, char const *argv[]) {
 
   #if 1// Excited State
   std::cout << std::endl << method_es<< "\n";
-  size_t nroots(2);
+  size_t nroots(4);
 
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
