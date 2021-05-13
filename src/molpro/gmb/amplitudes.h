@@ -1,9 +1,11 @@
-#ifndef  AMPLITUDES_H
-#define  AMPLITUDES_H
+#ifndef GMB_AMPLITUDES_H
+#define GMB_AMPLITUDES_H
 
 #include "supercontainer.h"
 
+extern std::string filename;
 enum ampl {t1, t2, r1, r2};
+
 
 template<typename T=double>
 class amplitudes : public supercontainer<T> {
@@ -28,7 +30,7 @@ public:
 
   amplitudes(const std::map<size_t,value_type>& source) {
     for (auto &imin : source) {
-      auto r1_guess = get_integral(test_case+".fcidump",o,v);
+      auto r1_guess = get_integral(filename,o,v);
       bbo::zero(r1_guess);
       libtensor::block_tensor_wr_ctrl<2, double> ctrl(r1_guess);
       libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
@@ -50,7 +52,7 @@ public:
         ctrl.ret_block(bidx);
       }
       this->m_m2.insert(std::make_pair("r1", new container<2,T> (r1_guess)));
-      auto r2_guess = get_integral(test_case+".fcidump",o,o,v,v);
+      auto r2_guess = get_integral(filename,o,o,v,v);
       bbo::zero(r2_guess);
       this->m_m4.insert(std::make_pair("r2", new container<4,T> (r2_guess)));
     }
@@ -98,4 +100,4 @@ public:
   }
 };
 
-#endif // AMPLITUDES_H
+#endif //GMB_AMPLITUDES_H

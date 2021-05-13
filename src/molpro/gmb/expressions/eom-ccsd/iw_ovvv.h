@@ -40,4 +40,4 @@ container<4,double> eom_ccsd_iw_ovvv(
 
 }
 
-#endif // GMB_EOM_CCSD_IW_OVVV_H
+#endif //GMB_EOM_CCSD_IW_OVVV_H

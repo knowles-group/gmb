@@ -26,4 +26,4 @@ container<4,double> hbar_oovv(
     return hb_oovv;
 };
 
-#endif // GMB_HBAR_OOVV_H
+#endif //GMB_HBAR_OOVV_H

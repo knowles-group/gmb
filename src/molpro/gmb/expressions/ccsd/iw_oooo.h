@@ -30,4 +30,4 @@ container<4,double> ccsd_iw_oooo(
 
 }
 
-#endif // GMB_CCSD_IW_OOOO_H
+#endif //GMB_CCSD_IW_OOOO_H

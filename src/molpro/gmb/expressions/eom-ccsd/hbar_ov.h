@@ -20,4 +20,4 @@ container<2,double> hbar_ov(
     return hb_ov;
 };
 
-#endif // GMB_HBAR_OV_H
+#endif //GMB_HBAR_OV_H

@@ -1,5 +1,5 @@
-#ifndef ID_XX_H
-#define ID_XX_H
+#ifndef GMB_ID_XX_H
+#define GMB_ID_XX_H
 
 #include "../container.h"
 
@@ -19,4 +19,4 @@ container<2,double> id_xx(
     return d_xx;
 }
 
-#endif // ID_XX_H
+#endif //GMB_ID_XX_H

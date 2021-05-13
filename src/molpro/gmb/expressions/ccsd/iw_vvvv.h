@@ -27,4 +27,4 @@ container<4,double> ccsd_iw_vvvv(
 
 }
 
-#endif // GMB_CCSD_IW_VVVV_H
+#endif //GMB_CCSD_IW_VVVV_H

@@ -23,4 +23,4 @@ double ccsd_energy (
    return energy;
 }
 
-#endif // GMB_CCSD_ENERGY_H
+#endif //GMB_CCSD_ENERGY_H

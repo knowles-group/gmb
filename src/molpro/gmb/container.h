@@ -1,5 +1,5 @@
-#ifndef  SECONDQUANTIZATION_CONTAINER_H
-#define  SECONDQUANTIZATION_CONTAINER_H
+#ifndef GMB_CONTAINER_H
+#define GMB_CONTAINER_H
 
 
 #include <libtensor/libtensor.h>
@@ -92,4 +92,4 @@ public:
 
 };
 
-#endif // SECONDQUANTIZATION_CONTAINER_H
+#endif //GMB_CONTAINER_H

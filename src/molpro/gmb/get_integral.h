@@ -1,5 +1,5 @@
-#ifndef GET_INTEGRAL_H
-#define GET_INTEGRAL_H
+#ifndef GMB_GET_INTEGRAL_H
+#define GMB_GET_INTEGRAL_H
 
 
 #include "molpro/FCIdump.h"
@@ -40,4 +40,4 @@ container<4,double> get_i(std::string filename,
                           orb_type o2, 
                           orb_type o3, 
                           orb_type o4);
-#endif // GET_INTEGRAL_H
+#endif //GMB_GET_INTEGRAL_H

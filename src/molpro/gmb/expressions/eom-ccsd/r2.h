@@ -49,4 +49,4 @@ container<4,double> eom_ccsd_r2 (
     return r2_new;
 }     
 
-#endif // GMB_CCSD_R2_H
+#endif //GMB_CCSD_R2_H

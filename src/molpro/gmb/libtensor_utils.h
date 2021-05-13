@@ -1,5 +1,5 @@
-#ifndef LIBTENSOR_UTILS_H
-#define LIBTENSOR_UTILS_H
+#ifndef GMB_LIBTENSOR_UTILS_H
+#define GMB_LIBTENSOR_UTILS_H
 
 #include "libtensor/libtensor.h"
 
@@ -61,4 +61,4 @@ namespace bbo {
     void zero(libtensor::btensor<4,double> &tensor);
     
 } // namespace bbo
-#endif //LIBTENSOR_UTILS_H
+#endif //GMB_LIBTENSOR_UTILS_H

@@ -6,7 +6,7 @@ double get_integral(std::string filename) {
   infile.open(filename);
   //send error if output not found
   if (!infile) {
-      std::cout << "Unable to open file: " << filename << std::endl;
+      std::cout << "Unable to open file: " << filename<< "\n";
       exit(1); // terminate with error
   }
   molpro::FCIdump dump(filename);
@@ -17,7 +17,7 @@ double get_integral(std::string filename) {
   while ((type = dump.nextIntegral(i, j, k, l, integral)) != molpro::FCIdump::endOfFile) {
     if (type == molpro::FCIdump::I0)
       if (false) std::cout << "found " <<
-                "scalar integral " << integral << std::endl;
+                "scalar integral " << integral<< "\n";
   }
   return integral;
 }
@@ -32,7 +32,7 @@ container<2,double> get_integral(std::string filename,
   infile.open(filename);
   //send error if output not found
   if (!infile) {
-      std::cout << "Unable to open file: " << filename << std::endl;
+      std::cout << "Unable to open file: " << filename<< "\n";
       exit(1); // terminate with error
   }
   
@@ -124,7 +124,7 @@ container<2,double> get_integral(std::string filename,
           std::cout << "orb number: " << iot 
                     << " ispin: " << ispin
                     << " does not exist."
-                    << std::endl;
+                   << "\n";
       }
     }
   }
@@ -205,11 +205,11 @@ container<2,double> get_integral(std::string filename,
           size_t offset = (j+v_shift[spin][1][symj])+(i+v_shift[spin][0][symi])*(v_norb[spin][1]);
           ptr[offset] = value;
           if (false) {
-            std::cout << "first if" << std::endl;
-            std::cout << "i = " << i << " j = " << j << " k = " << k << " l = " << l << std::endl;
-            std::cout << "symi = " << symi << " symj = " << symj << " symk = " << symk << " syml = " << syml << std::endl;
-            std::cout << " value = " << value << std::endl;
-            std::cout << " offset = " << offset << std::endl;
+            std::cout << "first if\n";
+            std::cout << "i = " << i << " j = " << j << " k = " << k << " l = " << l<< "\n";
+            std::cout << "symi = " << symi << " symj = " << symj << " symk = " << symk << " syml = " << syml<< "\n";
+            std::cout << " value = " << value<< "\n";
+            std::cout << " offset = " << offset<< "\n";
           }
         }
         if ((((j) >= v_psi[spin][0].first[symj] & (j) < v_psi[spin][0].second[symj]) 
@@ -218,10 +218,10 @@ container<2,double> get_integral(std::string filename,
           size_t offset = (i+v_shift[spin][1][symi])+(j+v_shift[spin][0][symj])*(v_norb[spin][1]);
           ptr[offset] = value;
           if (false) {
-            std::cout << "second if" << std::endl;
-            std::cout << "i = " << i << " j = " << j << " k = " << k << " l = " << l << std::endl;
-            std::cout << " value = " << value << std::endl;
-            std::cout << " offset = " << offset << std::endl;
+            std::cout << "second if\n";
+            std::cout << "i = " << i << " j = " << j << " k = " << k << " l = " << l<< "\n";
+            std::cout << " value = " << value<< "\n";
+            std::cout << " offset = " << offset<< "\n";
           }
         }
       }
@@ -232,7 +232,7 @@ container<2,double> get_integral(std::string filename,
   }  
 
   if (false) {
-    std::cout << "printing integral" << std::endl;
+    std::cout << "printing integral\n";
     libtensor::bto_print<2, double>(std::cout).perform(integral);
   }
 
@@ -251,7 +251,7 @@ container<4,double> get_integral(std::string filename,
   infile.open(filename);
   //send error if output not found
   if (!infile) {
-      std::cout << "Unable to open file: " << filename << std::endl;
+      std::cout << "Unable to open file: " << filename<< "\n";
       exit(1); // terminate with error
   } 
   
@@ -326,7 +326,7 @@ container<4,double> get_integral(std::string filename,
     for (auto &&ispin : v_spin) 
       sp += v_norb[ispin][iot]; //space contains alpha+beta 
     libtensor::bispace<1> space(sp);
-    if (so_basis) space.split(v_norb[0][iot]); // split space alpha/beta
+    if (so_basis && (v_norb[0][iot] < sp)) space.split(v_norb[0][iot]); // split space alpha/beta
     v_sp.push_back(space);
   }
 
@@ -345,7 +345,7 @@ container<4,double> get_integral(std::string filename,
           std::cout << "orb number: " << iot 
                     << " ispin: " << ispin
                     << " does not exist."
-                    << std::endl;
+                   << "\n";
       }
     }
   }
@@ -430,7 +430,7 @@ container<4,double> get_integral(std::string filename,
   bbo::zero(integral);
   
   if (false) {
-    std::cout << "In get_integral, integral:" << std::endl;
+    std::cout << "In get_integral, integral:\n";
     libtensor::bto_print<4, double>(std::cout).perform(integral);
   }
 
@@ -446,10 +446,10 @@ container<4,double> get_integral(std::string filename,
     
     ol.get_index(it, bidx);
     if (false) {
-      std::cout << "bidx[0] = " << bidx[0] << std::endl;
-      std::cout << "bidx[1] = " << bidx[1] << std::endl;
-      std::cout << "bidx[2] = " << bidx[2] << std::endl;
-      std::cout << "bidx[3] = " << bidx[3] << std::endl;
+      std::cout << "bidx[0] = " << bidx[0]<< "\n";
+      std::cout << "bidx[1] = " << bidx[1]<< "\n";
+      std::cout << "bidx[2] = " << bidx[2]<< "\n";
+      std::cout << "bidx[3] = " << bidx[3]<< "\n";
     }
 
     std::vector<size_t> bidx_cp(orb_types.size());
@@ -459,10 +459,10 @@ container<4,double> get_integral(std::string filename,
     }
 
     if (false) {
-      std::cout << "bidx_cp[0] = " << bidx_cp[0] << std::endl;
-      std::cout << "bidx_cp[1] = " << bidx_cp[1] << std::endl;
-      std::cout << "bidx_cp[2] = " << bidx_cp[2] << std::endl;
-      std::cout << "bidx_cp[3] = " << bidx_cp[3] << std::endl;
+      std::cout << "bidx_cp[0] = " << bidx_cp[0]<< "\n";
+      std::cout << "bidx_cp[1] = " << bidx_cp[1]<< "\n";
+      std::cout << "bidx_cp[2] = " << bidx_cp[2]<< "\n";
+      std::cout << "bidx_cp[3] = " << bidx_cp[3]<< "\n";
     }
     
     bool block1(true), block2(true);
@@ -519,15 +519,15 @@ container<4,double> get_integral(std::string filename,
       
       while ((type = dump.nextIntegral(symi, i, symj, j, symk, k, syml, l, value)) != molpro::FCIdump::endOfFile) {
         if (false) {
-        std::cout << "type: " << std::endl;
-            if (type == molpro::FCIdump::I2aa) std::cout << "I2aa" << std::endl;
-            if (type == molpro::FCIdump::I2ab) std::cout << "I2ab" << std::endl;
-            if (type == molpro::FCIdump::I2bb) std::cout << "I2bb" << std::endl;
-            std::cout << "i = " << i << " j = " << j << " k = " << k << " l = " << l << std::endl;
-            std::cout << "symi = " << symi << " symj = " << symj << " symk = " << symk << " syml = " << syml << std::endl;
-            std::cout << " value = " << value << std::endl;
-            std::cout << "v_psi[spin1][0].first[symi]: " << v_psi[spin1][0].first[symi] << std::endl;
-            std::cout << "v_psi[spin1][0].second[symi]: " << v_psi[spin1][0].second[symi] << std::endl;
+        std::cout << "type: \n";
+            if (type == molpro::FCIdump::I2aa) std::cout << "I2aa\n";
+            if (type == molpro::FCIdump::I2ab) std::cout << "I2ab\n";
+            if (type == molpro::FCIdump::I2bb) std::cout << "I2bb\n";
+            std::cout << "i = " << i << " j = " << j << " k = " << k << " l = " << l<< "\n";
+            std::cout << "symi = " << symi << " symj = " << symj << " symk = " << symk << " syml = " << syml<< "\n";
+            std::cout << " value = " << value<< "\n";
+            std::cout << "v_psi[spin1][0].first[symi]: " << v_psi[spin1][0].first[symi]<< "\n";
+            std::cout << "v_psi[spin1][0].second[symi]: " << v_psi[spin1][0].second[symi]<< "\n";
         }
         if (block1) {
         if ( (((i) >= v_psi[spin1][0].first[symi] && (i) < v_psi[spin1][0].second[symi]) && ((j) >= v_psi[spin1][1].first[symj] && (j)<v_psi[spin1][1].second[symj]))
@@ -538,7 +538,7 @@ container<4,double> get_integral(std::string filename,
                         + (v_norb[spin2][3])*(k+v_shift[spin2][2][symk])
                         + (l+v_shift[spin2][3][syml]);
           ptr[offset] = value;
-          if (false) std::cout << "1 offset = " << offset << std::endl;
+          if (false) std::cout << "1 offset = " << offset<< "\n";
         }
         if ( (((j) >= v_psi[spin1][0].first[symj] && (j) < v_psi[spin1][0].second[symj]) && ((i) >= v_psi[spin1][1].first[symi] && (i)<v_psi[spin1][1].second[symi]))
           && (((l) >= v_psi[spin2][2].first[syml] && (l) < v_psi[spin2][2].second[syml]) && ((k) >= v_psi[spin2][3].first[symk] && (k)<v_psi[spin2][3].second[symk]))
@@ -548,7 +548,7 @@ container<4,double> get_integral(std::string filename,
                         + (v_norb[spin2][3])*(l+v_shift[spin2][2][syml])
                         + (k+v_shift[spin2][3][symk]);
           ptr[offset] = value;
-          if (false) std::cout << "3 offset = " << offset << std::endl;
+          if (false) std::cout << "3 offset = " << offset<< "\n";
         }
         if ( (((j) >= v_psi[spin1][0].first[symj] && (j) < v_psi[spin1][0].second[symj]) && ((i) >= v_psi[spin1][1].first[symi] && (i)<v_psi[spin1][1].second[symi]))
           && (((k) >= v_psi[spin2][2].first[symk] && (k) < v_psi[spin2][2].second[symk]) && ((l) >= v_psi[spin2][3].first[syml] && (l)<v_psi[spin2][3].second[syml]))
@@ -558,7 +558,7 @@ container<4,double> get_integral(std::string filename,
                         + (v_norb[spin2][3])*(k+v_shift[spin2][2][symk])
                         + (l+v_shift[spin2][3][syml]);
           ptr[offset] = value;
-          if (false) std::cout << "5 offset = " << offset << std::endl;
+          if (false) std::cout << "5 offset = " << offset<< "\n";
         }
         if ( (((i) >= v_psi[spin1][0].first[symi] && (i) < v_psi[spin1][0].second[symi]) && ((j) >= v_psi[spin1][1].first[symj] && (j)<v_psi[spin1][1].second[symj]))
           && (((l) >= v_psi[spin2][2].first[syml] && (l) < v_psi[spin2][2].second[syml]) && ((k) >= v_psi[spin2][3].first[symk] && (k)<v_psi[spin2][3].second[symk]))
@@ -568,7 +568,7 @@ container<4,double> get_integral(std::string filename,
                         + (v_norb[spin2][3])*(l+v_shift[spin2][2][syml])
                         + (k+v_shift[spin2][3][symk]);
           ptr[offset] = value;
-          if (false) std::cout << "7 offset = " << offset << std::endl;
+          if (false) std::cout << "7 offset = " << offset<< "\n";
         }
         }
         if (block2) {
@@ -580,7 +580,7 @@ container<4,double> get_integral(std::string filename,
                         + (v_norb[spin2][3])*(i+v_shift[spin2][2][symi])
                         + (j+v_shift[spin2][3][symj]);
           ptr[offset] = value;
-          if (false) std::cout << "2 offset = " << offset << std::endl;
+          if (false) std::cout << "2 offset = " << offset<< "\n";
         }
         if ( (((l) >= v_psi[spin1][0].first[syml] && (l) < v_psi[spin1][0].second[syml]) && ((k) >= v_psi[spin1][1].first[symk] && (k)<v_psi[spin1][1].second[symk]))
           && (((j) >= v_psi[spin2][2].first[symj] && (j) < v_psi[spin2][2].second[symj]) && ((i) >= v_psi[spin2][3].first[symi] && (i)<v_psi[spin2][3].second[symi])) 
@@ -590,7 +590,7 @@ container<4,double> get_integral(std::string filename,
                         + (v_norb[spin2][3])*(j+v_shift[spin2][2][symj])
                         + (i+v_shift[spin2][3][symi]);
           ptr[offset] = value;
-          if (false) std::cout << "4 offset = " << offset << std::endl;
+          if (false) std::cout << "4 offset = " << offset<< "\n";
         }
         if ( (((l) >= v_psi[spin1][0].first[syml] && (l) < v_psi[spin1][0].second[syml]) && ((k) >= v_psi[spin1][1].first[symk] && (k)<v_psi[spin1][1].second[symk]))
           && (((i) >= v_psi[spin2][2].first[symi] && (i) < v_psi[spin2][2].second[symi]) && ((j) >= v_psi[spin2][3].first[symj] && (j)<v_psi[spin2][3].second[symj]))
@@ -600,7 +600,7 @@ container<4,double> get_integral(std::string filename,
                         + (v_norb[spin2][3])*(i+v_shift[spin2][2][symi])
                         + (j+v_shift[spin2][3][symj]);
           ptr[offset] = value;
-          if (false) std::cout << "6 offset = " << offset << std::endl;
+          if (false) std::cout << "6 offset = " << offset<< "\n";
         }
         if ( (((k) >= v_psi[spin1][0].first[symk] && (k) < v_psi[spin1][0].second[symk]) && ((l) >= v_psi[spin1][1].first[syml] && (l)<v_psi[spin1][1].second[syml]))
           && (((j) >= v_psi[spin2][2].first[symj] && (j) < v_psi[spin2][2].second[symj]) && ((i) >= v_psi[spin2][3].first[symi] && (i)<v_psi[spin2][3].second[symi]))
@@ -610,7 +610,7 @@ container<4,double> get_integral(std::string filename,
                         + (v_norb[spin2][3])*(j+v_shift[spin2][2][symj])
                         + (i+v_shift[spin2][3][symi]);
           ptr[offset] = value;
-          if (false) std::cout << "8 offset = " << offset << std::endl;
+          if (false) std::cout << "8 offset = " << offset<< "\n";
         }
       }
     }
@@ -621,7 +621,7 @@ container<4,double> get_integral(std::string filename,
   }
   
   if (false) {
-    std::cout << "printing integral" << std::endl;
+    std::cout << "printing integral\n";
     libtensor::bto_print<4, double>(std::cout).perform(integral);
   }
   return integral;
@@ -632,10 +632,10 @@ container<4,double> get_i(std::string filename,
   orb_type o1, orb_type o2, orb_type o3, orb_type o4) {
   
   auto h2_o1o4o2o3 = get_integral(filename, o1, o4, o2, o3); 
-  // std::cout << "h2_o1o4o2o3" << std::endl;
+  // std::cout << "h2_o1o4o2o3\n";
   // h2_o1o4o2o3.print();
   auto h2_o1o3o2o4 = get_integral(filename, o1, o3, o2, o4); 
-  // std::cout << "h2_o1o3o2o4" << std::endl;
+  // std::cout << "h2_o1o3o2o4\n";
   // h2_o1o3o2o4.print();
   auto tmpi = get_integral(filename, o1, o2, o3, o4); 
   container<4,double> i(tmpi.get_space());

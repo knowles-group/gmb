@@ -19,4 +19,4 @@ container<2,double> diag_xx(
     return d_xx;
 };
 
-#endif // GMB_DIAG_XX_H
+#endif //GMB_DIAG_XX_H

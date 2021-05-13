@@ -25,4 +25,4 @@ container<4,double> ccsd_tau(
 }
 
 
-#endif // GMB_CCSD_TAU_H
+#endif //GMB_CCSD_TAU_H
