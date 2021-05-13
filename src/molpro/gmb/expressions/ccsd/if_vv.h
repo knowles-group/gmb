@@ -30,4 +30,4 @@ container<2,double> ccsd_if_vv(
 
 }
 
-#endif // GMB_CCSD_IF_VV_H
+#endif //GMB_CCSD_IF_VV_H

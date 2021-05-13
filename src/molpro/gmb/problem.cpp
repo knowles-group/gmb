@@ -11,9 +11,9 @@ int main(int argc, char* argv[]) {
   solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Summary);
   Rvector c, g;
   if (not solver->solve(c, g, problem))
-    std::cout << "failed" << std::endl;
+    std::cout << "failed\n";
   else
-    std::cout << "converged in " << solver->statistics().iterations << " iterations" << std::endl;
+    std::cout << "converged in " << solver->statistics().iterations << " iterations\n";
   solver->solution(c, g);
 }
 

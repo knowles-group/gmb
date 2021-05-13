@@ -37,4 +37,4 @@ container<2,double> ccsd_t1(
 
 }
 
-#endif // GMB_CCSD_T1_H
+#endif //GMB_CCSD_T1_H

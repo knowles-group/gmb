@@ -22,4 +22,4 @@ container<4,double> precond_oovv(
     return pc_oovv;
 };
 
-#endif // GMB_PRECOND_OOVV_H
+#endif //GMB_PRECOND_OOVV_H

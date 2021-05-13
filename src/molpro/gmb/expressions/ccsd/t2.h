@@ -41,4 +41,4 @@ container<4,double> ccsd_t2 (
     return t2_new;
 }     
 
-#endif // GMB_CCSD_T2_H
+#endif //GMB_CCSD_T2_H

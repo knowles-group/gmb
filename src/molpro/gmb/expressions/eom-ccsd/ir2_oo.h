@@ -24,4 +24,4 @@ container<2,double> eom_ccsd_ir2_oo(
 
 }
 
-#endif // GMB_EOM_CCSD_IR2_OO_H
+#endif //GMB_EOM_CCSD_IR2_OO_H

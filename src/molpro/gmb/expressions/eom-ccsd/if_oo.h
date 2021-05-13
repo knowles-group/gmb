@@ -34,4 +34,4 @@ container<2,double> eom_ccsd_if_oo(
 }
 
 
-#endif // GMB_EOM_CCSD_IF_OO_H
+#endif //GMB_EOM_CCSD_IF_OO_H

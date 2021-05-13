@@ -33,4 +33,4 @@ container<2,double> ccsd_if2_oo(
 }
 
 
-#endif // GMB_CCSD_IF2_OO_H
+#endif //GMB_CCSD_IF2_OO_H

@@ -10,15 +10,16 @@
 #include <chrono>
 #include <ctime>
 
+std::string filename; 
 // test case
-std::string test_case = "He-VDZ";
-// std::string test_case = "H2O-VDZ";
+std::string test_case = "H2O-VDZ";
+// std::string test_case = "He-VDZ";
 // std::string test_case = "Li-VDZ-UHF";
 
 using namespace bbo;
-int main(int argc, char const *argv[])
-{
-  std::string filename{argv[0]};
+int main(int argc, char const *argv[]) {
+  std::ios_base::sync_with_stdio(false);
+  filename = {argv[0]};
   if (filename.find_last_of("/") != std::string::npos)
     filename.resize(filename.find_last_of("/"));
   filename += "/" + test_case + ".fcidump";
@@ -29,7 +30,7 @@ int main(int argc, char const *argv[])
   std::unique_ptr<problem_gen> problem;
   std::string method_gs, method_es;
 
-  std::cout << "Reading FCIdump file: " << filename << std::endl;
+  std::cout << "Reading FCIdump file: " << filename<< "\n";
 
   // initialise hamiltonian
   method_gs = "CCSD";
@@ -53,11 +54,12 @@ int main(int argc, char const *argv[])
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);
   problem->energy(*ptampl);
-  std::cout << method_gs << " energy: " << std::setprecision(8) << problem->get_energy() << std::endl;
+  std::cout << method_gs << " energy: " << std::setprecision(8) << problem->get_energy()<< "\n";
 
   #if 1// Excited State
-  std::cout << std::endl << method_es << std::endl;
-  size_t nroots(4);
+  std::cout << std::endl << method_es<< "\n";
+  size_t nroots(2);
+
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
   

@@ -26,4 +26,4 @@ container<4,double> eom_ccsd_iw2_ovvv(
 
 }
 
-#endif // GMB_EOM_CCSD_IW2_OVVV_H
+#endif //GMB_EOM_CCSD_IW2_OVVV_H

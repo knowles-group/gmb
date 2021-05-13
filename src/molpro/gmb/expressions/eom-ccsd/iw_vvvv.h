@@ -31,4 +31,4 @@ container<4,double> eom_ccsd_iw_vvvv(
 }
 
 
-#endif // GMB_EOM_CCSD_IW_VVVV_H
+#endif //GMB_EOM_CCSD_IW_VVVV_H

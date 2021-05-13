@@ -23,4 +23,4 @@ container<2,double> diag_ov(
     return d_ov;
 };
 
-#endif // GMB_DIAG_OV_H
+#endif //GMB_DIAG_OV_H

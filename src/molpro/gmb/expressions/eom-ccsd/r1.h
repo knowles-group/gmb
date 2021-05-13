@@ -35,4 +35,4 @@ container<2,double> eom_ccsd_r1(
 
 }
 
-#endif // GMB_EOM_CCSD_R1_H
+#endif //GMB_EOM_CCSD_R1_H

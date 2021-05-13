@@ -22,4 +22,4 @@ container<4,double> diag_oovv(
     return d_oovv;
 };
 
-#endif // GMB_DIAG_OOVV_H
+#endif //GMB_DIAG_OOVV_H

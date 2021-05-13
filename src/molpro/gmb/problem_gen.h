@@ -1,5 +1,5 @@
-#ifndef PROBLEM_GEN_H_
-#define PROBLEM_GEN_H_
+#ifndef GMB_PROBLEM_GEN_H_
+#define GMB_PROBLEM_GEN_H_
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <vector>
 #include "hamiltonian.h"
@@ -37,4 +37,4 @@ std::ostream& operator<<(std::ostream& s, const problem_gen& problem) {
   return s;
 }
 
-#endif // PROBLEM_GEN_H_
+#endif //GMB_PROBLEM_GEN_H_

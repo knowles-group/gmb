@@ -1,5 +1,5 @@
-#ifndef PROBLEM_CCD_H_
-#define PROBLEM_CCD_H_
+#ifndef GMB_PROBLEM_CCD_H_
+#define GMB_PROBLEM_CCD_H_
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <vector>
 #include "problem_gen.h"
@@ -41,4 +41,4 @@ std::ostream& operator<<(std::ostream& s, const problem_ccd& problem) {
   s<<"Problem: CCD ";
   return s;
 }
-#endif // PROBLEM_CCD_H_
+#endif //GMB_PROBLEM_CCD_H_

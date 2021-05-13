@@ -1,14 +1,12 @@
-#ifndef  SUPERCONTAINER_H
-#define  SUPERCONTAINER_H
+#ifndef GMB_SUPERCONTAINER_H
+#define GMB_SUPERCONTAINER_H
 
 #include "container.h"
 #include "get_integral.h"
 #include <string>
 #include <memory>
-#include <algorithm>
 #include <map>
 
-extern std::string test_case;
 
 template<typename T=double>
 class supercontainer {
@@ -21,34 +19,7 @@ public:
   supercontainer() = default;
 
   supercontainer(const std::map<size_t,value_type>& source) {
-    std::cout << "supercontainer(const std::map<size_t,value_type>& source)" << std::endl;
-    for (auto &imin : source) {
-      auto r1 = get_integral(test_case+".fcidump",o,v);
-      bbo::zero(r1);
-      libtensor::block_tensor_wr_ctrl<2, double> ctrl(r1);
-      libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
-      size_t count(0);
-      for (libtensor::orbit_list<2, double>::iterator it = ol.begin();
-           it != ol.end(); it++) {
-        libtensor::index<2> bidx;
-        ol.get_index(it, bidx);
-        libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
-        libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
-        const libtensor::dimensions<2> &tdims = blk.get_dims();
-        double *ptr = tc.req_dataptr();
-        for (size_t i = 0; i < tdims.get_size(); i++) {
-          if (count == imin.first) 
-            ptr[0] = 1;
-          ++count;
-        }
-        tc.ret_dataptr(ptr);
-        ctrl.ret_block(bidx);
-      }
-      m_m2.insert(std::make_pair("r1", new container<2,T> (r1)));
-      auto r2 = get_integral(test_case+".fcidump",o,o,v,v);
-      bbo::zero(r2);
-      m_m4.insert(std::make_pair("r2", new container<4,T> (r2)));
-    }
+    throw std::logic_error("supercontainer(const std::map<size_t,value_type>& source) unimplemented");
   }
 
   supercontainer(const supercontainer &sc) {
@@ -90,15 +61,15 @@ public:
   const std::map<std::string, std::unique_ptr<container<4,T>>>& get_m4() const { return m_m4; };
 
   container<2,T>& m2get(std::string key) {
-    if (m_m2.find(key) == m_m2.end()) std::cout << key <<" not found!" << std::endl;
+    if (m_m2.find(key) == m_m2.end()) std::cout << key <<" not found!\n";
     return *m_m2[key];
   };
   container<2,T> newm2get(std::string key) {
-    if (m_m2.find(key) == m_m2.end()) std::cout << key <<" not found!" << std::endl;
+    if (m_m2.find(key) == m_m2.end()) std::cout << key <<" not found!\n";
     return *m_m2[key];
   };
   container<4,T>& m4get(std::string key) {
-    if (m_m4.find(key) == m_m4.end()) std::cout << key <<" not found!" << std::endl;
+    if (m_m4.find(key) == m_m4.end()) std::cout << key <<" not found!\n";
     return *m_m4[key]; };
 
 
@@ -146,4 +117,4 @@ public:
 
 };
 
-#endif // SUPERCONTAINER_H
+#endif //GMB_SUPERCONTAINER_H

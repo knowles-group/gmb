@@ -29,4 +29,4 @@ container<2,double> ccsd_if_oo(
 }
 
 
-#endif // GMB_CCSD_IF_OO_H
+#endif //GMB_CCSD_IF_OO_H
