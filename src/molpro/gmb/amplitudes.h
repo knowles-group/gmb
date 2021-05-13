@@ -28,6 +28,13 @@ public:
   amplitudes() 
   : supercontainer<T>()  {}
 
+/**
+ * @brief Construct a new amplitudes object to be used as guess vector.
+ * 
+ * The object is constructed from a map which contains what position should be filled with which value.
+ * 
+ * @param source map containing position and value to be added
+ */
   amplitudes(const std::map<size_t,value_type>& source) {
     for (auto &imin : source) {
       auto r1_guess = get_integral(filename,o,v);
@@ -45,7 +52,7 @@ public:
         double *ptr = tc.req_dataptr();
         for (size_t i = 0; i < tdims.get_size(); i++) {
           if (count == imin.first) 
-            ptr[i] = 1;
+            ptr[i] = imin.second;
           ++count;
         }
         tc.ret_dataptr(ptr);
@@ -64,6 +71,15 @@ public:
   container<2,T>& m2get(ampl key) { return supercontainer<T>::m2get(str(key)); };
   container<4,T>& m4get(ampl key) { return supercontainer<T>::m4get(str(key)); };
   
+  /**
+   * @brief Selects smallest n values of container. 
+   * Returns a map with the value and the position.
+   * 
+   * @param n number of smallest values needed
+   * @param max 
+   * @param ignore_sign 
+   * @return std::map<size_t, T> 
+   */
   std::map<size_t, T> select(size_t n, bool max = false, bool ignore_sign = false) const {
     std::map<size_t, T> m;
     size_t count(0);
