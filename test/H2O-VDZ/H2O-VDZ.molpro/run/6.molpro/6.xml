@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<molpro xmlns="http://www.molpro.net/schema/molpro-output"
+  xmlns:xsd="http://www.w3.org/1999/XMLSchema"
+  xmlns:cml="http://www.xml-cml.org/schema"
+  xmlns:stm="http://www.xml-cml.org/schema"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+ <job>
+  <jobstep command="RHF-SCF" commandset="SCFPRO">
+   <cml:molecule>
+    <cml:symmetry pointGroup="C2v">
+     <cml:transform3 title="generator" id="X">
+      -1  0  0  0  0  1  0  0  0  0  1  0  0  0  0  1
+     </cml:transform3>
+     <cml:transform3 title="generator" id="Y">
+       1  0  0  0  0 -1  0  0  0  0  1  0  0  0  0  1
+     </cml:transform3>
+    </cml:symmetry>
+    <cml:atomArray>
+     <cml:atom id="a1" elementType="O" x3="0.0" y3="0.0" z3="-0.688914995980905E-01"/>
+     <cml:atom id="a2" elementType="H" x3="0.0" y3="0.788010753606722" z3="0.546769975727568"/>
+     <cml:atom id="a3" elementType="H" x3="0.0" y3="-0.788010753606722" z3="0.546769975727568"/>
+    </cml:atomArray>
+    <cml:bondArray>
+     <cml:bond atomRefs2="a1 a2"/>
+     <cml:bond atomRefs2="a1 a3"/>
+    </cml:bondArray>
+   </cml:molecule>
+   <property name="Energy" method="RHF" principal="true" stateSymmetry="1" stateNumber="1"
+     value="-76.0214579634321"/>
+   <property name="One-electron energy" method="RHF" value="-122.445699919107"/>
+   <property name="Two-electron energy" method="RHF" value="37.621638821408"/>
+   <property name="Kinetic energy" method="RHF" value="75.8367557683566"/>
+   <property name="Nuclear energy" method="RHF" value="8.80260313426661"/>
+   <property name="Virial quotient" method="RHF" value="-1.00243552342402"/>
+   <property name="Dipole moment" method="RHF" principal="true" stateSymmetry="1"
+     stateNumber="1" value="0.0 0.0 0.827475259759362"/>
+   <time start="09:34:59" end="09:34:59" cpu="0.48" system="0.35" real="0.99"/>
+   <storage units="megabyte" memory="0.0" sf="0.0" df="33.13" eaf="0.0"/>
+   <summary overall_method="RHF/cc-pVDZ"/>
+  </jobstep>
+  <jobstep command="FCI" commandset="FCI">
+   <time start="09:34:59" end="09:34:59" cpu="0.03" system="0.01" real="0.05"/>
+   <storage units="megabyte" memory="0.0" sf="0.0" df="33.13" eaf="0.0"/>
+   <summary overall_method="FCI/cc-pVDZ"/>
+  </jobstep>
+  <jobstep command="CCSD" commandset="CCSD">
+   <property name="energy" method="Reference" stateSymmetry="1" stateNumber="1"
+     value="-76.0214579634321"/>
+   <property name="singlet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+     value="-0.147362059652356"/>
+   <property name="triplet pair energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+     value="-0.689983515064013E-01"/>
+   <property name="correlation energy" method="CCSD" stateSymmetry="1" stateNumber="1"
+     value="-0.216360411378435"/>
+   <property name="total energy" method="CCSD" principal="true" stateSymmetry="1"
+     stateNumber="1" value="-76.2378183748106"/>
+   <time start="09:34:59" end="09:35:00" cpu="0.45" system="0.15" real="0.63"/>
+   <storage units="megabyte" memory="0.0" sf="0.0" df="33.13" eaf="0.0"/>
+   <summary overall_method="CCSD/cc-pVDZ"/>
+  </jobstep>
+  <stm:metadataList>
+   <stm:metadata name="dc:date" content="2021-05-14T09:35:00+01:00"/>
+   <stm:metadata name="dc:creator" content="peterk"/>
+   <stm:metadata name="cmlm:insilico" content="Molpro"/>
+  </stm:metadataList>
+  <platform>
+   <version major="2021" minor="2" SHA="9c29d03b29da90752de06649c8b1ede2a364b710"
+     integer_bits="64" parallelism="serial">
+    2021.2
+    <date year="2021" month="5" day="14" hour="9" minute="34" second="59">
+     2021-05-14T09:34:59
+    </date>
+   </version>
+   <licence id="peterk"/>
+   <parallel processes="1" nodes="1" all_processes="1" openmp="1"/>
+   <dimensions natom="400" nvalence="500" nvalence_pno="1000" nbasis="12000" nstate="100"
+     nsymm="16" nrec="512" nprim="2" ncol="100"/>
+  </platform>
+  <input>
+   <p>gthresh,energy=1e-14</p>
+   <p>geometry={</p>
+   <p>O</p>
+   <p>H , O , r</p>
+   <p>H , O , r , h, theta</p>
+   <p>}</p>
+   <p>r=1 Ang</p>
+   <p>theta=104</p>
+   <p>basis,cc-pvdz</p>
+   <p>rhf</p>
+   <p>{fci,dump=H2O-VDZ.fcidump;core}</p>
+   <p>{ccsd;eom,-3.1,-2.2,-2.3;core}</p>
+  </input>
+  <diagnostics warnings="0"/>
+ </job>
+</molpro>
