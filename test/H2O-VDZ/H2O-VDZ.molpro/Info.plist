@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<plist>
+	<dict>
+		<key>run_input_hash</key>
+		<string>7922195454609388794</string>
+		<key>run_directories</key>
+		<string>6 5 4 3 2 1 </string>
+		<key>current_run</key>
+		<string>0</string>
+		<key>jobnumber</key>
+		<string>92146</string>
+		<key>_private_sjef_project_backend_inactive_synced</key>
+		<string>0</string>
+		<key>backend</key>
+		<string>local</string>
+		<key>_private_sjef_project_completed_job</key>
+		<string>localhost:92146</string>
+		<key>_status</key>
+		<string>3</string>
+		<key>_private_sjef_project_backend_inactive</key>
+		<string>1</string>
+	</dict>
+</plist>
