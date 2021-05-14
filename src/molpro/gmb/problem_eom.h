@@ -1,5 +1,5 @@
 #ifndef GMB_PROBLEM_EOM_H_
-#define PROBLEM_EOM_H_
+#define GMB_PROBLEM_EOM_H_
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <vector>
 #include "amplitudes.h"
@@ -33,4 +33,4 @@ std::ostream& operator<<(std::ostream& s, const problem_eom& problem) {
   return s;
 }
 
-#endif // PROBLEM_EOM_H_
+#endif // GMB_PROBLEM_EOM_H_

@@ -10,7 +10,7 @@
 #include <chrono>
 #include <ctime>
 
-std::string filename; 
+std::string filename;
 // test case
 std::string test_case = "H2O-VDZ";
 // std::string test_case = "He-VDZ";
@@ -19,7 +19,7 @@ std::string test_case = "H2O-VDZ";
 using namespace bbo;
 int main(int argc, char const *argv[]) {
   std::ios_base::sync_with_stdio(false);
-  filename = {argv[0]};
+  filename = argv[0];
   if (filename.find_last_of("/") != std::string::npos)
     filename.resize(filename.find_last_of("/"));
   filename += "/"+test_case+".fcidump";
@@ -62,7 +62,7 @@ int main(int argc, char const *argv[]) {
 
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
-  
+
   problem_es.reset(new problem_eom_ccsd(hamiltonian, *ptampl));
 
   auto solver_es = molpro::linalg::itsolv::create_LinearEigensystem<amplitudes<>>("Davidson");
