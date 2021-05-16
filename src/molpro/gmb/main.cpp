@@ -67,6 +67,7 @@ int main(int argc, char const *argv[]) {
 
   auto solver_es = molpro::linalg::itsolv::create_LinearEigensystem<amplitudes<>>("Davidson");
   auto residuals_es = v_rampl;
+  solver_es->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
   solver_es->set_n_roots(nroots);
   solver_es->solve(v_rampl, residuals_es, *problem_es, true);
   problem_es->set_energy(solver_es->eigenvalues());
