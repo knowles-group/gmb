@@ -43,7 +43,7 @@ container<4,double> eom_ccsd_r2 (
                            + contract(m, t2(i|m|a|b), ir1_oo(j|m))
                            + contract(m, t2(i|m|a|b), ir2_oo(j|m))
                         + asymm(a, b, 
-                         - contract(e|m, r2(i|m|a|e), iw_ovov(j|e|m|b))))
+                         + contract(e|m, r2(i|m|a|e), iw_ovov(j|e|m|b))))
                      + 0.5 * contract(e|f, r2(i|j|e|f), iw_vvvv(a|b|e|f))
                      + 0.5 * contract(m|n, r2(m|n|a|b), iw_oooo(i|j|m|n));
 	
