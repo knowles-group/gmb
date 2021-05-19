@@ -30,7 +30,7 @@ public:
     auto if_vv = ccsd_if_vv(m_tampl.m2get(t1), m_tampl.m4get(t2), m_ham.m2get(f_ov), m_ham.m2get(f_vv), 
                    m_ham.m4get(i_oovv), m_ham.m4get(i_ovvv));
 
-    auto iw_oooo = ccsd_iw_oooo(m_tampl.m2get(t1), tau, 
+    auto iw_oooo = eom_ccsd_iw_oooo(m_tampl.m2get(t1), tau, 
                     m_ham.m4get(i_oooo), m_ham.m4get(i_ooov), m_ham.m4get(i_oovv));    
     auto iw_ooov = eom_ccsd_iw_ooov(m_tampl.m2get(t1), m_tampl.m4get(t2), tau, if_ov,
                     iw_oooo, m_ham.m4get(i_ooov), m_ham.m4get(i_oovv), m_ham.m4get(i_ovov), m_ham.m4get(i_ovvv));
