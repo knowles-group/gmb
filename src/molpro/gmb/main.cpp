@@ -12,7 +12,10 @@
 
 std::string filename;
 // test case
-std::string test_case = "H2O-VDZ";
+std::string test_case = "h2o-vdz";
+
+// std::string test_case = "h2o-sto3g";
+// std::string test_case = "he";
 // std::string test_case = "He-VDZ";
 // std::string test_case = "Li-VDZ-UHF";
 
@@ -51,18 +54,20 @@ int main(int argc, char const *argv[]) {
 
   auto residual = *ptampl;
   // solver->set_verbosity(molpro::linalg::itsolv::Verbosity::None);
+  solver->set_convergence_threshold(1.0e-14);
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);
   problem->energy(*ptampl);
-  std::cout << method_gs << " energy: " << std::setprecision(8) << problem->get_energy()<< "\n";
+  std::cout << method_gs << " energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
 
+  std::unique_ptr<amplitudes<>> ptampl2(new amplitudes());
   #if 1// Excited State
   std::cout << "\n" << method_es<< "\n";
-  size_t nroots(4);
+  size_t nroots(5);
 
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
-
+  
   problem_es.reset(new problem_eom_ccsd(hamiltonian, *ptampl));
 
   auto solver_es = molpro::linalg::itsolv::create_LinearEigensystem<amplitudes<>>("Davidson");

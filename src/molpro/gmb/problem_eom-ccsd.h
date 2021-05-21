@@ -4,7 +4,6 @@
 #include <vector>
 #include "problem_eom.h"
 #include "expressions/eom-ccsd/eom-ccsd.h"
-#include "expressions/eom-ccsd/r2.h"
 #include "update.h"
 
 /**
@@ -26,21 +25,22 @@ public:
     auto tau = ccsd_tau(m_tampl.m2get(t1), m_tampl.m4get(t2));
     auto if_oo = eom_ccsd_if_oo(m_tampl.m2get(t1), m_tampl.m4get(t2), m_ham.m2get(f_oo), m_ham.m2get(f_ov),
                    m_ham.m4get(i_ooov), m_ham.m4get(i_oovv));    
-    auto if_ov = ccsd_if_ov(m_tampl.m2get(t1), m_ham.m2get(f_ov), m_ham.m4get(i_oovv)); 
-    auto if_vv = ccsd_if_vv(m_tampl.m2get(t1), m_tampl.m4get(t2), m_ham.m2get(f_ov), m_ham.m2get(f_vv), 
+    auto if_ov = eom_ccsd_if_ov(m_tampl.m2get(t1), m_ham.m2get(f_ov), m_ham.m4get(i_oovv)); 
+    auto if_vv = eom_ccsd_if_vv(m_tampl.m2get(t1), m_tampl.m4get(t2), m_ham.m2get(f_ov), m_ham.m2get(f_vv), 
                    m_ham.m4get(i_oovv), m_ham.m4get(i_ovvv));
 
     auto iw_oooo = eom_ccsd_iw_oooo(m_tampl.m2get(t1), tau, 
                     m_ham.m4get(i_oooo), m_ham.m4get(i_ooov), m_ham.m4get(i_oovv));    
-    auto iw_ooov = eom_ccsd_iw_ooov(m_tampl.m2get(t1), m_tampl.m4get(t2), tau, if_ov,
+    auto iw_ooov = eom_ccsd_iw_ooov(m_tampl.m2get(t1), m_tampl.m4get(t2), tau, m_ham.m2get(f_ov), if_ov,
                     iw_oooo, m_ham.m4get(i_ooov), m_ham.m4get(i_oovv), m_ham.m4get(i_ovov), m_ham.m4get(i_ovvv));
     auto iw_ovov = eom_ccsd_iw_ovov(m_tampl.m2get(t1), m_tampl.m4get(t2), 
                     m_ham.m4get(i_ooov), m_ham.m4get(i_oovv), m_ham.m4get(i_ovov), m_ham.m4get(i_ovvv));
     auto iw_vvvv = eom_ccsd_iw_vvvv(m_tampl.m2get(t1), tau, m_ham.m4get(i_oovv), m_ham.m4get(i_ovvv), m_ham.m4get(i_vvvv));
-    auto iw_ovvv = eom_ccsd_iw_ovvv(m_tampl.m2get(t1), m_tampl.m4get(t2), tau, if_ov,  
+    auto iw_ovvv = eom_ccsd_iw_ovvv(m_tampl.m2get(t1), m_tampl.m4get(t2), tau, m_ham.m2get(f_ov), if_ov,  
                     m_ham.m4get(i_ooov), m_ham.m4get(i_oovv), m_ham.m4get(i_ovov), m_ham.m4get(i_ovvv), iw_vvvv);
     auto iw2_ooov = eom_ccsd_iw2_ooov(m_tampl.m2get(t1), m_ham.m4get(i_ooov), m_ham.m4get(i_oovv));
     auto iw2_ovvv = eom_ccsd_iw2_ovvv(m_tampl.m2get(t1), m_ham.m4get(i_oovv), m_ham.m4get(i_ovvv));
+ 
     m_int.set("tau", tau);
     m_int.set("if_oo", if_oo);
     m_int.set("if_ov", if_ov);
@@ -82,6 +82,7 @@ public:
   }
 
   void action(const CVecRef<container_t> &parameters, const VecRef<container_t> &actions) const override {
+ 
     for (int k = 0; k < parameters.size(); k++) {
       auto &ccp = const_cast<container_t&> (parameters[k].get());     
       auto &a = actions[k].get();  
@@ -102,6 +103,7 @@ public:
                     ir1_oo, ir2_oo, ir1_vv, ir2_vv, 
                     m_ham.m4get(i_oovv), m_int.m4get("iw_oooo"), m_int.m4get("iw_ooov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw_ovov"), m_int.m4get("iw_ovvv"), m_int.m4get("iw2_ovvv"), m_int.m4get("iw_vvvv"));
       a.set(r2, r2_new);
+
     }
   }
 

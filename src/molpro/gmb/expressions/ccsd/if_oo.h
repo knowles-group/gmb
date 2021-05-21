@@ -23,8 +23,8 @@ container<2,double> ccsd_if_oo(
     libtensor::letter i,j,m,n,a,b,e,f;
 
     if_oo(j|m) = f_oo(j|m)
-               + contract(n|e, t1(n|e), i_ooov(m|n|j|e))      
-               + 0.5 * contract(n|e|f, i_oovv(n|m|e|f), t2(j|n|f|e));
+               + contract(n|e, t1(n|e), i_ooov(j|n|m|e))      
+               + 0.5 * contract(n|e|f, i_oovv(j|n|e|f), t2(m|n|e|f));
     return if_oo;
 }
 

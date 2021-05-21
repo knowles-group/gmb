@@ -20,6 +20,7 @@ container<2,double> eom_ccsd_ir1_oo(
     libtensor::letter i,j,m,n,a,b,c,e,f;
 
     ir1_oo(j|m) = contract(n|e, r1(n|e), iw2_ooov(m|n|j|e));
+        
     return ir1_oo;
 
 }

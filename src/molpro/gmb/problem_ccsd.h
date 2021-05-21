@@ -31,7 +31,7 @@ public:
     auto if_oo = ccsd_if_oo(ccv.m2get(t1), ccv.m4get(t2), m_ham.m2get(f_oo),
                    m_ham.m4get(i_ooov), m_ham.m4get(i_oovv));    
     auto if_ov = ccsd_if_ov(ccv.m2get(t1), m_ham.m2get(f_ov), m_ham.m4get(i_oovv)); 
-    auto if_vv = ccsd_if_vv(ccv.m2get(t1), ccv.m4get(t2), m_ham.m2get(f_ov), m_ham.m2get(f_vv), 
+    auto if_vv = ccsd_if_vv(ccv.m2get(t1), ccv.m4get(t2), if_ov, m_ham.m2get(f_vv), 
                    m_ham.m4get(i_oovv), m_ham.m4get(i_ovvv));
 
     auto if2_oo = ccsd_if2_oo(ccv.m2get(t1), ccv.m4get(t2), m_ham.m2get(f_oo), m_ham.m2get(f_ov),
