@@ -1,0 +1,12 @@
+gthresh,energy=1e-14
+geometry={
+O
+H , O , r
+H , O , r , h, theta
+}
+r=1 Ang
+theta=104
+basis,cc-pvdz
+rhf
+{fci,dump=H2O-VDZ.fcidump;core,1}
+{ccsd;eom,-3.1,-2.2,-2.3;core,1}

@@ -1,48 +1,56 @@
-#ifndef  SUPERCONTAINER_H
-#define  SUPERCONTAINER_H
+#ifndef GMB_SUPERCONTAINER_H
+#define GMB_SUPERCONTAINER_H
 
 #include "container.h"
+#include "get_integral.h"
 #include <string>
 #include <memory>
 #include <map>
 
+
 template<typename T=double>
 class supercontainer {
-private:
+protected:
   std::map<std::string, std::unique_ptr<container<2,T>>> m_m2;
   std::map<std::string, std::unique_ptr<container<4,T>>> m_m4;
 public:
   using value_type = T;
 
-  supercontainer() {}
-
-  supercontainer(const supercontainer &sc) {
-    for (auto &&im2 : sc.m_m2)
-      m_m2.insert(std::make_pair(im2.first, new container<2,T> (*im2.second)));
-    for (auto &&im4 : sc.m_m4)
-      m_m4.insert(std::make_pair(im4.first, new container<4,T> (*im4.second)));
-  }
+  supercontainer() = default;
 
   supercontainer(const std::map<size_t,value_type>& source) {
-    throw std::logic_error("unimplemented");
+    throw std::logic_error("supercontainer(const std::map<size_t,value_type>& source) unimplemented");
+  }
+
+  supercontainer(const supercontainer &sc) {
+    for (const auto &im2 : sc.m_m2) {
+      m_m2.insert(std::make_pair(im2.first, new container<2,T> (*im2.second)));
+    }
+    for (const auto &im4 : sc.m_m4)
+      m_m4.insert(std::make_pair(im4.first, new container<4,T> (*im4.second)));
+    
   }
 
   supercontainer& operator=(const supercontainer &sc) {
-    for (auto &&im2 : sc.m_m2)
-      m_m2.insert(std::make_pair(im2.first, new container<2,T> (*im2.second)));
-    for (auto &&im4 : sc.m_m4)
-      m_m4.insert(std::make_pair(im4.first, new container<4,T> (*im4.second)));
+    for (const auto &im2 : sc.m_m2) {
+      set(im2.first, *im2.second);
+    }
+    for (const auto &im4 : sc.m_m4)
+      set(im4.first, *im4.second);
     return *this;
   }
 
   void set(std::string key, const container<2,T> &c2) {
-    if (m_m2.find(key) == m_m2.end())
+    if (m_m2.find(key) == m_m2.end()) {
       m_m2.insert(std::make_pair(key, std::make_unique<container<2,T>> (c2)));
-    else
+    }
+    else {
       m_m2[key].reset(new container<2,T> (c2));
+    }
   };
 
   void set(std::string key, const container<4,T> &c4) {
+
      if (m_m4.find(key) == m_m4.end())
       m_m4.insert(std::make_pair(key, std::make_unique<container<4,T>> (c4)));
     else
@@ -53,12 +61,15 @@ public:
   const std::map<std::string, std::unique_ptr<container<4,T>>>& get_m4() const { return m_m4; };
 
   container<2,T>& m2get(std::string key) {
-    if (m_m2.find(key) == m_m2.end()) std::cout << key <<" not found!" << std::endl;
+    if (m_m2.find(key) == m_m2.end()) std::cout << key <<" not found!\n";
     return *m_m2[key];
   };
-
+  container<2,T> newm2get(std::string key) {
+    if (m_m2.find(key) == m_m2.end()) std::cout << key <<" not found!\n";
+    return *m_m2[key];
+  };
   container<4,T>& m4get(std::string key) {
-    if (m_m4.find(key) == m_m4.end()) std::cout << key <<" not found!" << std::endl;
+    if (m_m4.find(key) == m_m4.end()) std::cout << key <<" not found!\n";
     return *m_m4[key]; };
 
 
@@ -97,13 +108,13 @@ public:
     };
 
   std::map<size_t, T> select_max_dot(size_t n, const supercontainer& sc) const {
-    throw std::logic_error("unimplemented");
+    throw std::logic_error("supercontainer::select_max_dot(size_t n, const supercontainer& sc) unimplemented");
   }
 
   std::map<size_t, T> select(size_t n, bool max = false, bool ignore_sign = false) const {
-    throw std::logic_error("unimplemented");
+    throw std::logic_error("supercontainer::select(size_t n, bool max = false, bool ignore_sign = false) unimplemented");
   }
 
 };
 
-#endif // SUPERCONTAINER_H
+#endif //GMB_SUPERCONTAINER_H

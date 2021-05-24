@@ -1,5 +1,5 @@
-#ifndef  SECONDQUANTIZATION_CONTAINER_H
-#define  SECONDQUANTIZATION_CONTAINER_H
+#ifndef GMB_CONTAINER_H
+#define GMB_CONTAINER_H
 
 
 #include <libtensor/libtensor.h>
@@ -21,18 +21,18 @@ private:
   libtensor::bispace<N> m_sp; ///< tensor space
 public:
 
-  container(const libtensor::bispace<N> &sp) 
+  explicit container(const libtensor::bispace<N> &sp) 
   : m_sp(sp), 
     libtensor::btensor<N,T>(sp), 
     libtensor::block_tensor< N, T, libtensor::allocator >(sp.get_bis())
     {}
+
   container(const container &c) 
   : m_sp(c.get_space()), 
     libtensor::btensor<N,T>(c.get_space()), 
     libtensor::block_tensor< N, T, libtensor::allocator > (c.get_space().get_bis()) {
     bbo::copy(const_cast<container&> (c),*this);
   }
-
 
   container& operator=(const container &rhs) {
     bbo::copy(const_cast<container&>(rhs), *this);
@@ -86,10 +86,10 @@ public:
   const void print() { libtensor::bto_print<N, T>(std::cout).perform(*this);};
 
 
-  std::map<size_t, value_type> select_max_dot(size_t n, const container& y) const {throw std::logic_error("unimplemented");}
+  std::map<size_t, value_type> select_max_dot(size_t n, const container& y) const {throw std::logic_error("container::select_max_dot unimplemented");}
 
 
 
 };
 
-#endif // SECONDQUANTIZATION_CONTAINER_H
+#endif //GMB_CONTAINER_H

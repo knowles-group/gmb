@@ -1,5 +1,5 @@
-#ifndef ACTION_CCD_H
-#define ACTION_CCD_H
+#ifndef GMB_ACTION_CCD_H
+#define GMB_ACTION_CCD_H
 
 #include <libtensor/libtensor.h>
 
@@ -44,4 +44,4 @@ container<4,double> action_ccd (
 };
 
 
-#endif // ACTION_CCD_H
+#endif //GMB_ACTION_CCD_H

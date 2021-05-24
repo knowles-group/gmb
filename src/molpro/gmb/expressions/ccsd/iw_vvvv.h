@@ -9,7 +9,7 @@
  * 
  */
 container<4,double> ccsd_iw_vvvv(
-    container<2, double> &t1,      ///< CCSD T1 amplitude
+    container<2, double> &t1,      ///< CCSD T1
     container<4, double> &i_ovvv,  ///> anti-symmetrized integral <ia||bc>
     container<4, double> &i_vvvv   ///> anti-symmetrized integral <ab||cd>
 
@@ -26,4 +26,5 @@ container<4,double> ccsd_iw_vvvv(
     return iw_vvvv;
 
 }
-#endif // GMB_CCSD_IW_VVVV_H
+
+#endif //GMB_CCSD_IW_VVVV_H

@@ -1,5 +1,5 @@
-#ifndef DIAG_XX_H
-#define DIAG_XX_H
+#ifndef GMB_DIAG_XX_H
+#define GMB_DIAG_XX_H
 
 #include "../container.h"
 
@@ -17,6 +17,6 @@ container<2,double> diag_xx(
     libtensor::letter p,q;
     d_xx(p|q) =  set(p|q, 1.0, set(0.0, d_xx(p|q)));
     return d_xx;
-}
+};
 
-#endif // DIAG_XX_H
+#endif //GMB_DIAG_XX_H

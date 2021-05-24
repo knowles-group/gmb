@@ -8,8 +8,8 @@
  * 
  */
 double ccsd_energy (
-    libtensor::any_tensor<2, double> &t1,     ///< CCSD T1 amplitude
-    libtensor::any_tensor<4, double> &t2,     ///< CCSD T2 amplitude
+    libtensor::any_tensor<2, double> &t1,     ///< CCSD T1
+    libtensor::any_tensor<4, double> &t2,     ///< CCSD T2
     libtensor::any_tensor<2, double> &f_ov,   ///< fock matrix - ov block
     libtensor::any_tensor<4, double> &i_oovv  ///> anti-symmetrized integral <ij||ab>
 ) {
@@ -23,4 +23,4 @@ double ccsd_energy (
    return energy;
 }
 
-#endif // GMB_CCSD_ENERGY_H
+#endif //GMB_CCSD_ENERGY_H
