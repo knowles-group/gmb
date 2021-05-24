@@ -1,5 +1,5 @@
-#ifndef  HAMILTONIAN_H
-#define  HAMILTONIAN_H
+#ifndef GMB_HAMILTONIAN_H
+#define GMB_HAMILTONIAN_H
 
 #include "supercontainer.h"
 
@@ -42,4 +42,4 @@ public:
 
 };
 
-#endif // HAMILTONIAN_H
+#endif //GMB_HAMILTONIAN_H

@@ -1,5 +1,5 @@
-#ifndef INIT_H
-#define INIT_H
+#ifndef GMB_INIT_H
+#define GMB_INIT_H
 
 #include "get_integral.h"
 
@@ -12,4 +12,4 @@ namespace bbo {
 
 } // namespace bbo
 
-#endif // INIT_H
+#endif //GMB_INIT_H

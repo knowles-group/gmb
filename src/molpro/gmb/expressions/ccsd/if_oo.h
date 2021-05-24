@@ -7,11 +7,11 @@
 /**
  * @brief F_oo intermediate
  * 
- * Needed to calculate CCSD T1 amplitudes
+ * Needed to calculate CCSD T1s
  * 
  */
 container<2,double> ccsd_if_oo(
-    container<2, double> &t1,     ///< CCSD T1 amplitude
+    container<2, double> &t1,     ///< CCSD T1
     container<4, double> &t2,     ///< CCSD T2 intermediate
     container<2, double> &f_oo,   ///< fock matrix - oo block
     container<4, double> &i_ooov, ///> anti-symmetrized integral <ij||ka>
@@ -23,10 +23,10 @@ container<2,double> ccsd_if_oo(
     libtensor::letter i,j,m,n,a,b,e,f;
 
     if_oo(j|m) = f_oo(j|m)
-               + contract(n|e, t1(n|e), i_ooov(m|n|j|e))      
-               + 0.5 * contract(n|e|f, i_oovv(n|m|e|f), t2(j|n|f|e));
+               + contract(n|e, t1(n|e), i_ooov(j|n|m|e))      
+               + 0.5 * contract(n|e|f, i_oovv(j|n|e|f), t2(m|n|e|f));
     return if_oo;
 }
 
 
-#endif // GMB_CCSD_IF_OO_H
+#endif //GMB_CCSD_IF_OO_H

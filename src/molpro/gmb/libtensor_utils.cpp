@@ -173,7 +173,7 @@ namespace bbo {
   }
 
   void zero(libtensor::btensor<2,double> &tensor) {
-	if (false) std::cout << "copying a two-dimensional tensor" << std::endl;
+	if (false) std::cout << "copying a two-dimensional tensor\n";
 
   libtensor::block_tensor_wr_ctrl<2, double> ctrl(tensor);
 
@@ -206,7 +206,7 @@ namespace bbo {
   }
 
   if (false) {
-  std::cout << "printing t" << std::endl;
+  std::cout << "printing t\n";
   libtensor::bto_print<2, double>(std::cout).perform(tensor);
   }
 }
@@ -241,7 +241,7 @@ namespace bbo {
     ctrl.ret_block(bidx);
   }
   if (false) {
-  std::cout << "printing t" << std::endl;
+  std::cout << "printing t\n";
   libtensor::bto_print<4, double>(std::cout).perform(tensor);
   }
 }
