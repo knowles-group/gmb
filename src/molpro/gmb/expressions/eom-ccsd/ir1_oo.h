@@ -9,15 +9,14 @@
  * 
  */
 container<2,double> eom_ccsd_ir1_oo(
-    container<2, double> &f_oo,     ///< fock operator - vv block
+    container<2, double> &f_oo,     ///< fock operator - oo block
     container<2, double> &r1,       ///< EOM-CCSD R1 
     container<4, double> &iw2_ooov  ///> intermediate iw2_ooov
-
 ) {
 
     container<2, double> ir1_oo(f_oo.get_space());
 
-    libtensor::letter i,j,m,n,a,b,c,e,f;
+    libtensor::letter j,m,n,e;
 
     ir1_oo(j|m) = contract(n|e, r1(n|e), iw2_ooov(m|n|j|e));
         

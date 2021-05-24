@@ -4,7 +4,7 @@
 #include "../../container.h"
 
 /**
- * @brief \bar{H} EOM - OOVV block
+ * @brief \bar{H} EOM - OV block
  * 
  */
 

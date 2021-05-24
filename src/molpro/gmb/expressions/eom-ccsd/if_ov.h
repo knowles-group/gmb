@@ -18,11 +18,10 @@ container<2,double> eom_ccsd_if_ov(
 
     container<2, double> if_ov(f_ov.get_space());
 
-    libtensor::letter i,j,m,n,a,b,e,f;
+    libtensor::letter i,m,a,e;
 
-    if_ov(m|e) = f_ov(m|e)
-                + contract(f|n, t1(n|f), i_oovv(m|n|e|f));
-
+    if_ov(i|a) = f_ov(i|a)
+               + contract(m|e, t1(m|e), i_oovv(i|m|a|e));
     return if_ov;
 
 }

@@ -99,7 +99,7 @@ public:
           const double *ptr = tc.req_const_dataptr();
           for (size_t i = 0; i < tdims.get_size(); i++) {
               typename std::map<size_t,T>::iterator mmax
-                = std::max_element(m.begin(),m.end(),[] (const std::pair<size_t,T>& a, const std::pair<size_t,T>& b)->bool{ return a.second < b.second; } );
+                = std::max_element(m.begin(),m.end(),[](const std::pair<size_t,T>& a, const std::pair<size_t,T>& b)->bool{ return a.second < b.second; } );
             if (ptr[i] < mmax->second) {
               m.erase(mmax);
               m.insert(std::make_pair(count, ptr[i]));

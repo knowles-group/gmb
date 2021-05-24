@@ -19,13 +19,13 @@ container<2,double> eom_ccsd_if_vv(
 
     container<2, double> if_vv(f_vv.get_space());
 
-    libtensor::letter i,j,m,n,a,b,e,f;
+    libtensor::letter m,n,a,b,e;
 
-    if_vv(b|e) = f_vv(b|e)
-               - contract(m, t1(m|b), f_ov(m|e))
-               - 0.5 * contract(f|m|n, t2(m|n|b|f), i_oovv(m|n|e|f))
-               - contract(f|m|n, t1(m|b)*t1(n|f), i_oovv(m|n|e|f))
-               + contract(f|m, t1(m|f), i_ovvv(m|b|f|e));
+    if_vv(a|b) = f_vv(a|b)
+               - contract(m, t1(m|a), f_ov(m|b))
+               + contract(e|m, t1(m|e), i_ovvv(m|a|e|b))
+               - contract(e|m|n, t1(m|a)*t1(n|e), i_oovv(m|n|b|e))
+               - 0.5 * contract(e|m|n, t2(m|n|a|e), i_oovv(m|n|b|e));
     return if_vv;
 
 }

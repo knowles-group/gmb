@@ -17,9 +17,9 @@ container<2,double> eom_ccsd_ir1_vv(
 
     container<2, double> ir1_vv(f_vv.get_space());
 
-    libtensor::letter i,j,k,l,m,n,a,b,c,d,e,f;
+    libtensor::letter m,b,e,f;
 
-    ir1_vv(a|e) = contract(m|f, r1(m|f), iw2_ovvv(m|a|e|f));
+    ir1_vv(b|e) = contract(m|f, r1(m|f), iw2_ovvv(m|b|f|e));
     return ir1_vv;
 
 }

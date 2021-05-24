@@ -4,7 +4,7 @@
 #include "../../container.h"
 
 /**
- * @brief Preconditioner for EOM - OOVV block
+ * @brief \bar{H} EOM - OOVV block
  * 
  */
 

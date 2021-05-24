@@ -13,9 +13,6 @@
 std::string filename;
 // test case
 std::string test_case = "h2o-vdz";
-
-// std::string test_case = "h2o-sto3g";
-// std::string test_case = "he";
 // std::string test_case = "He-VDZ";
 // std::string test_case = "Li-VDZ-UHF";
 

@@ -34,17 +34,17 @@ container<4,double> eom_ccsd_r2 (
     r2_new(i|j|a|b) = asymm(a, b, 
                           contract(e, r2(i|j|a|e), if_vv(b|e))
                         - contract(m, r1(m|a), iw_ooov(i|j|m|b))
-                        + contract(e, t2(i|j|b|e), ir1_vv(a|e))
-                        + contract(e, t2(i|j|b|e), ir2_vv(a|e)))
+                        + contract(e, t2(i|j|a|e), ir1_vv(b|e))
+                        - contract(e, t2(i|j|a|e), ir2_vv(b|e)))
                      + asymm(i, j, 
-                           contract(e, r1(i|e), iw_ovvv(j|e|b|a))
-                           - contract(m, r2(i|m|a|b), if_oo(j|m))
+                           - contract(m, r2(i|m|a|b), if_oo(m|j))
+                           + contract(e, r1(i|e), iw_ovvv(j|e|b|a))
                            - contract(m, t2(i|m|a|b), ir1_oo(j|m))
                            - contract(m, t2(i|m|a|b), ir2_oo(j|m))
                         + asymm(a, b, 
-                         - contract(e|m, r2(i|m|a|e), iw_ovov(j|e|m|b))))
-                     + 0.5 * contract(e|f, r2(i|j|e|f), iw_vvvv(a|b|e|f))
-                     + 0.5 * contract(m|n, r2(m|n|a|b), iw_oooo(i|j|m|n));
+                         - contract(e|m, r2(i|m|a|e), iw_ovov(m|b|j|e))))
+                     + 0.5 * contract(m|n, r2(m|n|a|b), iw_oooo(i|j|m|n))
+                     + 0.5 * contract(e|f, r2(i|j|e|f), iw_vvvv(a|b|e|f));
     return r2_new;
 }     
 

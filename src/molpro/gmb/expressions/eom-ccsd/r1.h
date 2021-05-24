@@ -24,13 +24,13 @@ container<2,double> eom_ccsd_r1(
 
     libtensor::letter i,j,m,n,a,b,e,f;
 
-    r1_new(i|a) = 
-    contract(e, r1(i|e), if_vv(a|e))
-                - contract(m, r1(m|a), if_oo(i|m))
+    r1_new(i|a) = contract(e, r1(i|e), if_vv(a|e))
+                - contract(m, r1(m|a), if_oo(m|i))
                 + contract(e|m, r2(i|m|a|e), if_ov(m|e))
-                - contract(e|m, r1(m|e), iw_ovov(i|e|m|a))  
+                - contract(e|m, r1(m|e), iw_ovov(m|a|i|e))  
                 - 0.5 * contract(e|m|n, r2(m|n|a|e), iw2_ooov(m|n|i|e))
-                - 0.5 * contract(e|f|m, r2(i|m|e|f), iw2_ovvv(m|a|e|f));
+                + 0.5 * contract(e|f|m, r2(i|m|e|f), iw2_ovvv(m|a|f|e));
+                
 
     return r1_new;
 
