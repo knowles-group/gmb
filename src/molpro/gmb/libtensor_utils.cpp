@@ -3,7 +3,7 @@
 using namespace libtensor;
 
 
-namespace bbo {
+namespace gmb {
   template <typename T>
   T dot_prod(libtensor::any_tensor<1,T> &t1,
              libtensor::any_tensor<1,T> &t2) {
@@ -269,5 +269,5 @@ template void compute_axpy(double,
                            libtensor::any_tensor<4,double>&,
                            libtensor::expr_lhs<4,double>&);
 
-} // namespace bbo
+} // namespace gmb
 

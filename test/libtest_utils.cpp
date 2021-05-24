@@ -1,6 +1,6 @@
 #include "libtest_utils.h"
 
-namespace bbo_test {
+namespace gmb_test {
 
     template <size_t N, typename T>
         bool comp(libtensor::btensor<N,T> tref, 
@@ -22,4 +22,4 @@ template bool comp<4, double> (libtensor::btensor<4,double> tref,
                                libtensor::btensor<4,double> t);
        
     
-} // namespace bbo_test
+} // namespace gmb_test

@@ -10,9 +10,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(LibraryManager)
 
+include(FetchContent)
+FetchContent_Declare(libtensor GIT_REPOSITORY https://github.com/epifanovsky/libtensor
+        GIT_TAG 759566bfe96a4dea4f352be6e75cf126a66acc29)
+
+set(LIBTENSOR_STANDALONE 1)
+add_definitions(-DUSE_PTHREADS)
+FetchContent_MakeAvailable(libtensor)
 
 add_subdirectory(dependencies)
 
 add_subdirectory(src)
-
+enable_testing()
+add_subdirectory(test)
 
