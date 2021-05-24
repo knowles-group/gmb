@@ -5,7 +5,7 @@
  * @brief Support functions to test libtensor objects
  * 
  */
-namespace bbo_test {
+namespace gmb_test {
 
 /**
  * @brief Compare 2 tensors
@@ -21,5 +21,5 @@ template <size_t N, typename T>
 bool comp(libtensor::btensor<N,T> tref, 
           libtensor::btensor<N,T> t);
 
-} // namespace bbo_test
+} // namespace gmb_test
 

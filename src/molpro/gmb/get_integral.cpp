@@ -152,8 +152,8 @@ container<2,double> get_integral(std::string filename,
   psp.release();
   
   // set integral symmetry
-  if (o1 == o2) bbo::set_sym_pp(integral);
-  bbo::zero(integral);
+  if (o1 == o2) gmb::set_sym_pp(integral);
+  gmb::zero(integral);
 
   libtensor::block_tensor_wr_ctrl<2, double> ctrl(integral);
 
@@ -427,7 +427,7 @@ container<4,double> get_integral(std::string filename,
     libtensor::se_perm<4, double> se_0213(p0213, tr);
     sym.insert(se_0213);
   }
-  bbo::zero(integral);
+  gmb::zero(integral);
   
   if (false) {
     std::cout << "In get_integral, integral:\n";
@@ -661,7 +661,7 @@ container<4,double> get_i(std::string filename,
     libtensor::se_perm<4, double> se_0213(p0213, tr_sym);
     sym.insert(se_0213);
   }
-  bbo::zero(i);
+  gmb::zero(i);
   {
       libtensor::letter p,q,r,s;
       // <pq||rs> = <pq|rs> - <pq|sr> = [pr|qs] - [ps|qr]

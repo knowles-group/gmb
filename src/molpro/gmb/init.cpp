@@ -2,7 +2,7 @@
 #include "expressions/fock_xx.h"
 #include "expressions/diag_xx.h"
 
-namespace bbo {
+namespace gmb {
   
   void init(std::string filename, std::string method, hamiltonian<> &ham) {
 
@@ -42,5 +42,5 @@ namespace bbo {
       }
     }
   }
-} // namespace bbo
+} // namespace gmb
 

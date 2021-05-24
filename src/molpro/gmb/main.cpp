@@ -16,7 +16,7 @@ std::string test_case = "h2o-vdz";
 // std::string test_case = "He-VDZ";
 // std::string test_case = "Li-VDZ-UHF";
 
-using namespace bbo;
+using namespace gmb;
 int main(int argc, char const *argv[]) {
   std::ios_base::sync_with_stdio(false);
   filename = argv[0];

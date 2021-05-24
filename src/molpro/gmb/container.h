@@ -31,11 +31,11 @@ public:
   : m_sp(c.get_space()), 
     libtensor::btensor<N,T>(c.get_space()), 
     libtensor::block_tensor< N, T, libtensor::allocator > (c.get_space().get_bis()) {
-    bbo::copy(const_cast<container&> (c),*this);
+    gmb::copy(const_cast<container&> (c),*this);
   }
 
   container& operator=(const container &rhs) {
-    bbo::copy(const_cast<container&>(rhs), *this);
+    gmb::copy(const_cast<container&>(rhs), *this);
     return *this;
   }
 
@@ -68,7 +68,7 @@ public:
    * @param x tensor to be dotted with
    * @return T dot product between tensors
    */
-  T dot(const container &x) const { return bbo::dot_prod(const_cast<container&> (*this), const_cast<container&> (x)); };
+  T dot(const container &x) const { return gmb::dot_prod(const_cast<container&> (*this), const_cast<container&> (x)); };
 
   /**
    * @brief Assigns new value to the tensor Y = a*X + Y
@@ -76,8 +76,8 @@ public:
    * @param a constant value
    * @param x another tensor
    */
-  void axpy(T a, const container &x) { bbo::compute_axpy(a, const_cast<container&> (x), (*this)); };
-  // void axpy(T a, container x) { bbo::compute_axpy(a, x, (*this)); };
+  void axpy(T a, const container &x) { gmb::compute_axpy(a, const_cast<container&> (x), (*this)); };
+  // void axpy(T a, container x) { gmb::compute_axpy(a, x, (*this)); };
 
   /**
    * @brief print container

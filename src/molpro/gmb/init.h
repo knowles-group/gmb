@@ -6,10 +6,10 @@
 #include "hamiltonian.h"
 #include "supercontainer.h"
 
-namespace bbo {
+namespace gmb {
   
   void init(std::string filename, std::string method, hamiltonian<> &hamiltonian);
 
-} // namespace bbo
+} // namespace gmb
 
 #endif //GMB_INIT_H

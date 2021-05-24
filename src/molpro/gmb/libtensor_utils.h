@@ -4,7 +4,7 @@
 #include "libtensor/libtensor.h"
 
 // support libtensor functions 
-namespace bbo {
+namespace gmb {
 
   // support libtensor functions for iterative solver
 
@@ -60,5 +60,5 @@ namespace bbo {
     void zero(libtensor::btensor<2,double> &tensor);
     void zero(libtensor::btensor<4,double> &tensor);
     
-} // namespace bbo
+} // namespace gmb
 #endif //GMB_LIBTENSOR_UTILS_H
