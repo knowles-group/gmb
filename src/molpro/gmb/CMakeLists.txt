@@ -11,14 +11,6 @@ DependencyManager_Populate(utilities)
 DependencyManager_Populate(LinearAlgebra)
 DependencyManager_Populate(FCIdump)
 
-include(FetchContent)
-FetchContent_Declare(libtensor GIT_REPOSITORY https://github.com/epifanovsky/libtensor
-        GIT_TAG 759566bfe96a4dea4f352be6e75cf126a66acc29)
-
-set(LIBTENSOR_STANDALONE 1)
-add_definitions(-DUSE_PTHREADS)
-FetchContent_MakeAvailable(libtensor)
-
 target_link_libraries(${PROJECT_NAME} tensor FCIdump molpro::LinearAlgebra)
 
 set(tests He-VDZ H2O-VDZ Li-VDZ-UHF)

@@ -31,9 +31,8 @@ add_subdirectory(dependencies)
 
 ########## Targets ##########
 add_subdirectory(src)
-# add_subdirectory(test)
-# enable_testing()
-
+add_subdirectory(test)
+enable_testing()
 add_subdirectory(docs)
 
 
