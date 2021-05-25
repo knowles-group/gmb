@@ -1,5 +1,5 @@
 ####### Documentation #######
-# first we can indicate the documentation build as an option and set it to ON by default
+# Set the documentation build to ON
 option(BUILD_DOC "Build documentation" ON)
 
 # check if Doxygen is installed

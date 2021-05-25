@@ -4,14 +4,14 @@ set(src
     libtensor_utils.cpp
     get_integral.cpp)
     
-add_executable(gmb ${src})
+add_executable(${PROJECT_NAME} ${src})
 
 DependencyManager_Populate(Profiler)
 DependencyManager_Populate(utilities)
 DependencyManager_Populate(LinearAlgebra)
 DependencyManager_Populate(FCIdump)
 
-target_link_libraries(gmb tensor FCIdump molpro::LinearAlgebra)
+target_link_libraries(${PROJECT_NAME} tensor FCIdump molpro::LinearAlgebra)
 
 set(tests He-VDZ H2O-VDZ Li-VDZ-UHF)
 
