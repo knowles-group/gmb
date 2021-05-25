@@ -4,16 +4,18 @@ cache:
     - public
 image: registry.gitlab.com/knowles-group/secondquantization
 
-build:
-  except:
-    - tags
-  script:
-    - procs=$(lscpu -p | egrep -v '^#' | wc -l || echo 1); echo $procs processors available
-    - TOP=$PWD
-    - git checkout $CI_COMMIT_SHA # because of cache
-    - git reset --hard
-    - git clean -f src test dependencies
-    - cd $TOP; BUILD=build; mkdir -p $BUILD && cd $BUILD && pwd && CC=mpicc CXX=mpicxx cmake -DMPIOPTIONS="--allow-run-as-root" $TOP ; cmake --build . -- -j ${procs} ; cd test;  ctest -V -j ${procs}
+branches:
+  master:
+    build:
+      except:
+        - tags
+      script:
+        - procs=$(lscpu -p | egrep -v '^#' | wc -l || echo 1); echo $procs processors available
+        - TOP=$PWD
+        - git checkout $CI_COMMIT_SHA # because of cache
+        - git reset --hard
+        - git clean -f src test dependencies
+        - cd $TOP; BUILD=build; mkdir -p $BUILD && cd $BUILD && pwd && CC=mpicc CXX=mpicxx cmake -DMPIOPTIONS="--allow-run-as-root" $TOP ; cmake --build . -- -j ${procs} ; cd test;  ctest -V -j ${procs}
 
 # job:
 #   script:
