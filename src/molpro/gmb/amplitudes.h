@@ -88,7 +88,6 @@ public:
 
     // for now only singles
     for (auto &&im2 : this->m_m2) {
-      im2.second->print();
       // number of roots needed
       for (size_t ir = 0; ir < n; ir++) 
         m.insert(std::make_pair(1e6+ir, 1e6+ir));
