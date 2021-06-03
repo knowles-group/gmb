@@ -4,6 +4,7 @@
 #include "problem_eom-ccsd.h"
 #include "hamiltonian.h"
 #include "amplitudes.h"
+#include "expressions/energy_hf.h"
 #include <memory>
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <molpro/linalg/itsolv/SolverFactory.h>
@@ -12,9 +13,10 @@
 
 std::string filename;
 // test case
-std::string test_case = "h2o-vdz";
-// std::string test_case = "He-VDZ";
-// std::string test_case = "Li-VDZ-UHF";
+// std::string test_case = "hubbard"; // electron only
+std::string test_case = "polariton"; // electron + photons
+// std::string test_case = "smallcoupling_newd";
+// std::string test_case = "zerocoupling";
 
 using namespace gmb;
 int main(int argc, char const *argv[]) {
@@ -35,8 +37,16 @@ int main(int argc, char const *argv[]) {
   // initialise hamiltonian
   method_gs = "CCSD";
   method_es = "EOM-CCSD";
-  init(filename, method_gs, hamiltonian);
+  // init(filename, method_gs, hamiltonian); // regular electron only
+  init_ccpol(filename, method_gs, hamiltonian); // add photon space
+  std::cout << "HF energy: " << std::setprecision(12) 
+            << energy_hf(hamiltonian.m2get(f_oo),hamiltonian.m4get(i_oooo))<< "\n";
+// std::cout << "f_oo" << std::endl;
+// hamiltonian.m2get(f_oo).print();
+// std::cout << "i_oooo" << std::endl;
+// hamiltonian.m4get(i_oooo).print();
 
+#if 1 // CCSD
   // parse data
   if (method_gs == "CCSD" or method_gs == "CCS")
     ptampl->set(t1, container(hamiltonian.m2get(f_ov).get_space()));
@@ -51,16 +61,19 @@ int main(int argc, char const *argv[]) {
 
   auto residual = *ptampl;
   // solver->set_verbosity(molpro::linalg::itsolv::Verbosity::None);
-  solver->set_convergence_threshold(1.0e-14);
+  // solver->set_convergence_threshold(1.0e-14);
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);
   problem->energy(*ptampl);
-  std::cout << method_gs << " energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
+  std::cout << method_gs << " correlation energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
+  // std::cout << method_gs << " total energy: " << std::setprecision(12) 
+  //           << problem->get_energy() + energy_hf(hamiltonian.m2get(f_oo),hamiltonian.m4get(i_oooo))<< "\n";
+
 
   std::unique_ptr<amplitudes<>> ptampl2(new amplitudes());
-  #if 1// Excited State
+  #if 0 // Excited State
   std::cout << "\n" << method_es<< "\n";
-  size_t nroots(5);
+  size_t nroots(3);
 
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
@@ -74,6 +87,7 @@ int main(int argc, char const *argv[]) {
   solver_es->solve(v_rampl, residuals_es, *problem_es, true);
   problem_es->set_energy(solver_es->eigenvalues());
 
+  #endif
   #endif
 
   auto end = std::chrono::system_clock::now();

@@ -15,7 +15,7 @@ using syms_t=std::vector<sym_t>; ///< position in orbital space for each symmetr
 
 // orbital types occupied, virtual & basis (
 enum orb_type{o, v, b};
-enum spin{alpha=0, beta=1};
+enum spin{alpha=0, beta=1, photon=2};
 
 // get nuclear energy
 double get_integral(std::string filename);

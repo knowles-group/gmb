@@ -9,6 +9,8 @@ enum ampl {t1, t2, r1, r2};
 
 template<typename T=double>
 class amplitudes : public supercontainer<T> {
+private:
+  bool triplets = false;
 public:
   std::string str(ampl key) {
     std::string str;
@@ -26,7 +28,7 @@ public:
   using supercontainer<T>::supercontainer;
 
   amplitudes() 
-  : supercontainer<T>()  {}
+  : supercontainer<T>() {}
 
 /**
  * @brief Construct a new amplitudes object to be used as guess vector.
@@ -82,34 +84,36 @@ public:
    */
   std::map<size_t, T> select(size_t n, bool max = false, bool ignore_sign = false) const {
     std::map<size_t, T> m;
-    size_t count(0);
-    for (auto &&im2 : this->m_m2) {
-      for (size_t ir = 0; ir < n; ir++) {
-        m.insert(std::make_pair(1e6+ir, 1e6+ir));
-      }
-        libtensor::block_tensor_rd_ctrl<2, double> ctrl(*im2.second);
-        libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
-        for (libtensor::orbit_list<2, double>::iterator it = ol.begin();
-             it != ol.end(); it++) {
-          libtensor::index<2> bidx;
-          ol.get_index(it, bidx);
-          libtensor::dense_tensor_rd_i<2, double> &blk = ctrl.req_const_block(bidx);
-          libtensor::dense_tensor_rd_ctrl<2, double> tc(blk);
-          const libtensor::dimensions<2> &tdims = blk.get_dims();
-          const double *ptr = tc.req_const_dataptr();
-          for (size_t i = 0; i < tdims.get_size(); i++) {
-              typename std::map<size_t,T>::iterator mmax
-                = std::max_element(m.begin(),m.end(),[](const std::pair<size_t,T>& a, const std::pair<size_t,T>& b)->bool{ return a.second < b.second; } );
-            if (ptr[i] < mmax->second) {
-              m.erase(mmax);
-              m.insert(std::make_pair(count, ptr[i]));
-            }
-            ++count;
-          }
+    size_t count{0};
 
-          tc.ret_const_dataptr(ptr);
-          ctrl.ret_const_block(bidx);
+    // for now only singles
+    for (auto &&im2 : this->m_m2) {
+      // number of roots needed
+      for (size_t ir = 0; ir < n; ir++) 
+        m.insert(std::make_pair(1e6+ir, 1e6+ir));
+      libtensor::block_tensor_rd_ctrl<2, double> ctrl(*im2.second);
+      libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
+      for (libtensor::orbit_list<2, double>::iterator it = ol.begin();
+           it != ol.end(); it++) {
+        libtensor::index<2> bidx;
+        ol.get_index(it, bidx);
+        libtensor::dense_tensor_rd_i<2, double> &blk = ctrl.req_const_block(bidx);
+        libtensor::dense_tensor_rd_ctrl<2, double> tc(blk);
+        const libtensor::dimensions<2> &tdims = blk.get_dims();
+        const double *ptr = tc.req_const_dataptr();
+        for (size_t i = 0; i < tdims.get_size(); i++) {
+            typename std::map<size_t,T>::iterator mmax
+              = std::max_element(m.begin(),m.end(),[](const std::pair<size_t,T>& a, const std::pair<size_t,T>& b)->bool{ return a.second < b.second; } );
+          if (ptr[i] < mmax->second) {
+            m.erase(mmax);
+            m.insert(std::make_pair(count, ptr[i]));
+          }
+          ++count;
         }
+        tc.ret_const_dataptr(ptr);
+        ctrl.ret_const_block(bidx);
+        if (!triplets) break; // only alpha-alpha excitations
+      }
     }
 
     return m;

@@ -17,7 +17,7 @@ container<2,double> precond_ov(
 
     libtensor::letter i,j,a,b;
 
-    pc_ov(i|a) = div(res_ov(i|a), 
+    pc_ov(i|a) = - div(res_ov(i|a), 
                      (d_ov(i|a) - set((double)shift, d_ov(i|a))));
 
     return pc_ov;

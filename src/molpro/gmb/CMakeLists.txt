@@ -2,6 +2,8 @@ set(src
     main.cpp
     init.cpp
     libtensor_utils.cpp
+    # get_integral_ph.cpp
+    get_integral_pol.cpp
     get_integral.cpp)
     
 add_executable(gmb ${src})
@@ -22,7 +24,7 @@ FetchContent_MakeAvailable(libtensor)
 
 target_link_libraries(gmb tensor FCIdump molpro::LinearAlgebra)
 
-set(tests He-VDZ H2O-VDZ Li-VDZ-UHF)
+set(tests polariton hubbard He-VDZ H2O-VDZ Li-VDZ-UHF)
 
 foreach(test ${tests})
 file(COPY ../../../test/${test}.fcidump DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
