@@ -28,7 +28,7 @@ public:
   using supercontainer<T>::supercontainer;
 
   amplitudes() 
-  : supercontainer<T>()  {}
+  : supercontainer<T>() {}
 
 /**
  * @brief Construct a new amplitudes object to be used as guess vector.
@@ -84,11 +84,10 @@ public:
    */
   std::map<size_t, T> select(size_t n, bool max = false, bool ignore_sign = false) const {
     std::map<size_t, T> m;
-    size_t count(0);
+    size_t count{0};
 
     // for now only singles
     for (auto &&im2 : this->m_m2) {
-      im2.second->print();
       // number of roots needed
       for (size_t ir = 0; ir < n; ir++) 
         m.insert(std::make_pair(1e6+ir, 1e6+ir));

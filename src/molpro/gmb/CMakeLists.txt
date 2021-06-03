@@ -2,6 +2,8 @@ set(src
     main.cpp
     init.cpp
     libtensor_utils.cpp
+    # get_integral_ph.cpp
+    get_integral_pol.cpp
     get_integral.cpp)
     
 add_executable(${PROJECT_NAME} ${src})
@@ -19,3 +21,7 @@ foreach(test ${tests})
 file(COPY ../../../test/${test}/${test}.fcidump DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 endforeach()
 
+set(tests_pol polariton hubbard)
+foreach(test ${tests_pol})
+file(COPY ../../../test/${test}.fcidump DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+endforeach()
