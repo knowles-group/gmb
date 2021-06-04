@@ -3,14 +3,15 @@
 bool help = false; // print stuff
 bool zerophoton = false; // to test - zeroing photonic parts
 
+  // polaritonic parameters   
+  sym_t nmax{1}; // maximum number of photns
+  double omega{1.028}; // cavity frequency
+
 // get one-electron integral
 container<2,double> get_integral_pol(std::string filename, 
                                  orb_type o1, 
                                  orb_type o2) {
 
-  // polaritonic parameters   
-  size_t nmax{1}; // maximum number of photns
-  double omega{1.028}; // cavity frequency
   
   std::ifstream infile;
   infile.open(filename);
@@ -27,11 +28,13 @@ container<2,double> get_integral_pol(std::string filename,
   size_t nel = dump.parameter("NELEC")[0];
   size_t nbeta = nel/2;
   size_t nalpha = nel - nbeta;
+  sym_t nphoton = 1; // occupied is always 1 (vacuum orbital)
 
-  std::vector<spin> v_spin = {alpha, beta};
+  // vector ocntaining possible spins
+  std::vector<spin> v_spin = {alpha, beta,photon};
 
-  std::vector<size_t> no = {nalpha, nbeta}, nv;
-  for (auto &&ispin : v_spin) nv.push_back(nb - no[ispin]);
+  // vector containing number of occupied orbital per spin
+  std::vector<size_t> no = {nalpha, nbeta,nphoton}, nv = {nb - nalpha, nb - nbeta, nmax};
 
   std::vector<int> orbsym = dump.parameter("ORBSYM");
   // size_t ms2 = dump.parameter("MS2")[0];
@@ -48,10 +51,16 @@ container<2,double> get_integral_pol(std::string filename,
   syms_t full(8);
   for (auto &&os : orbsym) full[os-1] += 1;
 
+  // photon space
+  syms_t fermi_ph = {nphoton, 0, 0, 0, 0, 0, 0, 0};
+  syms_t full_ph = {nphoton + nmax, 0, 0, 0, 0, 0, 0, 0};
+
   std::vector<std::pair<syms_t, syms_t>> 
-    occ = {{empty, fermi}, {empty, closed}}, 
-    vir = {{fermi, full},{closed, full}}; 
+    occ = {{empty, fermi}, {empty, closed}, {empty, fermi_ph}}, 
+    vir = {{fermi, full},{closed, full},{fermi_ph, full_ph}};
+
   std::pair<syms_t, syms_t> bas = {empty, full};
+  std::pair<syms_t, syms_t> bas_ph = {empty, full_ph}; // idk if needeed, but just in case
 
   std::vector<orb_type> orb_types = {o1,o2};
   
@@ -62,7 +71,6 @@ container<2,double> get_integral_pol(std::string filename,
 
   // fill in vectors
   for (size_t iot = 0; iot < orb_types.size(); iot++) {
-    size_t spp(1); // photon space 
     for (auto &&ispin : v_spin) {
       switch (orb_types[iot]) {
         case (o): { 
@@ -72,17 +80,16 @@ container<2,double> get_integral_pol(std::string filename,
         case (v): { 
           v_norb[ispin][iot] = nv[ispin]; 
           v_psi[ispin][iot] = vir[ispin]; 
-          spp = nmax; } break;
+        } break;
         case (b): { 
           v_norb[ispin][iot] = nb; 
           v_psi[ispin][iot] = bas; 
-          spp += nmax; 
         } break;
         default: 
           break;
       }
     }
-    size_t sp(spp);
+    size_t sp(0);
     for (auto &&ispin : v_spin) 
       sp += v_norb[ispin][iot]; //alpha+beta space 
     libtensor::bispace<1> space(sp); 
@@ -212,16 +219,24 @@ container<2,double> get_integral_pol(std::string filename,
       }
     } else if (!zerophoton) {
       if (o1 == o && o2 == o)
-        for (size_t i = 0; i < tdims.get_size(); i++) {
-          // ptr[i+i*tdims.get_size()] = omega*(0.5+i);
-          ptr[i+i*tdims.get_size()] = omega*(0.5+i)-omega*(0.5); // with shift
+        for (size_t i = 0; i < 1; i++) {
+          // ptr[i+i*nmax] = omega*(0.5+i);
+          ptr[i+i*nmax] = omega*(0.5+i)-omega*(0.5); // with shift
           
         }
       else if (o1 == v && o2 == v) {
-        for (size_t i = 0; i < tdims.get_size(); i++) {
-          // ptr[i+i*tdims.get_size()] = omega*(1.5+i);
-          ptr[i+i*tdims.get_size()] = omega*(1.5+i)-omega*(0.5); // with shift
+        std::cout << "tdims.get_size() = " << tdims.get_size() << std::endl;
+        std::cout << "nmax = " << nmax << std::endl;
+        for (size_t i = 0; i < nmax; i++) {
+        // std::cout << "i = " << i << std::endl;
+        // std::cout << "i*nmax = " << i*nmax << std::endl;
+          // ptr[i+i*nmax] = omega*(1.5+i);
+          ptr[i+i*nmax] = omega*(1.5+i)-omega*(0.5); // with shift
         }
+        // for (size_t i = 0; i < tdims.get_size(); i++) {
+        //   // ptr[i] = i; 
+        //   std::cout << i << std::endl;
+        // }
       }
     }
     // Return data pointer
@@ -247,8 +262,8 @@ container<4,double> get_integral_pol(std::string filename,
                                     bool add_ph) {
 
   // polaritonic parameters  
-  sym_t nmax{1};       // max number of photon
-  double omega{1.028}; // cavity frequency
+  // sym_t nmax{1};       // max number of photon
+  // double omega{1.028}; // cavity frequency
   double gamma{0.01};  // coupling strength
   if (zerophoton) gamma = 0;
 
@@ -293,7 +308,8 @@ container<4,double> get_integral_pol(std::string filename,
   syms_t fermi_ph = {nphoton, 0, 0, 0, 0, 0, 0, 0};
   syms_t full_ph = {nphoton + nmax, 0, 0, 0, 0, 0, 0, 0};
 
-  std::vector<std::pair<syms_t, syms_t>> occ = {{empty, fermi}, {empty, closed}, {empty, fermi_ph}}, 
+  std::vector<std::pair<syms_t, syms_t>> 
+    occ = {{empty, fermi}, {empty, closed}, {empty, fermi_ph}}, 
     vir = {{fermi, full},{closed, full},{fermi_ph, full_ph}}; // photon
 
   std::pair<syms_t, syms_t> bas = {empty, full}; 
@@ -628,31 +644,29 @@ container<4,double> get_integral_pol(std::string filename,
       // integral.scale(10e-10);
     } else {
     if (add_ph & !zerophoton) {
-      if ((bidx_cp[0] == 0 && bidx_cp[1] == 0  && bidx_cp[2] == 2 && bidx_cp[3] == 2) // aapp
-        || (bidx_cp[0] == 2 && bidx_cp[1] == 2  && bidx_cp[2] == 0 && bidx_cp[3] == 0)) // ppaa
+      if (help) {
+        std::cout << "bidx_cp[0] = " << bidx_cp[0]<< "\n";
+        std::cout << "bidx_cp[1] = " << bidx_cp[1]<< "\n";
+        std::cout << "bidx_cp[2] = " << bidx_cp[2]<< "\n";
+        std::cout << "bidx_cp[3] = " << bidx_cp[3]<< "\n";
+      }
+      if ((bidx_cp[0] == 0 && bidx_cp[1] == 0  && bidx_cp[2] == 2 && bidx_cp[3] == 2)) // aapp
       {
         // std::cout << "alpha" << std::endl;    
-        if (help) {
-          std::cout << "bidx_cp[0] = " << bidx_cp[0]<< "\n";
-          std::cout << "bidx_cp[1] = " << bidx_cp[1]<< "\n";
-          std::cout << "bidx_cp[2] = " << bidx_cp[2]<< "\n";
-          std::cout << "bidx_cp[3] = " << bidx_cp[3]<< "\n";
-        }
         spin1 = alpha;
         spin2 = photon;
-      } else if ((bidx_cp[0] == 1 && bidx_cp[1] == 1  && bidx_cp[2] == 2 && bidx_cp[3] == 2) // bbpp
-        || (bidx_cp[0] == 2 && bidx_cp[1] == 2  && bidx_cp[2] == 1 && bidx_cp[3] == 1)) // ppbb
+      } else if (bidx_cp[0] == 2 && bidx_cp[1] == 2  && bidx_cp[2] == 0 && bidx_cp[3] == 0) // ppaa
+      {
+        spin1 = photon;
+        spin2 = alpha;
+      } else if (bidx_cp[0] == 1 && bidx_cp[1] == 1  && bidx_cp[2] == 2 && bidx_cp[3] == 2) // bbpp
      {
-        // std::cout << "beta" << std::endl;
-        if (help) {
-          std::cout << "bidx_cp[0] = " << bidx_cp[0]<< "\n";
-          std::cout << "bidx_cp[1] = " << bidx_cp[1]<< "\n";
-          std::cout << "bidx_cp[2] = " << bidx_cp[2]<< "\n";
-          std::cout << "bidx_cp[3] = " << bidx_cp[3]<< "\n";
-        }
-
         spin1 = beta;
         spin2 = photon;
+      } else if (bidx_cp[0] == 2 && bidx_cp[1] == 2  && bidx_cp[2] == 1 && bidx_cp[3] == 1) // ppbb
+     {
+        spin1 = photon;
+        spin2 = beta;
       } else {
         ctrl.req_zero_block(bidx);
         continue;
@@ -764,7 +778,7 @@ container<4,double> get_integral_pol(std::string filename,
             }
           }
           // 4
-          // (qp|sr)
+          // (qp|sr)  
           if ((((p) >= v_psi[spin1][1].first[symp] && (p) < v_psi[spin1][1].second[symp]) 
             && ((q) >= v_psi[spin1][0].first[symq] && (q) < v_psi[spin1][0].second[symq]))
             && (((r) >= v_psi[spin2][3].first[symr] && (r) < v_psi[spin2][3].second[symr]))) {
