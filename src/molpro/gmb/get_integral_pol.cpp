@@ -225,18 +225,10 @@ container<2,double> get_integral_pol(std::string filename,
           
         }
       else if (o1 == v && o2 == v) {
-        std::cout << "tdims.get_size() = " << tdims.get_size() << std::endl;
-        std::cout << "nmax = " << nmax << std::endl;
         for (size_t i = 0; i < nmax; i++) {
-        // std::cout << "i = " << i << std::endl;
-        // std::cout << "i*nmax = " << i*nmax << std::endl;
           // ptr[i+i*nmax] = omega*(1.5+i);
           ptr[i+i*nmax] = omega*(1.5+i)-omega*(0.5); // with shift
         }
-        // for (size_t i = 0; i < tdims.get_size(); i++) {
-        //   // ptr[i] = i; 
-        //   std::cout << i << std::endl;
-        // }
       }
     }
     // Return data pointer
