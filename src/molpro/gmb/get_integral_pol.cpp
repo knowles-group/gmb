@@ -213,14 +213,14 @@ container<2,double> get_integral_pol(std::string filename,
     } else if (!zerophoton) {
       if (o1 == o && o2 == o)
         for (size_t i = 0; i < tdims.get_size(); i++) {
-          ptr[i+i*tdims.get_size()] = omega*(0.5+i);
-          // ptr[i+i*tdims.get_size()] = omega*(0.5+i)-omega*(0.5); // with shift
+          // ptr[i+i*tdims.get_size()] = omega*(0.5+i);
+          ptr[i+i*tdims.get_size()] = omega*(0.5+i)-omega*(0.5); // with shift
           
         }
       else if (o1 == v && o2 == v) {
         for (size_t i = 0; i < tdims.get_size(); i++) {
-          ptr[i+i*tdims.get_size()] = omega*(1.5+i);
-          // ptr[i+i*tdims.get_size()] = omega*(1.5+i)-omega*(0.5); // with shift
+          // ptr[i+i*tdims.get_size()] = omega*(1.5+i);
+          ptr[i+i*tdims.get_size()] = omega*(1.5+i)-omega*(0.5); // with shift
         }
       }
     }
@@ -292,7 +292,6 @@ container<4,double> get_integral_pol(std::string filename,
   // photon space
   syms_t fermi_ph = {nphoton, 0, 0, 0, 0, 0, 0, 0};
   syms_t full_ph = {nphoton + nmax, 0, 0, 0, 0, 0, 0, 0};
-
 
   std::vector<std::pair<syms_t, syms_t>> occ = {{empty, fermi}, {empty, closed}, {empty, fermi_ph}}, 
     vir = {{fermi, full},{closed, full},{fermi_ph, full_ph}}; // photon
@@ -417,6 +416,7 @@ container<4,double> get_integral_pol(std::string filename,
        
   
   container<4, double> integral(*p_sp4);
+
   p_sp4.release();
   // set symmetry
   // Request a control object
@@ -448,6 +448,7 @@ container<4,double> get_integral_pol(std::string filename,
 
   // Loop over all blocks using orbit_list
   libtensor::orbit_list<4, double> ol(ctrl.req_const_symmetry());
+#if 1
 
   for (libtensor::orbit_list<4, double>::iterator it = ol.begin();
          it != ol.end(); it++) {
@@ -630,13 +631,26 @@ container<4,double> get_integral_pol(std::string filename,
       if ((bidx_cp[0] == 0 && bidx_cp[1] == 0  && bidx_cp[2] == 2 && bidx_cp[3] == 2) // aapp
         || (bidx_cp[0] == 2 && bidx_cp[1] == 2  && bidx_cp[2] == 0 && bidx_cp[3] == 0)) // ppaa
       {
-        // std::cout << "alpha" << std::endl;
+        // std::cout << "alpha" << std::endl;    
+        if (help) {
+          std::cout << "bidx_cp[0] = " << bidx_cp[0]<< "\n";
+          std::cout << "bidx_cp[1] = " << bidx_cp[1]<< "\n";
+          std::cout << "bidx_cp[2] = " << bidx_cp[2]<< "\n";
+          std::cout << "bidx_cp[3] = " << bidx_cp[3]<< "\n";
+        }
         spin1 = alpha;
         spin2 = photon;
       } else if ((bidx_cp[0] == 1 && bidx_cp[1] == 1  && bidx_cp[2] == 2 && bidx_cp[3] == 2) // bbpp
         || (bidx_cp[0] == 2 && bidx_cp[1] == 2  && bidx_cp[2] == 1 && bidx_cp[3] == 1)) // ppbb
      {
         // std::cout << "beta" << std::endl;
+        if (help) {
+          std::cout << "bidx_cp[0] = " << bidx_cp[0]<< "\n";
+          std::cout << "bidx_cp[1] = " << bidx_cp[1]<< "\n";
+          std::cout << "bidx_cp[2] = " << bidx_cp[2]<< "\n";
+          std::cout << "bidx_cp[3] = " << bidx_cp[3]<< "\n";
+        }
+
         spin1 = beta;
         spin2 = photon;
       } else {
@@ -658,7 +672,7 @@ container<4,double> get_integral_pol(std::string filename,
       double *ptr = tc.req_dataptr();
 
       // read dipole integrals
-      molpro::FCIdump dump{"RESULT"}; 
+      molpro::FCIdump dump{"dipole"}; 
       size_t p, q, r, s;
       int sp, sm;
       unsigned int symp, symq, symr, syms;
@@ -711,7 +725,6 @@ container<4,double> get_integral_pol(std::string filename,
                         + (v_norb[spin2][3])*(r+v_shift[spin2][2][symr])
                         + (sp+v_shift[spin2][3][syms]);
               ptr[offset] = - gamma*omega*sqrt(sp)*value;
-              if (help) std::cout << "v_shift[spin1][1][symp] = " << v_shift[spin1][1][symp] << std::endl;
               if (help) std::cout << "2 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
@@ -740,7 +753,7 @@ container<4,double> get_integral_pol(std::string filename,
               if (help) std::cout << "3 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-            if ((sm) >= v_psi[spin2][3].first[syms] && (sm)<v_psi[spin2][3].second[syms]) {
+            if ((sm) >= v_psi[spin2][2].first[syms] && (sm)<v_psi[spin2][2].second[syms]) {
               size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][0][symp])
                         + (v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][1][symq])
                         + (v_norb[spin2][3])*(sm+v_shift[spin2][2][syms])
@@ -764,7 +777,7 @@ container<4,double> get_integral_pol(std::string filename,
               if (help) std::cout << "4 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-            if ((sm) >= v_psi[spin2][3].first[syms] && (sm)<v_psi[spin2][3].second[syms]) {
+            if ((sm) >= v_psi[spin2][2].first[syms] && (sm)<v_psi[spin2][2].second[syms]) {
               size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][0][symq])
                         + (v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][1][symp])
                         + (v_norb[spin2][3])*(sm+v_shift[spin2][2][syms])
@@ -799,7 +812,6 @@ container<4,double> get_integral_pol(std::string filename,
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
           }
-            #if 1
           // 6
           // (sr|pq)
           if ((((p) >= v_psi[spin1][2].first[symp] && (p) < v_psi[spin1][2].second[symp]) 
@@ -824,7 +836,6 @@ container<4,double> get_integral_pol(std::string filename,
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
           }
-          #endif
           // 7
           // (rs|qp)
           if ((((p) >= v_psi[spin1][3].first[symp] && (p) < v_psi[spin1][3].second[symp]) 
@@ -849,7 +860,6 @@ container<4,double> get_integral_pol(std::string filename,
               if (help) std::cout << "7b off set = " << offset << std::endl;
             }
           }
-          #if 1
           // 8
           // (sr|qp)
           if ((((p) >= v_psi[spin1][3].first[symp] && (p) < v_psi[spin1][3].second[symp]) 
@@ -874,7 +884,6 @@ container<4,double> get_integral_pol(std::string filename,
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
           }
-          #endif
         }
       }
     // Return data pointer
@@ -885,6 +894,7 @@ container<4,double> get_integral_pol(std::string filename,
   }
     } 
 
+  #endif
   if (false) {
     std::cout << "printing integral\n";
     libtensor::bto_print<4, double>(std::cout).perform(integral);

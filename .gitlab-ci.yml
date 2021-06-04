@@ -5,9 +5,9 @@ cache:
 image: registry.gitlab.com/knowles-group/secondquantization
 
 build:
-        #  only:
-        # refs:
-        #- master
+  only:
+    refs:
+      - master
   script:
     - procs=$(lscpu -p | egrep -v '^#' | wc -l || echo 1); echo $procs processors available
     - TOP=$PWD
