@@ -2,10 +2,11 @@ set(src
     main.cpp
     init.cpp
     libtensor_utils.cpp
-    # get_integral_ph.cpp
+    #    get_integral_ph.cpp
     get_integral_pol.cpp
     get_integral.cpp)
-    
+
+
 add_executable(${PROJECT_NAME} ${src})
 
 DependencyManager_Populate(Profiler)
@@ -24,5 +25,7 @@ endforeach()
 # set(tests_pol hubbard)
 file(COPY ../../../test/hubbard/hubbard.fcidump
           ../../../test/hubbard/polariton.fcidump 
-          ../../../test/hubbard/RESULT
+	  ../../../test/hubbard/dipole
           DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+
+              
