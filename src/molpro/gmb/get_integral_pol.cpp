@@ -1,8 +1,10 @@
 #include "get_integral_pol.h"
 
-bool shift = true; // shift
-bool help = false; // print stuff
-bool zerophoton = false; // to test - zeroing photonic parts
+bool noel{false}; // nobeta
+bool nobeta{false}; // nobeta
+bool shift{true}; // shift
+bool help{false}; // print stuff
+bool zerophoton{false}; // to test - zeroing photonic parts
 
 // polaritonic parameters  
 unsigned int nmax{1}; // maximum number of photns
@@ -86,8 +88,8 @@ void read_dump(std::string filename,
     for (auto &&ispin : v_spin) 
       sp += v_norb[ispin][iot]; //alpha+beta space 
     libtensor::bispace<1> space(sp); 
-    space.split(v_norb[0][iot]); // split space alpha/beta
-    space.split(nel); // split space electrons/photons
+    if(v_norb[1][iot] != 0) space.split(v_norb[0][iot]); // split space alpha/beta
+    if(v_norb[2][iot] != 0) space.split(v_norb[0][iot]+v_norb[1][iot]); // split space electrons/photons
     v_sp.push_back(space);
   }
 
@@ -425,16 +427,19 @@ container<4,double> get_integral_pol(std::string filename,
           itype = molpro::FCIdump::I2ab;
           block2 = false;
         }
+        if (nobeta) skip = true;
     } else if ((bidx_cp[0] == 1 && bidx_cp[1] == 1  && bidx_cp[2] == 0 && bidx_cp[3] == 0)) { // bbaa
         spin1 = beta; spin2 = alpha;
         if (uhf) {
           itype = molpro::FCIdump::I2ab;
           block1 = false;
         }
+        if (nobeta) skip = true;
     } else if (bidx_cp[0] == 1 && bidx_cp[1] == 1  && bidx_cp[2] == 1 && bidx_cp[3] == 1) { // bbbb
         if (uhf) itype = molpro::FCIdump::I2bb;
         spin1 = beta;
         spin2 = beta;
+        if (nobeta) skip = true;
     } else {
         skip = true;
     } 
@@ -645,7 +650,7 @@ container<4,double> get_integral_pol(std::string filename,
                         + (v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][1][symq])
                         + (v_norb[spin2][3])*(r+v_shift[spin2][2][symr])
                         + (sp+v_shift[spin2][3][syms]);
-              ptr[offset] = - gamma*omega*sqrt(sp)*value;
+              ptr[offset] = - 0.5*gamma*omega*sqrt(sp)*value;
               if (help) std::cout << "1 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
@@ -654,7 +659,7 @@ container<4,double> get_integral_pol(std::string filename,
             //             + (v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][1][symq])
             //             + (v_norb[spin2][3])*(r+v_shift[spin2][2][symr])
             //             + (sm+v_shift[spin2][3][syms]);
-            //   ptr[offset] = - gamma*omega*sqrt(sm+1)*value;
+            //   ptr[offset] = - 0.5*gamma*omega*sqrt(sm+1)*value;
             //   if (help) std::cout << "1b off set = " << offset << std::endl;
             //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             // }
@@ -669,7 +674,7 @@ container<4,double> get_integral_pol(std::string filename,
                         + (v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][1][symp])
                         + (v_norb[spin2][3])*(r+v_shift[spin2][2][symr])
                         + (sp+v_shift[spin2][3][syms]);
-              ptr[offset] = - gamma*omega*sqrt(sp)*value;
+              ptr[offset] = - 0.5*gamma*omega*sqrt(sp)*value;
               if (help) std::cout << "2 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
@@ -678,7 +683,7 @@ container<4,double> get_integral_pol(std::string filename,
             //             + (v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][1][symp])
             //             + (v_norb[spin2][3])*(r+v_shift[spin2][2][symr])
             //             + (sm+v_shift[spin2][3][syms]);
-            //   ptr[offset] = - gamma*omega*sqrt(sm+1)*value;
+            //   ptr[offset] = - 0.5*gamma*omega*sqrt(sm+1)*value;
             //   if (help) std::cout << "2b off set = " << offset << std::endl;
             //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             // }
@@ -694,7 +699,7 @@ container<4,double> get_integral_pol(std::string filename,
                         + (v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][1][symq])
                         + (v_norb[spin2][3])*(sp+v_shift[spin2][2][syms])
                         + (r+v_shift[spin2][3][symr]);
-              ptr[offset] = - gamma*omega*sqrt(sp)*value;
+              ptr[offset] = - 0.5*gamma*omega*sqrt(sp)*value;
               if (help) std::cout << "3 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
@@ -703,7 +708,7 @@ container<4,double> get_integral_pol(std::string filename,
             //             + (v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][1][symq])
             //             + (v_norb[spin2][3])*(sm+v_shift[spin2][2][syms])
             //             + (r+v_shift[spin2][3][symr]);
-            //   ptr[offset] = - gamma*omega*sqrt(sm+1)*value;
+            //   ptr[offset] = - 0.5*gamma*omega*sqrt(sm+1)*value;
             //   if (help) std::cout << "3b off set = " << offset << std::endl;
             //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             // }
@@ -718,7 +723,7 @@ container<4,double> get_integral_pol(std::string filename,
                         + (v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][1][symp])
                         + (v_norb[spin2][3])*(sp+v_shift[spin2][2][syms])
                         + (r+v_shift[spin2][3][symr]);
-              ptr[offset] = - gamma*omega*sqrt(sp)*value;
+              ptr[offset] = - 0.5*gamma*omega*sqrt(sp)*value;
               if (help) std::cout << "4 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
@@ -727,7 +732,7 @@ container<4,double> get_integral_pol(std::string filename,
             //             + (v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][1][symp])
             //             + (v_norb[spin2][3])*(sm+v_shift[spin2][2][syms])
             //             + (r+v_shift[spin2][3][symr]);
-            //   ptr[offset] = - gamma*omega*sqrt(sm+1)*value;
+            //   ptr[offset] = - 0.5*gamma*omega*sqrt(sm+1)*value;
             //   if (help) std::cout << "4b off set = " << offset << std::endl;
             //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             // }
@@ -745,7 +750,7 @@ container<4,double> get_integral_pol(std::string filename,
                         + (v_norb[spin1][2]*v_norb[spin1][3])*(sp+v_shift[spin2][1][syms])
                         + (v_norb[spin1][3])*(p+v_shift[spin1][2][symp])
                         + (q+v_shift[spin1][3][symq]);
-              ptr[offset] = - gamma*omega*sqrt(sp)*value;
+              ptr[offset] = - 0.5*gamma*omega*sqrt(sp)*value;
               if (help) std::cout << "5 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
@@ -754,7 +759,7 @@ container<4,double> get_integral_pol(std::string filename,
             //             + (v_norb[spin1][2]*v_norb[spin1][3])*(sm+v_shift[spin2][1][syms])
             //             + (v_norb[spin1][3])*(p+v_shift[spin1][2][symp])
             //             + (q+v_shift[spin1][3][symq]);
-            //   ptr[offset] = - gamma*omega*sqrt(sm+1)*value;
+            //   ptr[offset] = - 0.5*gamma*omega*sqrt(sm+1)*value;
             //   if (help) std::cout << "5b off set = " << offset << std::endl;
             //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             // }
@@ -769,7 +774,7 @@ container<4,double> get_integral_pol(std::string filename,
                         + (v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][1][symr])
                         + (v_norb[spin1][3])*(p+v_shift[spin1][2][symp])
                         + (q+v_shift[spin1][3][symq]);
-              ptr[offset] = - gamma*omega*sqrt(sp)*value;
+              ptr[offset] = - 0.5*gamma*omega*sqrt(sp)*value;
               if (help) std::cout << "6 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
@@ -778,7 +783,7 @@ container<4,double> get_integral_pol(std::string filename,
             //             + (v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][1][symr])
             //             + (v_norb[spin1][3])*(p+v_shift[spin1][2][symp])
             //             + (q+v_shift[spin1][3][symq]);
-            //   ptr[offset] = - gamma*omega*sqrt(sm+1)*value;
+            //   ptr[offset] = - 0.5*gamma*omega*sqrt(sm+1)*value;
             //   if (help) std::cout << "6b off set = " << offset << std::endl;
             //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             // }
@@ -793,7 +798,7 @@ container<4,double> get_integral_pol(std::string filename,
                         + (v_norb[spin1][2]*v_norb[spin1][3])*(sp+v_shift[spin2][1][syms])
                         + (v_norb[spin1][3])*(q+v_shift[spin1][2][symq])
                         + (p+v_shift[spin1][3][symp]);
-              ptr[offset] = - gamma*omega*sqrt(sp)*value;
+              ptr[offset] = - 0.5*gamma*omega*sqrt(sp)*value;
               if (help) std::cout << "7 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
@@ -802,7 +807,7 @@ container<4,double> get_integral_pol(std::string filename,
             //             + (v_norb[spin1][2]*v_norb[spin1][3])*(sm+v_shift[spin2][1][syms])
             //             + (v_norb[spin1][3])*(q+v_shift[spin1][2][symq])
             //             + (p+v_shift[spin1][3][symp]);
-            //   ptr[offset] = - gamma*omega*sqrt(sm+1)*value;
+            //   ptr[offset] = - 0.5*gamma*omega*sqrt(sm+1)*value;
             //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             //   if (help) std::cout << "7b off set = " << offset << std::endl;
             // }
@@ -817,7 +822,7 @@ container<4,double> get_integral_pol(std::string filename,
                         + (v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][1][symr])
                         + (v_norb[spin1][3])*(q+v_shift[spin1][2][symq])
                         + (p+v_shift[spin1][3][symp]);
-              ptr[offset] = - gamma*omega*sqrt(sp)*value;
+              ptr[offset] = - 0.5*gamma*omega*sqrt(sp)*value;
               if (help) std::cout << "8 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
@@ -826,7 +831,7 @@ container<4,double> get_integral_pol(std::string filename,
             //             + (v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][1][symr])
             //             + (v_norb[spin1][3])*(q+v_shift[spin1][2][symq])
             //             + (p+v_shift[spin1][3][symp]);
-            //   ptr[offset] = - gamma*omega*sqrt(sm+1)*value;
+            //   ptr[offset] = - 0.5*gamma*omega*sqrt(sm+1)*value;
             //   if (help) std::cout << "8b off set = " << offset << std::endl;
             //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             // }
