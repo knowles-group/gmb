@@ -81,33 +81,30 @@ public:
   }
 
   void action(const CVecRef<container_t> &parameters, const VecRef<container_t> &actions) const override {
- 
     for (int k = 0; k < parameters.size(); k++) {
       auto &ccp = const_cast<container_t&> (parameters[k].get());     
       auto &a = actions[k].get();  
-
       // compute intermediates
+      auto ir1_vv = eom_ccsd_ir1_vv(m_ham.m2get(f_vv),ccp.m2get(r1),m_int.m4get("iw2_ovvv"));          
       auto ir1_oo = eom_ccsd_ir1_oo(m_ham.m2get(f_oo),ccp.m2get(r1),m_int.m4get("iw2_ooov"));          
       auto ir2_oo = eom_ccsd_ir2_oo(m_ham.m2get(f_oo),ccp.m4get(r2),m_ham.m4get(i_oovv));          
-      auto ir1_vv = eom_ccsd_ir1_vv(m_ham.m2get(f_vv),ccp.m2get(r1),m_int.m4get("iw2_ovvv"));          
       auto ir2_vv = eom_ccsd_ir2_vv(m_ham.m2get(f_vv),ccp.m4get(r2),m_ham.m4get(i_oovv));          
-
       // compute r1
       auto r1_new = eom_ccsd_r1(ccp.m2get(r1), ccp.m4get(r2), m_int.m2get("if_oo"), m_int.m2get("if_ov"), m_int.m2get("if_vv"),  
                     m_int.m4get("iw_ovov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw2_ovvv"));
       a.set(r1, r1_new);
-      
       // compute r2
       auto r2_new = eom_ccsd_r2(ccp.m2get(r1), ccp.m4get(r2), m_tampl.m4get(t2), m_int.m2get("if_oo"), m_int.m2get("if_vv"),  
                     ir1_oo, ir2_oo, ir1_vv, ir2_vv, 
                     m_ham.m4get(i_oovv), m_int.m4get("iw_oooo"), m_int.m4get("iw_ooov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw_ovov"), m_int.m4get("iw_ovvv"), m_int.m4get("iw2_ovvv"), m_int.m4get("iw_vvvv"));
       a.set(r2, r2_new);
-
     }
   }
 
-  friend
-  std::ostream& operator<<(std::ostream& s, const problem_eom_ccsd& problem) ;
+  void print(std::ostream& s) const {
+    s << "EOM-CCSD";
+  }
+
 };
 
 std::ostream& operator<<(std::ostream& s, const problem_eom_ccsd& problem) {
