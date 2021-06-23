@@ -17,8 +17,7 @@ double energy_hf(
 
     libtensor::letter i, j, k, l;
     energy = trace(i,j,f_oo(i|j))
-                  - 0.5*trace (i|j, k|l, i_oooo(i|j|k|l))
-                  ;
+                  - 0.5*trace (i|j, k|l, i_oooo(i|j|k|l));
     return energy;
 };
 

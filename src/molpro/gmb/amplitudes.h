@@ -4,7 +4,8 @@
 #include "supercontainer.h"
 
 extern std::string filename;
-enum ampl {t1, t2, r1, r2};
+
+enum ampl {t1, t2, r1, r2, l1, l2};
 
 
 template<typename T=double>
@@ -39,7 +40,7 @@ public:
  */
   amplitudes(const std::map<size_t,value_type>& source) {
     for (auto &imin : source) {
-      auto r1_guess = get_integral_pol(filename,o,v);
+      auto r1_guess = get_integral(filename,o,v);
       gmb::zero(r1_guess);
       libtensor::block_tensor_wr_ctrl<2, double> ctrl(r1_guess);
       libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
@@ -61,7 +62,7 @@ public:
         ctrl.ret_block(bidx);
       }
       this->m_m2.insert(std::make_pair("r1", new container<2,T> (r1_guess)));
-      auto r2_guess = get_integral_pol(filename,o,o,v,v);
+      auto r2_guess = get_integral(filename,o,o,v,v);
       gmb::zero(r2_guess);
       this->m_m4.insert(std::make_pair("r2", new container<4,T> (r2_guess)));
     }

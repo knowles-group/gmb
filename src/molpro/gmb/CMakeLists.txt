@@ -2,8 +2,6 @@ set(src
     main.cpp
     init.cpp
     libtensor_utils.cpp
-    #    get_integral_ph.cpp
-    get_integral_pol.cpp
     get_integral.cpp)
 
 
