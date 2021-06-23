@@ -4,7 +4,7 @@
 #include <vector>
 #include "problem_eom.h"
 #include "expressions/eom-ccsd/eom-ccsd.h"
-#include "update.h"
+#include "expressions/update.h"
 
 /**
  * @brief EOM-CCSD

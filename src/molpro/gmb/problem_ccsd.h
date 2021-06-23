@@ -8,7 +8,7 @@
 #include "expressions/eom-ccsd/precond_ov.h"
 #include "expressions/diag_oovv.h"
 #include "expressions/diag_ov.h"
-#include "update.h"
+#include "expressions/update.h"
 
 
 class problem_ccsd : public problem_gen {

@@ -3,8 +3,8 @@
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <vector>
 #include "problem_gen.h"
-#include "action_mp2.h"
-#include "update.h"
+#include "expressions/action_mp2.h"
+#include "expressions/update.h"
 #include "expressions/id_xxxx.h"
 
 
