@@ -1,4 +1,5 @@
 #include "get_integral.h"
+#include "utils.h"
 
 bool noel{false}; // no electrons
 bool nobeta{false}; // nobeta
@@ -11,13 +12,7 @@ extern std::unique_ptr<polariton> ppol;
 
 // get nuclear energy
 double get_integral(std::string filename) {
-  std::ifstream infile;
-  infile.open(filename);
-  //send error if output not found
-  if (!infile) {
-      std::cout << "Unable to open file: " << filename<< "\n";
-      exit(1); // terminate with error
-  }
+  gmb::check_file(filename);
   molpro::FCIdump dump(filename);
   int i, j, k, l;
   double integral(0.0);
@@ -41,13 +36,7 @@ void read_dump(std::string filename,
                std::vector<std::vector<bool>>& ssss,
                bool &uhf) {
 
-  std::ifstream infile;
-  infile.open(filename);
-  //send error if output not found
-  if (!infile) {
-      std::cerr << "Unable to open file: " << filename<< "\n";
-      exit(1); // terminate with error
-  }
+  gmb::check_file(filename);
 
   // read parameters from fcidump file
   molpro::FCIdump dump{filename};
@@ -117,7 +106,7 @@ void read_dump(std::string filename,
     for (auto &&ispin : v_spin) 
       sp += v_norb[ispin][iot]; //alpha+beta space 
     libtensor::bispace<1> space(sp); 
-    if(v_norb[1][iot] != 0) 
+    if(v_spin.size() > 1 && v_norb[1][iot] != 0) 
       space.split(v_norb[0][iot]); // split space alpha/beta
     if (ppol != nullptr && v_norb[2][iot] != 0) 
       space.split(v_norb[0][iot]+v_norb[1][iot]); // split space electrons/photons
@@ -147,15 +136,17 @@ void read_dump(std::string filename,
         else v_shift[ispin][ino][isym] = - v_psi[ispin][ino].first[isym] + v_psi[ispin][ino].second[isym-1] + v_shift[ispin][ino][isym-1];
     }
   }
-  infile.close();
 }
 
 // get one-electron integral
 container<2,double> get_integral(std::string filename, 
                                  orb_type o1, 
-                                 orb_type o2) {
+                                 orb_type o2,
+                                 bool so_basis) {
                                  
-  std::vector<spin> v_spin = {alpha, beta}; // vector containing possible spins
+  std::vector<spin> v_spin = {alpha}; // vector containing possible spins
+  if (so_basis) 
+    v_spin.push_back(beta);
   if (ppol != nullptr) 
     v_spin.push_back(photon);
   std::vector<orb_type> orb_types = {o1,o2}; // vector containing orbital types
@@ -328,9 +319,12 @@ container<4,double> get_integral(std::string filename,
                                  orb_type o1, 
                                  orb_type o2, 
                                  orb_type o3, 
-                                 orb_type o4) {
-
-  std::vector<spin> v_spin = {alpha, beta}; // vector containing possible spins
+                                 orb_type o4,
+                                 bool so_basis) {
+                                 
+  std::vector<spin> v_spin = {alpha}; // vector containing possible spins
+  if (so_basis) 
+    v_spin.push_back(beta);
   if (ppol != nullptr)
     v_spin.push_back(photon);
   std::vector<orb_type> orb_types = {o1,o2,o3,o4}; // vector containing orbital types
@@ -658,15 +652,8 @@ container<4,double> get_integral(std::string filename,
       std::string dipfile{filename};
       dipfile.resize(filename.find_last_of("/")+1);
       dipfile += "DMO";
-      //send error if file not found
-      std::ifstream infile;
-      infile.open(dipfile);
-      //send error if output not found
-      if (!infile) {
-          std::cerr << "Unable to open file: " << dipfile << "\n";
-          exit(1); // terminate with error
-      }
-      infile.close();
+
+      gmb::check_file(filename);
       molpro::FCIdump dump{dipfile}; 
       size_t p, q, r, s;
       int sp, sm;

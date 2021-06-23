@@ -5,6 +5,7 @@
 #include "hamiltonian.h"
 #include "amplitudes.h"
 #include "expressions/energy_hf.h"
+#include "utils.h"
 #include <memory>
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <molpro/linalg/itsolv/SolverFactory.h>
@@ -17,17 +18,17 @@ std::string filename;
 std::string test_case = "h2_074"; 
 std::unique_ptr<polariton> ppol;
 
-template <typename T>
-void get_polval(std::stringstream &ss, T &value) {
-  if (!ss.good()) {
-    std::cerr << "The keyword polariton needs 3 arguments as: polariton=[nmax,gamma,omega]\n";
-    exit(1);
-  }
-  std::string substr;
-  getline(ss, substr, ',');
-  std::stringstream ssval{substr};
-  ssval >> value;
-}
+// template <typename T>
+// void get_polval(std::stringstream &ss, T &value) {
+//   if (!ss.good()) {
+//     std::cerr << "The keyword polariton needs 3 arguments as: polariton=[nmax,gamma,omega]\n";
+//     exit(1);
+//   }
+//   std::string substr;
+//   getline(ss, substr, ',');
+//   std::stringstream ssval{substr};
+//   ssval >> value;
+// }
 
 
 using namespace gmb;

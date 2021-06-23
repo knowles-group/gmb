@@ -1,6 +1,7 @@
 set(src 
     main.cpp
     init.cpp
+    utils.cpp
     libtensor_utils.cpp
     get_integral.cpp)
 

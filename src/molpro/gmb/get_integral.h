@@ -43,14 +43,16 @@ void read_dump(std::string filename,
 // get one-electron integral
 container<2,double> get_integral(std::string filename, 
                                  orb_type o1, 
-                                 orb_type o2);
+                                 orb_type o2,
+                                 bool so_basis = true);
 
 // get two-electron integral
 container<4,double> get_integral(std::string filename, 
                                  orb_type o1, 
                                  orb_type o2, 
                                  orb_type o3, 
-                                 orb_type o4);
+                                 orb_type o4,
+                                 bool so_basis = true);
 
 // get anti-symmetrized two-electron integral
 container<4,double> get_i(std::string filename, 
