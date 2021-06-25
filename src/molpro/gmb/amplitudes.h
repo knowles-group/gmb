@@ -4,7 +4,8 @@
 #include "supercontainer.h"
 
 extern std::string filename;
-enum ampl {t1, t2, r1, r2};
+
+enum ampl {t1, t2, r1, r2, l1, l2};
 
 
 template<typename T=double>
@@ -28,7 +29,7 @@ public:
   using supercontainer<T>::supercontainer;
 
   amplitudes() 
-  : supercontainer<T>()  {}
+  : supercontainer<T>() {}
 
 /**
  * @brief Construct a new amplitudes object to be used as guess vector.
@@ -84,7 +85,7 @@ public:
    */
   std::map<size_t, T> select(size_t n, bool max = false, bool ignore_sign = false) const {
     std::map<size_t, T> m;
-    size_t count(0);
+    size_t count{0};
 
     // for now only singles
     for (auto &&im2 : this->m_m2) {

@@ -26,10 +26,14 @@ public:
 
   friend
   std::ostream& operator<<(std::ostream& s, const problem_eom& problem) ;
+
+  virtual 
+  void print(std::ostream& s) const {}
+
 };
 
 std::ostream& operator<<(std::ostream& s, const problem_eom& problem) {
-  s<<"";
+  problem.print(s);
   return s;
 }
 

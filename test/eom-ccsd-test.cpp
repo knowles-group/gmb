@@ -4,6 +4,7 @@
 #include "molpro/FCIdump.h"
 
 #include "../src/molpro/gmb/init.cpp"
+#include "../src/molpro/gmb/utils.cpp"
 #include "../src/molpro/gmb/get_integral.cpp"
 #include "../src/molpro/gmb/libtensor_utils.cpp"
 
@@ -21,6 +22,7 @@ std::string test_case = "He-VDZ";
 // std::string test_case = "Li-VDZ-UHF";
 std::string filename(test_case+"/"+test_case+".fcidump");
 
+std::unique_ptr<polariton> ppol;
 
 int main(int argc, char* argv[]) {
   std::cout << "Test: " << test_case << std::endl;
@@ -33,7 +35,7 @@ TEST(CCSD,energy) {
   hamiltonian<> hamiltonian;
   std::unique_ptr<amplitudes<>> ptampl(new amplitudes());
   std::unique_ptr<problem_gen> problem;
-  std::string method_gs = "CCSD";
+  std::string method_gs = "ccsd";
 
  // initialise hamiltonian
   gmb::init(filename, method_gs, hamiltonian);
@@ -62,9 +64,10 @@ TEST(CCSD,energy) {
   ASSERT_NEAR(energy_ref, energy, 10E-13);
   infile.close();
 
+#if 1
   // EOM-CCSD
-  std::string method_es = "EOM-CCSD";
-  size_t nroots(5);
+  std::string method_es = "eom-ccsd";
+  size_t nroots(3);
 
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
@@ -77,7 +80,7 @@ TEST(CCSD,energy) {
   solver_es->set_n_roots(nroots);
   solver_es->solve(v_rampl, residuals_es, *problem_es, true);
   problem_es->set_energy(solver_es->eigenvalues());
-  energy = problem_es->get_energy()[3];
+  energy = problem_es->get_energy()[1];
 
   // get reference value and compare
   infile.open(test_case+"/energy_eom-ccsd");
@@ -85,6 +88,7 @@ TEST(CCSD,energy) {
   energy_ref = stod(line);
   ASSERT_NEAR(energy_ref, energy, 10E-09);
   infile.close();
+#endif
 }
 
 
