@@ -4,9 +4,7 @@
 
 namespace gmb {
   
-  void init(std::string &filename, std::string method, hamiltonian<> &ham) {
-std::cout << "init" << std::endl;
-    // filename += ".fcidump";
+  void init(std::string filename, std::string method, hamiltonian<> &ham) {
     // getting integrals <pq||rs> 
     auto int_oooo = get_i(filename, o, o, o, o);
     auto int_oovv = get_i(filename, o, o, v, v);
@@ -25,13 +23,11 @@ std::cout << "init" << std::endl;
     ham.set(i_ovov, int_ovov);
 
     if (method.find("cc") != std::string::npos) {
-std::cout << "cc" << std::endl;
 
       auto int_vvvv = get_i(filename, v, v, v, v);
       ham.set(i_vvvv, int_vvvv);
 
       if (method.find("ccsd") != std::string::npos) {
-std::cout << "ccsd" << std::endl;
         auto int_ooov = get_i(filename, o, o, o, v);
         auto int_ovvv = get_i(filename, o, v, v, v);
         ham.set(i_ooov, int_ooov);

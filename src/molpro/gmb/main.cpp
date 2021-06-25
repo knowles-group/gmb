@@ -13,25 +13,13 @@
 #include <ctime>
 #include "expressions/diag_ov.h"
 
+using namespace gmb;
+
 // test case
 std::string filename;
-std::string test_case = "h2_074"; 
+std::string test_case = "hubbard"; 
 std::unique_ptr<polariton> ppol;
 
-// template <typename T>
-// void get_polval(std::stringstream &ss, T &value) {
-//   if (!ss.good()) {
-//     std::cerr << "The keyword polariton needs 3 arguments as: polariton=[nmax,gamma,omega]\n";
-//     exit(1);
-//   }
-//   std::string substr;
-//   getline(ss, substr, ',');
-//   std::stringstream ssval{substr};
-//   ssval >> value;
-// }
-
-
-using namespace gmb;
 int main(int argc, char const *argv[]) {
   std::ios_base::sync_with_stdio(false);
   filename = argv[0];
@@ -63,6 +51,7 @@ int main(int argc, char const *argv[]) {
       ppol = std::make_unique<polariton>(pol.nmax,pol.gamma,pol.omega);
     }
   }
+  // ppol = std::make_unique<polariton>(1,0.01,1.028);
 
   std::cout << "Required calculation: " << "\n";
   std::cout << "dump = " << filename << "\n";
@@ -109,17 +98,17 @@ int main(int argc, char const *argv[]) {
   // solver options
   solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
   // solver->set_max_iter(110);
+  // solver->set_convergence_threshold(1.0e-14);
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);
   problem->energy(*ptampl);
 
   // print results
   std::cout << *problem << " correlation energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
-  std::cout << *problem  << " total energy: " << std::setprecision(12) 
+  std::cout << *problem  << " total energy: " << std::setprecision(13) 
             << problem->get_energy() + hf_energy<< "\n";
   
   #if 1 // Excited State
-  
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
   

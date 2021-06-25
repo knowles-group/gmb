@@ -227,7 +227,9 @@ container<2,double> get_integral(std::string filename,
       if (ppol != nullptr) {
         h1file.resize(filename.find_last_of("/")+1);
         h1file += "PERTH0MO";
+        // h1file += "H0MO";
       }
+      gmb::check_file(h1file);
       molpro::FCIdump dump(h1file);
       dump.rewind();
       while ((type = dump.nextIntegral(symi, i, symj, j, symk, k, syml, l, value)) != molpro::FCIdump::endOfFile) {
@@ -273,7 +275,7 @@ container<2,double> get_integral(std::string filename,
         case (o):
           for (size_t i = 0; i < 1; i++) {
             if (shift) 
-              ptr[i+i*ppol->nmax] = ppol->omega*(0.5+i)-ppol->omega*(0.5); // with shift          
+              ptr[i+i*ppol->nmax] = ppol->omega*(i); // with shift          
             else
               ptr[i+i*ppol->nmax] = ppol->omega*(0.5+i);
           }
@@ -281,7 +283,7 @@ container<2,double> get_integral(std::string filename,
         case (v):
           for (size_t i = 0; i < ppol->nmax; i++) {
             if (shift) 
-              ptr[i+i*ppol->nmax] = ppol->omega*(1.5+i)-ppol->omega*(0.5); // with shift        
+              ptr[i+i*ppol->nmax] = ppol->omega*(1+i); // with shift        
             else
               ptr[i+i*ppol->nmax] = ppol->omega*(1.5+i);
           }
@@ -289,7 +291,7 @@ container<2,double> get_integral(std::string filename,
         case (b):
           for (size_t i = 0; i < 1+ppol->nmax; i++) {
             if (shift) 
-              ptr[i+i*ppol->nmax] = ppol->omega*(0.5+i)-ppol->omega*(0.5); // with shift        
+              ptr[i+i*ppol->nmax] = ppol->omega*(i); // with shift        
             else
               ptr[i+i*ppol->nmax] = ppol->omega*(0.5+i);
           }
@@ -653,10 +655,9 @@ container<4,double> get_integral(std::string filename,
       dipfile.resize(filename.find_last_of("/")+1);
       dipfile += "DMO";
 
-      gmb::check_file(filename);
+      gmb::check_file(dipfile);
       molpro::FCIdump dump{dipfile}; 
       size_t p, q, r, s;
-      int sp, sm;
       unsigned int symp, symq, symr, syms;
       double value;
       molpro::FCIdump::integralType type;
@@ -664,11 +665,10 @@ container<4,double> get_integral(std::string filename,
 #if 1
       while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
         for (int r = 0; r < ppol->nmax + 1; r++) {
-          sp = r+1;
-          sm = r-1;
+          s = r+1;
           if (help) {
             std::cout << "p = " << p  << "; q = " << q << " value = " << value << std::endl;
-            std::cout << "r = " << r  << "; sp = " << sp <<  " sm = " << sm  << std::endl;
+            std::cout << "r = " << r  << "; s = " << s <<  std::endl;
             std::cout << "symp = " << symp << " symq = " << symq << " symr = " << symr << " syms = " << syms<< "\n";
           }
           symr = 0;
@@ -679,98 +679,58 @@ container<4,double> get_integral(std::string filename,
           if ((((p) >= v_psi[spin1][0].first[symp] && (p) < v_psi[spin1][0].second[symp]) 
             && ((q) >= v_psi[spin1][1].first[symq] && (q) < v_psi[spin1][1].second[symq]))
             && (((r) >= v_psi[spin2][2].first[symr] && (r) < v_psi[spin2][2].second[symr])
-            && ((sp) >= v_psi[spin2][3].first[syms] && (sp) < v_psi[spin2][3].second[syms]))) {
+            && ((s) >= v_psi[spin2][3].first[syms] && (s) < v_psi[spin2][3].second[syms]))) {
               size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][0][symp])
                         + (v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][1][symq])
                         + (v_norb[spin2][3])*(r+v_shift[spin2][2][symr])
-                        + (sp+v_shift[spin2][3][syms]);
-              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sp)*value;
+                        + (s+v_shift[spin2][3][syms]);
+              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(s)*value;
               if (help) std::cout << "1 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-            // if ((sm) >= v_psi[spin2][3].first[syms] && (sm)<v_psi[spin2][3].second[syms]) {
-            //   size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][0][symp])
-            //             + (v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][1][symq])
-            //             + (v_norb[spin2][3])*(r+v_shift[spin2][2][symr])
-            //             + (sm+v_shift[spin2][3][syms]);
-            //   ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sm+1)*value;
-            //   if (help) std::cout << "1b off set = " << offset << std::endl;
-            //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
-            // }
-          // }
           //2
           // (qp|rs)
           if ((((q) >= v_psi[spin1][0].first[symq] && (q) < v_psi[spin1][0].second[symq]) 
             && ((p) >= v_psi[spin1][1].first[symp] && (p) < v_psi[spin1][1].second[symp]))
             && (((r) >= v_psi[spin2][2].first[symr] && (r) < v_psi[spin2][2].second[symr])
-            && ((sp) >= v_psi[spin2][3].first[syms] && (sp) < v_psi[spin2][3].second[syms]))) {
+            && ((s) >= v_psi[spin2][3].first[syms] && (s) < v_psi[spin2][3].second[syms]))) {
               size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][0][symq])
                         + (v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][1][symp])
                         + (v_norb[spin2][3])*(r+v_shift[spin2][2][symr])
-                        + (sp+v_shift[spin2][3][syms]);
-              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sp)*value;
+                        + (s+v_shift[spin2][3][syms]);
+              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(s)*value;
               if (help) std::cout << "2 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-            // if ((sm) >= v_psi[spin2][3].first[syms] && (sm)<v_psi[spin2][3].second[syms]) {
-            //   size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][0][symq])
-            //             + (v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][1][symp])
-            //             + (v_norb[spin2][3])*(r+v_shift[spin2][2][symr])
-            //             + (sm+v_shift[spin2][3][syms]);
-            //   ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sm+1)*value;
-            //   if (help) std::cout << "2b off set = " << offset << std::endl;
-            //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
-            // }
-          // }
           #if 1
           // 3
           // (pq|sr)
           if ((((p) >= v_psi[spin1][0].first[symp] && (p) < v_psi[spin1][0].second[symp]) 
             && ((q) >= v_psi[spin1][1].first[symq] && (q) < v_psi[spin1][1].second[symq]))
             && (((r) >= v_psi[spin2][3].first[symr] && (r) < v_psi[spin2][3].second[symr])
-            && ((sp) >= v_psi[spin2][2].first[syms] && (sp) < v_psi[spin2][2].second[syms]))) {
+            && ((s) >= v_psi[spin2][2].first[syms] && (s) < v_psi[spin2][2].second[syms]))) {
               size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][0][symp])
                         + (v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][1][symq])
-                        + (v_norb[spin2][3])*(sp+v_shift[spin2][2][syms])
+                        + (v_norb[spin2][3])*(s+v_shift[spin2][2][syms])
                         + (r+v_shift[spin2][3][symr]);
-              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sp)*value;
+              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(s)*value;
               if (help) std::cout << "3 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-            // if ((sm) >= v_psi[spin2][2].first[syms] && (sm)<v_psi[spin2][2].second[syms]) {
-            //   size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][0][symp])
-            //             + (v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][1][symq])
-            //             + (v_norb[spin2][3])*(sm+v_shift[spin2][2][syms])
-            //             + (r+v_shift[spin2][3][symr]);
-            //   ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sm+1)*value;
-            //   if (help) std::cout << "3b off set = " << offset << std::endl;
-            //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
-            // }
-          // }
           // 4
           // (qp|sr)  
           if ((((p) >= v_psi[spin1][1].first[symp] && (p) < v_psi[spin1][1].second[symp]) 
             && ((q) >= v_psi[spin1][0].first[symq] && (q) < v_psi[spin1][0].second[symq]))
             && (((r) >= v_psi[spin2][3].first[symr] && (r) < v_psi[spin2][3].second[symr])
-            && ((sp) >= v_psi[spin2][2].first[syms] && (sp) < v_psi[spin2][2].second[syms]))) {
+            && ((s) >= v_psi[spin2][2].first[syms] && (s) < v_psi[spin2][2].second[syms]))) {
               size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][0][symq])
                         + (v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][1][symp])
-                        + (v_norb[spin2][3])*(sp+v_shift[spin2][2][syms])
+                        + (v_norb[spin2][3])*(s+v_shift[spin2][2][syms])
                         + (r+v_shift[spin2][3][symr]);
-              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sp)*value;
+              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(s)*value;
               if (help) std::cout << "4 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-            // if ((sm) >= v_psi[spin2][2].first[syms] && (sm)<v_psi[spin2][2].second[syms]) {
-            //   size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(q+v_shift[spin1][0][symq])
-            //             + (v_norb[spin2][2]*v_norb[spin2][3])*(p+v_shift[spin1][1][symp])
-            //             + (v_norb[spin2][3])*(sm+v_shift[spin2][2][syms])
-            //             + (r+v_shift[spin2][3][symr]);
-            //   ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sm+1)*value;
-            //   if (help) std::cout << "4b off set = " << offset << std::endl;
-            //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
-            // }
-          // }
             #endif 
           }
           if (block2) {
@@ -779,97 +739,57 @@ container<4,double> get_integral(std::string filename,
           if ((((p) >= v_psi[spin1][2].first[symp] && (p) < v_psi[spin1][2].second[symp]) 
             && ((q) >= v_psi[spin1][3].first[symq] && (q) < v_psi[spin1][3].second[symq]))
             && (((r) >= v_psi[spin2][0].first[symr] && (r) < v_psi[spin2][0].second[symr])
-            && ((sp) >= v_psi[spin2][1].first[syms] && (sp) < v_psi[spin2][1].second[syms]))) {
+            && ((s) >= v_psi[spin2][1].first[syms] && (s) < v_psi[spin2][1].second[syms]))) {
               size_t offset = (v_norb[spin2][1]*v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][0][symr])
-                        + (v_norb[spin1][2]*v_norb[spin1][3])*(sp+v_shift[spin2][1][syms])
+                        + (v_norb[spin1][2]*v_norb[spin1][3])*(s+v_shift[spin2][1][syms])
                         + (v_norb[spin1][3])*(p+v_shift[spin1][2][symp])
                         + (q+v_shift[spin1][3][symq]);
-              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sp)*value;
+              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(s)*value;
               if (help) std::cout << "5 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-            // if ((sm) >= v_psi[spin2][1].first[syms] && (sm)<v_psi[spin2][1].second[syms]) {
-            //   size_t offset = (v_norb[spin2][1]*v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][0][symr])
-            //             + (v_norb[spin1][2]*v_norb[spin1][3])*(sm+v_shift[spin2][1][syms])
-            //             + (v_norb[spin1][3])*(p+v_shift[spin1][2][symp])
-            //             + (q+v_shift[spin1][3][symq]);
-            //   ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sm+1)*value;
-            //   if (help) std::cout << "5b off set = " << offset << std::endl;
-            //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
-            // }
-          // }
           // 6
           // (sr|pq)
           if ((((p) >= v_psi[spin1][2].first[symp] && (p) < v_psi[spin1][2].second[symp]) 
             && ((q) >= v_psi[spin1][3].first[symq] && (q) < v_psi[spin1][3].second[symq]))
             && (((r) >= v_psi[spin2][1].first[symr] && (r) < v_psi[spin2][1].second[symr])
-            && ((sp) >= v_psi[spin2][0].first[syms] && (sp) < v_psi[spin2][0].second[syms]))) {
-              size_t offset = (v_norb[spin2][1]*v_norb[spin1][2]*v_norb[spin1][3])*(sp+v_shift[spin2][0][syms])
+            && ((s) >= v_psi[spin2][0].first[syms] && (s) < v_psi[spin2][0].second[syms]))) {
+              size_t offset = (v_norb[spin2][1]*v_norb[spin1][2]*v_norb[spin1][3])*(s+v_shift[spin2][0][syms])
                         + (v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][1][symr])
                         + (v_norb[spin1][3])*(p+v_shift[spin1][2][symp])
                         + (q+v_shift[spin1][3][symq]);
-              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sp)*value;
+              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(s)*value;
               if (help) std::cout << "6 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-            // if ((sm) >= v_psi[spin2][0].first[syms] && (sm)<v_psi[spin2][0].second[syms]) {
-            //   size_t offset = (v_norb[spin2][1]*v_norb[spin1][2]*v_norb[spin1][3])*(sm+v_shift[spin2][0][syms])
-            //             + (v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][1][symr])
-            //             + (v_norb[spin1][3])*(p+v_shift[spin1][2][symp])
-            //             + (q+v_shift[spin1][3][symq]);
-            //   ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sm+1)*value;
-            //   if (help) std::cout << "6b off set = " << offset << std::endl;
-            //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
-            // }
-          // }
           // 7
           // (rs|qp)
           if ((((p) >= v_psi[spin1][3].first[symp] && (p) < v_psi[spin1][3].second[symp]) 
             && ((q) >= v_psi[spin1][2].first[symq] && (q) < v_psi[spin1][2].second[symq]))
             && (((r) >= v_psi[spin2][0].first[symr] && (r) < v_psi[spin2][0].second[symr])
-            && ((sp) >= v_psi[spin2][1].first[syms] && (sp) < v_psi[spin2][1].second[syms]))) {
+            && ((s) >= v_psi[spin2][1].first[syms] && (s) < v_psi[spin2][1].second[syms]))) {
               size_t offset = (v_norb[spin2][1]*v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][0][symr])
-                        + (v_norb[spin1][2]*v_norb[spin1][3])*(sp+v_shift[spin2][1][syms])
+                        + (v_norb[spin1][2]*v_norb[spin1][3])*(s+v_shift[spin2][1][syms])
                         + (v_norb[spin1][3])*(q+v_shift[spin1][2][symq])
                         + (p+v_shift[spin1][3][symp]);
-              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sp)*value;
+              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(s)*value;
               if (help) std::cout << "7 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-            // if ((sm) >= v_psi[spin2][1].first[syms] && (sm)<v_psi[spin2][1].second[syms]) {
-            //   size_t offset = (v_norb[spin2][1]*v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][0][symr])
-            //             + (v_norb[spin1][2]*v_norb[spin1][3])*(sm+v_shift[spin2][1][syms])
-            //             + (v_norb[spin1][3])*(q+v_shift[spin1][2][symq])
-            //             + (p+v_shift[spin1][3][symp]);
-            //   ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sm+1)*value;
-            //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
-            //   if (help) std::cout << "7b off set = " << offset << std::endl;
-            // }
-          // }
           // 8
           // (sr|qp)
           if ((((p) >= v_psi[spin1][3].first[symp] && (p) < v_psi[spin1][3].second[symp]) 
             && ((q) >= v_psi[spin1][2].first[symq] && (q) < v_psi[spin1][2].second[symq]))
             && (((r) >= v_psi[spin2][1].first[symr] && (r) < v_psi[spin2][1].second[symr])
-            && ((sp) >= v_psi[spin2][0].first[syms] && (sp) < v_psi[spin2][0].second[syms]))) {
-              size_t offset = (v_norb[spin2][1]*v_norb[spin1][2]*v_norb[spin1][3])*(sp+v_shift[spin2][0][syms])
+            && ((s) >= v_psi[spin2][0].first[syms] && (s) < v_psi[spin2][0].second[syms]))) {
+              size_t offset = (v_norb[spin2][1]*v_norb[spin1][2]*v_norb[spin1][3])*(s+v_shift[spin2][0][syms])
                         + (v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][1][symr])
                         + (v_norb[spin1][3])*(q+v_shift[spin1][2][symq])
                         + (p+v_shift[spin1][3][symp]);
-              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sp)*value;
+              ptr[offset] = - ppol->gamma*ppol->omega*sqrt(s)*value;
               if (help) std::cout << "8 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-            // if ((sm) >= v_psi[spin2][0].first[syms] && (sm)<v_psi[spin2][0].second[syms]) {
-            //   size_t offset = (v_norb[spin2][1]*v_norb[spin1][2]*v_norb[spin1][3])*(sm+v_shift[spin2][0][syms])
-            //             + (v_norb[spin1][2]*v_norb[spin1][3])*(r+v_shift[spin2][1][symr])
-            //             + (v_norb[spin1][3])*(q+v_shift[spin1][2][symq])
-            //             + (p+v_shift[spin1][3][symp]);
-            //   ptr[offset] = - ppol->gamma*ppol->omega*sqrt(sm+1)*value;
-            //   if (help) std::cout << "8b off set = " << offset << std::endl;
-            //   if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
-            // }
-          // }
         }}
       }
     #endif

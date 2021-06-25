@@ -21,10 +21,7 @@ foreach(test ${tests})
 file(COPY ../../../test/${test}/${test}.fcidump DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 endforeach()
 
-# set(tests_pol hubbard)
-file(COPY ../../../test/hubbard/hubbard.fcidump
-          ../../../test/hubbard/polariton.fcidump 
-	  ../../../test/hubbard/dipole
-          DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY ../../../test/hubbard
+     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
               

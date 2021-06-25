@@ -21,10 +21,11 @@ struct polariton {
   sym_t nmax{0};
   double gamma{0.0};
   double omega{0.0};
+  double lambd{0.0};
   polariton() = default;
   polariton(sym_t nmax_, double gamma_, double omega_) 
   : nmax{nmax_}, gamma{gamma_}, omega{omega_} 
-  {}
+  {lambd = gamma*(sqrt(2*omega));}
 };
 
 // get nuclear energy
