@@ -33,6 +33,6 @@ add_subdirectory(dependencies)
 add_subdirectory(src)
 add_subdirectory(test)
 enable_testing()
-add_subdirectory(docs)
+#add_subdirectory(docs)
 
 

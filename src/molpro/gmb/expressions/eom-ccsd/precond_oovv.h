@@ -17,7 +17,7 @@ container<4,double> precond_oovv(
 
     libtensor::letter i,j,a,b;
 
-    pc_oovv(i|j|a|b) =  div(res_oovv(i|j|a|b), 
+    pc_oovv(i|j|a|b) = - div(res_oovv(i|j|a|b), 
                      (d_oovv(i|j|a|b) - set((double)shift, d_oovv(i|j|a|b))));
     return pc_oovv;
 };

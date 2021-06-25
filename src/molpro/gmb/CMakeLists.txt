@@ -1,9 +1,11 @@
 set(src 
     main.cpp
     init.cpp
+    utils.cpp
     libtensor_utils.cpp
     get_integral.cpp)
-    
+
+
 add_executable(${PROJECT_NAME} ${src})
 
 DependencyManager_Populate(Profiler)
@@ -19,3 +21,7 @@ foreach(test ${tests})
 file(COPY ../../../test/${test}/${test}.fcidump DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 endforeach()
 
+file(COPY ../../../test/hubbard
+     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+
+              

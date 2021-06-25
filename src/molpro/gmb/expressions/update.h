@@ -1,7 +1,7 @@
 #ifndef GMB_UPDATE_H
 #define GMB_UPDATE_H
 
-#include "container.h"
+#include "../container.h"
 
 /**
  * @brief Update T1 amplitudes.

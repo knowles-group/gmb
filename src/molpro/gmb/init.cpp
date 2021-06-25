@@ -5,18 +5,16 @@
 namespace gmb {
   
   void init(std::string filename, std::string method, hamiltonian<> &ham) {
-
     // getting integrals <pq||rs> 
     auto int_oooo = get_i(filename, o, o, o, o);
     auto int_oovv = get_i(filename, o, o, v, v);
     auto int_ovov = get_i(filename, o, v, o, v);
 
-    // getting fock matrix - oo block
+    // getting fock matrix
     auto h1_oo = get_integral(filename,o,o);
     auto d_oo = diag_xx(h1_oo);
-
-    // getting fock matrix - vv block
     auto h1_vv = get_integral(filename,v,v);
+
     ham.set(f_oo, fock_xx(d_oo, h1_oo, int_oooo));
     ham.set(f_vv, fock_xx(d_oo, h1_vv, int_ovov));
 
@@ -24,12 +22,12 @@ namespace gmb {
     ham.set(i_oovv, int_oovv);
     ham.set(i_ovov, int_ovov);
 
-    if (method.substr(0,2) == "CC") {
+    if (method.find("cc") != std::string::npos) {
 
       auto int_vvvv = get_i(filename, v, v, v, v);
       ham.set(i_vvvv, int_vvvv);
 
-      if (method == "CCSD") {
+      if (method.find("ccsd") != std::string::npos) {
         auto int_ooov = get_i(filename, o, o, o, v);
         auto int_ovvv = get_i(filename, o, v, v, v);
         ham.set(i_ooov, int_ooov);
@@ -42,5 +40,6 @@ namespace gmb {
       }
     }
   }
+
 } // namespace gmb
 

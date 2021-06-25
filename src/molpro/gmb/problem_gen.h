@@ -17,9 +17,9 @@ public:
   problem_gen(const hamiltonian<> &ham)
   : m_ham(ham) {}
 
-  virtual ~problem_gen() {}
+  virtual ~problem_gen() = default;
 
-  void energy(container_t x) {
+  void energy(container_t x) const {
     if (x.get_m2().find("t1") == x.get_m2().end())
       m_energy = 0.25 * x.m4get(t2).dot(m_ham.m4get(i_oovv));
     else
@@ -29,11 +29,14 @@ public:
   double get_energy() const {return m_energy;}  
 
   friend
-  std::ostream& operator<<(std::ostream& s, const problem_gen& problem) ;
+  std::ostream& operator<<(std::ostream& s, const problem_gen& problem);
+
+  virtual 
+  void print(std::ostream& s) const {}
 };
 
 std::ostream& operator<<(std::ostream& s, const problem_gen& problem) {
-  s<<"";
+  problem.print(s);
   return s;
 }
 
