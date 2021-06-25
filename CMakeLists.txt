@@ -21,8 +21,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(LibraryManager)
 
 # libtensor
-FetchContent_Declare(libtensor GIT_REPOSITORY https://github.com/epifanovsky/libtensor
-        GIT_TAG 759566bfe96a4dea4f352be6e75cf126a66acc29)
+FetchContent_Declare(libtensor
+#        GIT_REPOSITORY https://github.com/epifanovsky/libtensor
+        GIT_REPOSITORY https://github.com/pjknowles/libtensor
+        GIT_TAG gmb)
 set(LIBTENSOR_STANDALONE 1)
 add_definitions(-DUSE_PTHREADS)
 FetchContent_MakeAvailable(libtensor)
@@ -31,8 +33,8 @@ add_subdirectory(dependencies)
 
 ########## Targets ##########
 add_subdirectory(src)
-add_subdirectory(test)
 enable_testing()
+add_subdirectory(test)
 #add_subdirectory(docs)
 
 
