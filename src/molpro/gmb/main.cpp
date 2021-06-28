@@ -24,6 +24,8 @@ std::unique_ptr<polariton> ppol;
 int main(int argc, char *argv[]) {
   molpro::Options options("gmb", argc, argv);
   filename = options.parameter("dump",std::string{""});
+  auto expected_results = options.parameter("results",std::vector<double>{});
+  std::vector<bool> found_expected_results(expected_results.size(),false);
   std::ios_base::sync_with_stdio(false);
 //  filename = argv[0];
 //  if (filename.find_last_of("/") != std::string::npos)
@@ -110,8 +112,10 @@ int main(int argc, char *argv[]) {
   std::cout << *problem << " correlation energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
   std::cout << *problem  << " total energy: " << std::setprecision(13) 
             << problem->get_energy() + hf_energy<< "\n";
-  
-  #if 1 // Excited State
+  for (int i=0; i<expected_results.size(); ++i)
+    if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
+
+#if 1 // Excited State
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
   
@@ -123,6 +127,9 @@ int main(int argc, char *argv[]) {
   solver_es->set_n_roots(nroots);
   solver_es->solve(v_rampl, residuals_es, *problem_es, true);
   problem_es->set_energy(solver_es->eigenvalues());
+  for (const auto& ev : solver_es->eigenvalues())
+    for (int i=0; i<expected_results.size(); ++i)
+      if (std::abs(ev-expected_results[i])<1e-10) found_expected_results[i]=true;
   auto energies = problem_es->get_energy();
   std::cout << "\n" << *problem_es << " excitation energies (Ha) \n";  
   for (auto &i : energies)
@@ -136,6 +143,10 @@ int main(int argc, char *argv[]) {
   std::time_t end_time = std::chrono::system_clock::to_time_t(end);
   std::cout << "\nFinished computation at " << std::ctime(&end_time)
             << "Elapsed time: " << elapsed_seconds.count() << "s\n";
+  for (int i=0; i<expected_results.size(); ++i)
+    if (not found_expected_results[i])
+      throw std::runtime_error("Did not match expected result "+std::to_string(expected_results[i]));
+
 }
 
 #include <molpro/linalg/itsolv/SolverFactory-implementation.h>
