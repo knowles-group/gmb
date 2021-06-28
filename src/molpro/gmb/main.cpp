@@ -30,12 +30,13 @@ int main(int argc, char const *argv[]) {
   
   // parse arguments
   polariton pol;
-  std::string dump{filename}, method{"eom-ccsd"};
+  std::string dump{filename}, fname_dip, method{"eom-ccsd"};
   // syms_t states(8);
   int nroots{7};
   for (int i = 0; i < argc; ++i) {
     std::string arg{argv[i]};
-    if (arg.substr(0,arg.find('=')) == "dump") filename = arg.substr(arg.find('=')+1);
+    if (arg.substr(0,arg.find('=')) == "fcidump") filename = arg.substr(arg.find('=')+1);
+    if (arg.substr(0,arg.find('=')) == "dipole") fname_dip = arg.substr(arg.find('=')+1);
     if (arg.substr(0,arg.find('=')) == "method") method = arg.substr(arg.find('=')+1);
     if (arg.substr(0,arg.find('=')) == "states") {
       std::stringstream ss;
@@ -54,14 +55,21 @@ int main(int argc, char const *argv[]) {
   ppol = std::make_unique<polariton>(1,0.01,1.028);
 
   std::cout << "Required calculation: " << "\n";
-  std::cout << "dump = " << filename << "\n";
+  std::cout << "fcidump = " << filename << "\n";
   std::cout << "method = " << method << "\n";
   std::cout << "roots = " << nroots << "\n";
   if (ppol != nullptr) {
-    std::cout << "polariton parameters:" << std::endl;
-    std::cout << "nmax = " << ppol->nmax << std::endl;
-    std::cout << "gamma = " << ppol->gamma << std::endl;
-    std::cout << "omega = " << ppol->omega << std::endl;
+    if (fname_dip.size() == 0 ) {
+      fname_dip = filename;
+      fname_dip.resize(fname_dip.find_last_of("."));
+      fname_dip += ".dip";
+      ppol->filename = fname_dip;
+    }
+    std::cout << "dipole file = " << fname_dip << "\n";
+    std::cout << "polariton parameters:" << "\n";
+    std::cout << "nmax = " << ppol->nmax << "\n";
+    std::cout << "gamma = " << ppol->gamma << "\n";
+    std::cout << "omega = " << ppol->omega << "\n";
   }
 
   hamiltonian<> ham;
@@ -70,7 +78,7 @@ int main(int argc, char const *argv[]) {
   std::string method_gs, method_es;
 
   // initialise hamiltonian
-  run(filename, method, ham); 
+  init(filename, method, ham); 
     
 
 #if 1 // CCSD

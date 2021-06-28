@@ -173,30 +173,22 @@ container<2,double> get_integral(std::string filename,
   container<2,double> integral(*psp);
   psp.release();
   
-  // set integral symmetry
   if (o1 == o2) gmb::set_sym_pp(integral);
   gmb::zero(integral);
 
   libtensor::block_tensor_wr_ctrl<2, double> ctrl(integral);
-
-  // Loop over blocks using orbit_list
   libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
-  for (libtensor::orbit_list<2, double>::iterator it = ol.begin();
-         it != ol.end(); it++) {
-    // Obtain the index of the current block
+  for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
     libtensor::index<2> bidx;
     ol.get_index(it, bidx);
-#if 1
-
     std::vector<size_t> bidx_cp(orb_types.size());
     for (size_t i = 0; i < orb_types.size(); i++) {
       bidx_cp[i] = bidx[i];
       if (!ssss[0][i]) ++bidx_cp[i]; // if alpha block doesn't 
     }
-
-    spin spin = alpha;
+    spin spin{alpha};
     auto itype = molpro::FCIdump::I1a;
-    bool skip(false);
+    bool skip{false};
     if (bidx_cp[0] == 0 && bidx_cp[1] == 0) { // aa
       itype = molpro::FCIdump::I1a;
       spin = alpha; 
@@ -211,25 +203,17 @@ container<2,double> get_integral(std::string filename,
     }
       
     if (!skip) {
-      // Request tensor block from control object
       libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
       libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
-      // Request data pointer
-       const libtensor::dimensions<2> &tdims = blk.get_dims();
-      // Request data pointer
+      const libtensor::dimensions<2> &tdims = blk.get_dims();
       double *ptr = tc.req_dataptr();
-      // read integrals from fcidump file
       size_t i, j, k, l;
       unsigned int symi, symj, symk, syml;
       double value;
       molpro::FCIdump::integralType type;
       
       std::string h1file{filename};
-      if (ppol != nullptr && pol) {
-        h1file.resize(filename.find_last_of("/")+1);
-        h1file += "PERTH0MO";
-        // h1file += "H0MO";
-      }
+
       gmb::check_file(h1file);
       molpro::FCIdump dump(h1file);
       dump.rewind();
@@ -237,40 +221,23 @@ container<2,double> get_integral(std::string filename,
         if ((((i) >= v_psi[spin][0].first[symi] & (i) < v_psi[spin][0].second[symi]) 
           && ((j) >= v_psi[spin][1].first[symj] & (j) < v_psi[spin][1].second[symj]))
           && type == itype) {
-          size_t offset = (j+v_shift[spin][1][symj])+(i+v_shift[spin][0][symi])*(v_norb[spin][1]);
+          auto offset = gmb::get_offset(i+v_shift[spin][0][symi], j+v_shift[spin][1][symj], v_norb[spin][1]);
           ptr[offset] = value;
-          if (false) {
-            std::cout << "i = " << i << " j = " << j << " k = " << k << " l = " << l<< "\n";
-            std::cout << "symi = " << symi << " symj = " << symj << " symk = " << symk << " syml = " << syml<< "\n";
-            std::cout << "first if\n";
-            std::cout << " value = " << value<< "\n";
-            std::cout << " offset = " << offset<< "\n";
-          }
         }
-        if ((((j) >= v_psi[spin][0].first[symj] & (j) < v_psi[spin][0].second[symj]) 
-          && ((i) >= v_psi[spin][1].first[symi] & (i) < v_psi[spin][1].second[symi]))
+        if ((((i) >= v_psi[spin][1].first[symi] & (i) < v_psi[spin][1].second[symi])
+          && ((j) >= v_psi[spin][0].first[symj] & (j) < v_psi[spin][0].second[symj]))
           && type == itype) {
-          size_t offset = (i+v_shift[spin][1][symi])+(j+v_shift[spin][0][symj])*(v_norb[spin][1]);
+          auto offset = gmb::get_offset(j+v_shift[spin][0][symj], i+v_shift[spin][1][symi], v_norb[spin][1]);
           ptr[offset] = value;
-          if (false) {
-            std::cout << "second if\n";
-            std::cout << " value = " << value<< "\n";
-            std::cout << " offset = " << offset<< "\n";
-          }
         }
       }
-      // Return data pointer
       tc.ret_dataptr(ptr);
-      // Return the tensor block (mark as done)
       ctrl.ret_block(bidx);
     } else if (ppol != nullptr && pol) {
       if (o1 == o2) {
-        // Request tensor block from control object
         libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
         libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
-        // Request data pointer
          const libtensor::dimensions<2> &tdims = blk.get_dims();
-        // Request data pointer
         double *ptr = tc.req_dataptr();
         switch (o1) {
         case (o):
@@ -298,22 +265,14 @@ container<2,double> get_integral(std::string filename,
           }
           break;
         }
-        // Return data pointer
         tc.ret_dataptr(ptr);
-        // Return the tensor block (mark as done)
         ctrl.ret_block(bidx);
       } else { 
         ctrl.req_zero_block(bidx);
         continue;
     }
     }
-#endif
   }  
-  if (false) {
-    std::cout << "printing integral\n";
-    libtensor::bto_print<2, double>(std::cout).perform(integral);
-  }
-
   return integral;
 }
 

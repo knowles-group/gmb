@@ -11,8 +11,8 @@ namespace gmb {
 
   void check_file(std::string file);
   
-  int get_offset(int i, int j, int k, int l, int ni, int nj, int nk);
-  int get_offset(int i, int j, int ni);
+  size_t get_offset(size_t i, size_t j, size_t k, size_t l, size_t ni, size_t nj, size_t nk, size_t nl);
+  size_t get_offset(size_t i, size_t j, size_t nj);
     
 } // namespace gmb
 #endif //GMB_UTILS_H

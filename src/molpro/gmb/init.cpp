@@ -5,41 +5,41 @@
 #include "expressions/anti.h"
 
 extern std::unique_ptr<polariton> ppol;
+extern std::string filename;
 
 namespace gmb {
 
-  void run(std::string filename, std::string method, hamiltonian<> &ham) {
-    init(filename, method, ham);
-    if (ppol != nullptr) {
-      add_self_energy(method, ham);
-    }
-  }
 
   void init(std::string filename, std::string method, hamiltonian<> &ham) {
 
-    // getting integrals <pq||rs> 
+    // One-electron integrals
+    auto h1_oo = get_integral(filename,o,o);
+    auto h1_vv = get_integral(filename,v,v);
+
+    // Two-electron integrals <pq||rs> 
     auto int_oooo = get_i(filename, o, o, o, o);
     auto int_oovv = get_i(filename, o, o, v, v);
     auto int_ovov = get_i(filename, o, v, o, v);
 
     double fact = ppol->omega*ppol->gamma*ppol->gamma;
-    auto dip_oo = get_integral("hubbard/test",o,o,false);
-    auto dip_ov = get_integral("hubbard/test",o,v,false);
-    auto dip_vo = get_integral("hubbard/test",v,o,false);
-    auto dip_vv = get_integral("hubbard/test",v,v,false);
+    auto dip_oo = get_integral(ppol->filename,o,o,false);
+    auto dip_ov = get_integral(ppol->filename,o,v,false);
+    auto dip_vo = get_integral(ppol->filename,v,o,false);
+    auto dip_vv = get_integral(ppol->filename,v,v,false);
 
     if (ppol != nullptr) {
       libtensor::letter p,q,r,s;
+      h1_oo(p|q) += fact*(contract(r,dip_oo(p|r),dip_oo(r|q))
+                        + contract(s,dip_ov(p|s),dip_vo(s|q)));
+      h1_vv(p|q) += fact*(contract(r,dip_vv(p|r),dip_vv(r|q))
+                        + contract(s,dip_vo(p|s),dip_ov(s|q)));
       int_oooo(p|q|r|s) += fact*2.0*(dip_oo(p|r)*dip_oo(q|s)-dip_oo(q|r)*dip_oo(p|s));
       int_oovv(p|q|r|s) += fact*2.0*(dip_ov(p|r)*dip_ov(q|s)-dip_ov(q|r)*dip_ov(p|s));
       int_ovov(p|q|r|s) += fact*2.0*(dip_oo(p|r)*dip_vv(q|s)-dip_vo(q|r)*dip_ov(p|s));
     }
 
-
     // getting fock matrix
-    auto h1_oo = get_integral(filename,o,o);
     auto d_oo = diag_xx(h1_oo);
-    auto h1_vv = get_integral(filename,v,v);
 
     ham.set(f_oo, fock_xx(d_oo, h1_oo, int_oooo));
     ham.set(f_vv, fock_xx(d_oo, h1_vv, int_ovov));
@@ -59,12 +59,15 @@ namespace gmb {
       ham.set(i_vvvv, int_vvvv);
 
       if (method.find("ccsd") != std::string::npos) {
+        auto h1_ov = get_integral(filename,o,v);
+
         auto int_ooov = get_i(filename, o, o, o, v);
         auto int_ovvv = get_i(filename, o, v, v, v);
 
-
         if (ppol != nullptr) {
           libtensor::letter p,q,r,s;
+          h1_ov(p|q) += fact*(contract(r,dip_oo(p|r),dip_ov(r|q))
+                            + contract(s,dip_ov(p|s),dip_vv(s|q)));
           int_ooov(p|q|r|s) += fact*2.0*(dip_oo(p|r)*dip_ov(q|s)-dip_oo(q|r)*dip_ov(p|s));
           int_ovvv(p|q|r|s) += fact*2.0*(dip_ov(p|r)*dip_vv(q|s)-dip_vv(q|r)*dip_ov(p|s));
         }
@@ -72,7 +75,6 @@ namespace gmb {
         ham.set(i_ovvv, int_ovvv);
   
         // getting fock matrix - ov block
-        auto h1_ov = get_integral(filename,o,v);
         ham.set(f_ov, fock_xx(d_oo, h1_ov, int_ooov));
 
       }
@@ -130,9 +132,7 @@ namespace gmb {
   return h2_o1o2o3o4;
 }
 
-  void add_self_energy(std::string method, hamiltonian<> &ham) {
-    //
-  }
+
 
 } // namespace gmb
 

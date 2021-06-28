@@ -64,13 +64,11 @@ public:
     if (m_m2.find(key) == m_m2.end()) std::cout << key <<" not found!\n";
     return *m_m2[key];
   };
-  container<2,T> newm2get(std::string key) {
-    if (m_m2.find(key) == m_m2.end()) std::cout << key <<" not found!\n";
-    return *m_m2[key];
-  };
+
   container<4,T>& m4get(std::string key) {
     if (m_m4.find(key) == m_m4.end()) std::cout << key <<" not found!\n";
-    return *m_m4[key]; };
+    return *m_m4[key]; 
+  };
 
 
   void fill(T a) {

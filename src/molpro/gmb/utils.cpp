@@ -33,9 +33,15 @@ namespace gmb {
     infile.close();
   }
 
-  int get_offset(int i, int j, int k, int l, int ni, int nj, int nk) {
-    int offset = ni*(j*k*l) + nj*(k*l) + nk*l +l;
-  };
+  size_t get_offset(size_t i, size_t j, size_t k, size_t l, size_t ni, size_t nj, size_t nk, size_t nl) {
+    size_t offset = i*(nj*nk*nl) + j*(nk*nl) + k*nl + l;
+    return offset;
+  }
+
+  size_t get_offset(size_t i, size_t j, size_t nj) {
+    size_t offset = i*nj + j;
+    return offset;
+  }
 
 template void get_polval(std::stringstream &ss, unsigned int &value); 
 template void get_polval(std::stringstream &ss, double &value); 
