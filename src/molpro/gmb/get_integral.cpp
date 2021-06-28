@@ -142,6 +142,7 @@ void read_dump(std::string filename,
 container<2,double> get_integral(std::string filename, 
                                  orb_type o1, 
                                  orb_type o2,
+                                 bool pol,
                                  bool so_basis) {
                                  
   std::vector<spin> v_spin = {alpha}; // vector containing possible spins
@@ -224,7 +225,7 @@ container<2,double> get_integral(std::string filename,
       molpro::FCIdump::integralType type;
       
       std::string h1file{filename};
-      if (ppol != nullptr) {
+      if (ppol != nullptr && pol) {
         h1file.resize(filename.find_last_of("/")+1);
         h1file += "PERTH0MO";
         // h1file += "H0MO";
@@ -262,7 +263,7 @@ container<2,double> get_integral(std::string filename,
       tc.ret_dataptr(ptr);
       // Return the tensor block (mark as done)
       ctrl.ret_block(bidx);
-    } else if (ppol != nullptr) {
+    } else if (ppol != nullptr && pol) {
       if (o1 == o2) {
         // Request tensor block from control object
         libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
@@ -808,44 +809,3 @@ container<4,double> get_integral(std::string filename,
   return integral;
 }
 
-  // get antisymmetrized two-electron integral <pq||rs> 
-  container<4,double> get_i(std::string filename, 
-  orb_type o1, orb_type o2, orb_type o3, orb_type o4) {
-  
-  auto h2_o1o3o2o4 = get_integral(filename, o1, o3, o2, o4); 
-  auto h2_o1o4o2o3 = get_integral(filename, o1, o4, o2, o3); 
-  auto tmpi = get_integral(filename, o1, o2, o3, o4); 
-  container<4,double> i(tmpi.get_space());
-
-  // set symmetry
-  libtensor::block_tensor_wr_ctrl<4, double> ctrl(i);
-  libtensor::symmetry<4, double> &sym = ctrl.req_symmetry();
-  libtensor::scalar_transf<double> tr_sym(1.0);
-  libtensor::scalar_transf<double> tr_asym(-1.0);
-  if (o1 == o2) {
-    libtensor::permutation<4> p01; p01.permute(0, 1);
-    libtensor::se_perm<4, double> se_01(p01, tr_asym);
-    sym.insert(se_01);
-  }
-  if (o2 == o3) {
-    libtensor::permutation<4> p23; p23.permute(2, 3);
-    libtensor::se_perm<4, double> se_23(p23, tr_asym);
-    sym.insert(se_23);
-  }
-  if (o1 == o3 && o2 == o4) {
-    libtensor::permutation<4> p0213; p0213.permute(0, 2).permute(1, 3);
-    libtensor::se_perm<4, double> se_0213(p0213, tr_sym);
-    sym.insert(se_0213);
-  }
-  gmb::zero(i);
-  {
-      libtensor::letter p,q,r,s;
-      // <pq||rs> = <pq|rs> - <pq|sr> = [pr|qs] - [ps|qr]
-      i(p|q|r|s) = h2_o1o3o2o4(p|r|q|s) - h2_o1o4o2o3(p|s|q|r);
-  }
-  if (false) {
-    std::cout << "printing integral " << o1 << o2 << o3 << o4 <<"\n";
-    libtensor::bto_print<4, double>(std::cout).perform(i);
-  }  
-  return i;
-}

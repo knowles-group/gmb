@@ -51,7 +51,7 @@ int main(int argc, char const *argv[]) {
       ppol = std::make_unique<polariton>(pol.nmax,pol.gamma,pol.omega);
     }
   }
-  // ppol = std::make_unique<polariton>(1,0.01,1.028);
+  ppol = std::make_unique<polariton>(1,0.01,1.028);
 
   std::cout << "Required calculation: " << "\n";
   std::cout << "dump = " << filename << "\n";
@@ -70,7 +70,7 @@ int main(int argc, char const *argv[]) {
   std::string method_gs, method_es;
 
   // initialise hamiltonian
-  init(filename, method, ham); // add photon space
+  run(filename, method, ham); 
     
 
 #if 1 // CCSD
@@ -98,7 +98,7 @@ int main(int argc, char const *argv[]) {
   // solver options
   solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
   // solver->set_max_iter(110);
-  // solver->set_convergence_threshold(1.0e-14);
+  // solver->set_convergence_threshold(1.0e-7);
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);
   problem->energy(*ptampl);
@@ -108,7 +108,7 @@ int main(int argc, char const *argv[]) {
   std::cout << *problem  << " total energy: " << std::setprecision(13) 
             << problem->get_energy() + hf_energy<< "\n";
   
-  #if 1 // Excited State
+  #if 0 // Excited State
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
   
