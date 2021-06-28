@@ -9,16 +9,17 @@ FetchContent_MakeAvailable(googletest)
 
 include(GoogleTest)
 
-file(COPY He-VDZ H2O-VDZ Li-VDZ-UHF DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY He-VDZ H2O-VDZ Li-VDZ-UHF hubbard DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
-set(gmb-tests 
-    eom-ccsd-test)
-    
+set(gmb-tests
+        eom-ccsd-test)
+
 foreach (test ${gmb-tests})
     add_executable(${test} ${test}.cpp)
-    target_link_libraries(${test} PUBLIC gmock_main molpro::LinearAlgebra tensor FCIdump )
+    target_link_libraries(${test} PUBLIC gmock_main molpro::LinearAlgebra tensor FCIdump)
     add_test(NAME ${test} COMMAND ${test})
 endforeach ()
 
-#foreach(exetest ")
+add_test(NAME hubbard-electronic-ccsd COMMAND gmb results=-1.438005955234,0.77032869369221 dump=hubbard/hubbard.fcidump)
+add_test(NAME hubbard-weak-polaritonic-ccsd COMMAND gmb results=-1.43753686502,0.7703417856321 dump=hubbard/hubbard.fcidump polariton=[1,.01,1.028])
 
