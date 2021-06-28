@@ -11,6 +11,7 @@
 #include <molpro/linalg/itsolv/SolverFactory.h>
 #include <chrono>
 #include <ctime>
+#include <molpro/Options.h>
 #include "expressions/diag_ov.h"
 
 using namespace gmb;
@@ -20,14 +21,16 @@ std::string filename;
 std::string test_case = "hubbard"; 
 std::unique_ptr<polariton> ppol;
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char *argv[]) {
+  molpro::Options options("gmb", argc, argv);
+  filename = options.parameter("dump",std::string{""});
   std::ios_base::sync_with_stdio(false);
-  filename = argv[0];
-  if (filename.find_last_of("/") != std::string::npos)
-    filename.resize(filename.find_last_of("/"));
-  filename += "/"+test_case+"/"+test_case+".fcidump";
+//  filename = argv[0];
+//  if (filename.find_last_of("/") != std::string::npos)
+//    filename.resize(filename.find_last_of("/"));
+//  filename += "/"+test_case+"/"+test_case+".fcidump";
   auto start = std::chrono::system_clock::now();
-  
+
   // parse arguments
   polariton pol;
   std::string dump{filename}, method{"eom-ccsd"};
@@ -35,7 +38,7 @@ int main(int argc, char const *argv[]) {
   int nroots{7};
   for (int i = 0; i < argc; ++i) {
     std::string arg{argv[i]};
-    if (arg.substr(0,arg.find('=')) == "dump") filename = arg.substr(arg.find('=')+1);
+//    if (arg.substr(0,arg.find('=')) == "dump") filename = arg.substr(arg.find('=')+1);
     if (arg.substr(0,arg.find('=')) == "method") method = arg.substr(arg.find('=')+1);
     if (arg.substr(0,arg.find('=')) == "states") {
       std::stringstream ss;

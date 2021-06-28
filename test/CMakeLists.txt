@@ -20,3 +20,5 @@ foreach (test ${gmb-tests})
     add_test(NAME ${test} COMMAND ${test})
 endforeach ()
 
+#foreach(exetest ")
+
