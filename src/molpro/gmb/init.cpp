@@ -1,7 +1,6 @@
 #include "init.h"
 #include "expressions/fock_xx.h"
 #include "expressions/diag_xx.h"
-#include "expressions/d2_xxxx.h"
 #include "expressions/anti.h"
 
 extern std::unique_ptr<polariton> ppol;
