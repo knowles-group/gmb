@@ -52,7 +52,7 @@ int main(int argc, char const *argv[]) {
       ppol = std::make_unique<polariton>(pol.nmax,pol.gamma,pol.omega);
     }
   }
-  ppol = std::make_unique<polariton>(1,0.01,1.028);
+  // ppol = std::make_unique<polariton>(1,0.01,1.028);
 
   std::cout << "Required calculation: " << "\n";
   std::cout << "fcidump = " << filename << "\n";
@@ -78,7 +78,10 @@ int main(int argc, char const *argv[]) {
   std::string method_gs, method_es;
 
   // initialise hamiltonian
-  init(filename, method, ham); 
+  if (ppol != nullptr) 
+    init_pol(filename, method, ham); 
+  else
+    init(filename, method, ham); 
     
 
 #if 1 // CCSD

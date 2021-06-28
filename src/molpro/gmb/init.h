@@ -15,7 +15,7 @@ namespace gmb {
    * @param method 
    * @param hamiltonian 
    */
-  void run(std::string filename, std::string method, hamiltonian<> &hamiltonian);
+  void init(std::string filename, std::string method, hamiltonian<> &hamiltonian);
   /**
    * @brief Initialise calculation 
    * 
@@ -23,7 +23,7 @@ namespace gmb {
    * @param method 
    * @param hamiltonian 
    */
-  void init(std::string filename, std::string method, hamiltonian<> &hamiltonian);
+  void init_pol(std::string filename, std::string method, hamiltonian<> &hamiltonian);
 
   /**
    * @brief get anti-symmetrized two-electron integral
