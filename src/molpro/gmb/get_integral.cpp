@@ -611,12 +611,10 @@ container<4,double> get_integral(std::string filename,
       double *ptr = tc.req_dataptr();
 
       // read dipole integrals
-      std::string dipfile{filename};
-      dipfile.resize(filename.find_last_of("/")+1);
-      dipfile += "DMO";
+      std::string fname_dip{ppol->filename};
 
-      gmb::check_file(dipfile);
-      molpro::FCIdump dump{dipfile}; 
+      gmb::check_file(fname_dip);
+      molpro::FCIdump dump{fname_dip}; 
       size_t p, q, r, s;
       unsigned int symp, symq, symr, syms;
       double value;
