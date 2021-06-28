@@ -18,7 +18,7 @@ using namespace gmb;
 
 // test case
 std::string filename;
-std::string test_case = "hubbard"; 
+std::string test_case = "hubbard";
 std::unique_ptr<polariton> ppol;
 
 int main(int argc, char *argv[]) {
@@ -34,29 +34,20 @@ int main(int argc, char *argv[]) {
   auto start = std::chrono::system_clock::now();
 
   // parse arguments
-  polariton pol;
-  std::string dump{filename}, method{"eom-ccsd"};
+  auto method = options.parameter("method","eom-ccsd");
   // syms_t states(8);
-  int nroots{7};
-  for (int i = 0; i < argc; ++i) {
-    std::string arg{argv[i]};
-//    if (arg.substr(0,arg.find('=')) == "dump") filename = arg.substr(arg.find('=')+1);
-    if (arg.substr(0,arg.find('=')) == "method") method = arg.substr(arg.find('=')+1);
-    if (arg.substr(0,arg.find('=')) == "states") {
-      std::stringstream ss;
-      ss << arg.substr(arg.find('=')+1);
-      ss >> nroots;
-    }
-    if (arg.substr(0,arg.find('=')) == "polariton") {
-      std::stringstream ss{arg.substr(arg.find('[')+1, arg.find(']')-1-arg.find('['))};
-      polariton pol;
-      get_polval(ss,pol.nmax);
-      get_polval(ss,pol.gamma);
-      get_polval(ss,pol.omega);
-      ppol = std::make_unique<polariton>(pol.nmax,pol.gamma,pol.omega);
+//  int nroots{7};
+  auto nroots = options.parameter("states",7);
+  {
+    auto option_polariton_nmax = options.parameter("polariton_nmax", 0);
+    if (option_polariton_nmax > 0) {
+      auto option_polariton_gamma = options.parameter("polariton_gamma", 0.01);
+      auto option_polariton_omega = options.parameter("polariton_omega", 1.0);
+      ppol = std::make_unique<polariton>(option_polariton_nmax,
+                                         option_polariton_gamma,
+                                         option_polariton_omega);
     }
   }
-  // ppol = std::make_unique<polariton>(1,0.01,1.028);
 
   std::cout << "Required calculation: " << "\n";
   std::cout << "dump = " << filename << "\n";
@@ -76,7 +67,7 @@ int main(int argc, char *argv[]) {
 
   // initialise hamiltonian
   init(filename, method, ham); // add photon space
-    
+
 
 #if 1 // CCSD
   auto vnn = get_integral(filename);
@@ -110,7 +101,7 @@ int main(int argc, char *argv[]) {
 
   // print results
   std::cout << *problem << " correlation energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
-  std::cout << *problem  << " total energy: " << std::setprecision(13) 
+  std::cout << *problem  << " total energy: " << std::setprecision(13)
             << problem->get_energy() + hf_energy<< "\n";
   for (int i=0; i<expected_results.size(); ++i)
     if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
@@ -118,7 +109,7 @@ int main(int argc, char *argv[]) {
 #if 1 // Excited State
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
-  
+
   problem_es.reset(new problem_eom_ccsd(ham, *ptampl));
   std::cout << "\n" << *problem_es << "\n";
   auto solver_es = molpro::linalg::itsolv::create_LinearEigensystem<amplitudes<>>("Davidson");
@@ -131,9 +122,9 @@ int main(int argc, char *argv[]) {
     for (int i=0; i<expected_results.size(); ++i)
       if (std::abs(ev-expected_results[i])<1e-10) found_expected_results[i]=true;
   auto energies = problem_es->get_energy();
-  std::cout << "\n" << *problem_es << " excitation energies (Ha) \n";  
+  std::cout << "\n" << *problem_es << " excitation energies (Ha) \n";
   for (auto &i : energies)
-    std::cout << i << " \n";  
+    std::cout << i << " \n";
 
   #endif
   #endif
