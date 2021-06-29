@@ -13,6 +13,7 @@
 #include <ctime>
 #include <molpro/Options.h>
 #include "expressions/diag_ov.h"
+#include "gmb.h"
 
 using namespace gmb;
 
@@ -21,8 +22,7 @@ std::string filename;
 std::string test_case = "hubbard";
 std::unique_ptr<polariton> ppol;
 
-int main(int argc, char *argv[]) {
-  molpro::Options options("gmb", argc, argv);
+void molpro::gmb::gmb(const molpro::Options& options) {
   filename = options.parameter("dump",std::string{""});
   auto expected_results = options.parameter("results",std::vector<double>{});
   std::vector<bool> found_expected_results(expected_results.size(),false);
