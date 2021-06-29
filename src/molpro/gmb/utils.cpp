@@ -15,6 +15,13 @@ namespace gmb {
     ssval >> value;
   }
 
+  /**
+   * @brief Check if a file exists.
+   * 
+   * If file cannot be found, terminates program.
+   * 
+   * @param file 
+   */
   void check_file(std::string file) {
     std::ifstream infile;
     infile.open(file);
@@ -24,6 +31,16 @@ namespace gmb {
         exit(1); // terminate with error
     }
     infile.close();
+  }
+
+  size_t get_offset(size_t i, size_t j, size_t k, size_t l, size_t ni, size_t nj, size_t nk, size_t nl) {
+    size_t offset = i*(nj*nk*nl) + j*(nk*nl) + k*nl + l;
+    return offset;
+  }
+
+  size_t get_offset(size_t i, size_t j, size_t nj) {
+    size_t offset = i*nj + j;
+    return offset;
   }
 
 template void get_polval(std::stringstream &ss, unsigned int &value); 

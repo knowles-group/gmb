@@ -8,7 +8,6 @@
 #include "container.h"
 #include <vector>
 #include <string>
-#include "get_integral.h"
 
 using sym_t=unsigned int;
 using syms_t=std::vector<sym_t>; ///< position in orbital space for each symmetry
@@ -22,10 +21,15 @@ struct polariton {
   double gamma{0.0};
   double omega{0.0};
   double lambd{0.0};
+  std::string filename;
+
   polariton() = default;
   polariton(sym_t nmax_, double gamma_, double omega_) 
   : nmax{nmax_}, gamma{gamma_}, omega{omega_} 
-  {lambd = gamma*(sqrt(2*omega));}
+  {
+    lambd = gamma*(sqrt(2*omega));
+  }
+
 };
 
 // get nuclear energy
@@ -45,6 +49,7 @@ void read_dump(std::string filename,
 container<2,double> get_integral(std::string filename, 
                                  orb_type o1, 
                                  orb_type o2,
+                                 bool pol = true,
                                  bool so_basis = true);
 
 // get two-electron integral
@@ -55,10 +60,5 @@ container<4,double> get_integral(std::string filename,
                                  orb_type o4,
                                  bool so_basis = true);
 
-// get anti-symmetrized two-electron integral
-container<4,double> get_i(std::string filename, 
-                          orb_type o1, 
-                          orb_type o2, 
-                          orb_type o3, 
-                          orb_type o4);
+
 #endif //GMB_GET_INTEGRAL_H

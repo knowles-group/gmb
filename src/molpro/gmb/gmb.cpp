@@ -50,14 +50,21 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   }
 
   std::cout << "Required calculation: " << "\n";
-  std::cout << "dump = " << filename << "\n";
+  std::cout << "fcidump = " << filename << "\n";
   std::cout << "method = " << method << "\n";
   std::cout << "roots = " << nroots << "\n";
   if (ppol != nullptr) {
-    std::cout << "polariton parameters:" << std::endl;
-    std::cout << "nmax = " << ppol->nmax << std::endl;
-    std::cout << "gamma = " << ppol->gamma << std::endl;
-    std::cout << "omega = " << ppol->omega << std::endl;
+    if (fname_dip.size() == 0 ) {
+      fname_dip = filename;
+      fname_dip.resize(fname_dip.find_last_of("."));
+      fname_dip += ".dip";
+      ppol->filename = fname_dip;
+    }
+    std::cout << "dipole file = " << fname_dip << "\n";
+    std::cout << "polariton parameters:" << "\n";
+    std::cout << "nmax = " << ppol->nmax << "\n";
+    std::cout << "gamma = " << ppol->gamma << "\n";
+    std::cout << "omega = " << ppol->omega << "\n";
   }
 
   hamiltonian<> ham;
@@ -66,8 +73,11 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   std::string method_gs, method_es;
 
   // initialise hamiltonian
-  init(filename, method, ham); // add photon space
-
+  if (ppol != nullptr)
+    init_pol(filename, method, ham);
+  else
+    init(filename, method, ham);
+    
 
 #if 1 // CCSD
   auto vnn = get_integral(filename);
@@ -94,7 +104,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   // solver options
   solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
   // solver->set_max_iter(110);
-  // solver->set_convergence_threshold(1.0e-14);
+  // solver->set_convergence_threshold(1.0e-7);
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);
   problem->energy(*ptampl);
@@ -107,6 +117,8 @@ void molpro::gmb::gmb(const molpro::Options& options) {
     if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
 
 #if 1 // Excited State
+
+  #if 0 // Excited State
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
 
