@@ -18,5 +18,5 @@ foreach (test eom-ccsd-test)
 endforeach ()
 
 add_test(NAME hubbard-electronic-ccsd COMMAND main results=-1.438005955234,0.77032869369221 dump=hubbard/hubbard.fcidump)
-add_test(NAME hubbard-weak-polaritonic-ccsd COMMAND main results=-1.43753686502,0.7703417856321 dump=hubbard/hubbard.fcidump polariton_nmax=1 polariton_gamma=.01 polariton_omega=1.028])
+add_test(NAME hubbard-weak-polaritonic-ccsd COMMAND main results=-1.437954983527,0.77056663031178 dump=hubbard/hubbard.fcidump polariton_nmax=1 polariton_gamma=.01 polariton_omega=1.028])
 

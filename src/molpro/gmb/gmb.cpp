@@ -14,6 +14,7 @@
 #include <molpro/Options.h>
 #include "expressions/diag_ov.h"
 #include "gmb.h"
+#include <regex>
 
 using namespace gmb;
 
@@ -37,7 +38,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   auto method = options.parameter("method","eom-ccsd");
   // syms_t states(8);
 //  int nroots{7};
-  auto nroots = options.parameter("states",7);
+  auto nroots = options.parameter("states", 7);
   {
     auto option_polariton_nmax = options.parameter("polariton_nmax", 0);
     if (option_polariton_nmax > 0) {
@@ -46,6 +47,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
       ppol = std::make_unique<polariton>(option_polariton_nmax,
                                          option_polariton_gamma,
                                          option_polariton_omega);
+      ppol->filename = options.parameter("dipole", std::regex_replace(filename,std::regex{".fcidump$"},".dip"));
     }
   }
 
@@ -54,13 +56,13 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   std::cout << "method = " << method << "\n";
   std::cout << "roots = " << nroots << "\n";
   if (ppol != nullptr) {
-    if (fname_dip.size() == 0 ) {
-      fname_dip = filename;
-      fname_dip.resize(fname_dip.find_last_of("."));
-      fname_dip += ".dip";
-      ppol->filename = fname_dip;
-    }
-    std::cout << "dipole file = " << fname_dip << "\n";
+//    if (fname_dip.size() == 0 ) {
+//      fname_dip = filename;
+//      fname_dip.resize(fname_dip.find_last_of("."));
+//      fname_dip += ".dip";
+//      ppol->filename = fname_dip;
+//    }
+    std::cout << "dipole file = " << ppol->filename << "\n";
     std::cout << "polariton parameters:" << "\n";
     std::cout << "nmax = " << ppol->nmax << "\n";
     std::cout << "gamma = " << ppol->gamma << "\n";
@@ -117,8 +119,6 @@ void molpro::gmb::gmb(const molpro::Options& options) {
     if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
 
 #if 1 // Excited State
-
-  #if 0 // Excited State
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
 
