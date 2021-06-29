@@ -23,6 +23,8 @@ std::string filename;
 std::string test_case = "hubbard";
 std::unique_ptr<polariton> ppol;
 
+extern "C" void general_many_body() { molpro::gmb::gmb();}
+
 void molpro::gmb::gmb(const molpro::Options& options) {
   filename = options.parameter("dump",std::string{""});
   auto expected_results = options.parameter("results",std::vector<double>{});
