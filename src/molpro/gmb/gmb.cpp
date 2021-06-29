@@ -28,16 +28,11 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   auto expected_results = options.parameter("results",std::vector<double>{});
   std::vector<bool> found_expected_results(expected_results.size(),false);
   std::ios_base::sync_with_stdio(false);
-//  filename = argv[0];
-//  if (filename.find_last_of("/") != std::string::npos)
-//    filename.resize(filename.find_last_of("/"));
-//  filename += "/"+test_case+"/"+test_case+".fcidump";
   auto start = std::chrono::system_clock::now();
 
   // parse arguments
   auto method = options.parameter("method","eom-ccsd");
   // syms_t states(8);
-//  int nroots{7};
   auto nroots = options.parameter("states", 7);
   {
     auto option_polariton_nmax = options.parameter("polariton_nmax", 0);
@@ -47,7 +42,9 @@ void molpro::gmb::gmb(const molpro::Options& options) {
       ppol = std::make_unique<polariton>(option_polariton_nmax,
                                          option_polariton_gamma,
                                          option_polariton_omega);
-      ppol->filename = options.parameter("dipole", std::regex_replace(filename,std::regex{".fcidump$"},".dip"));
+      ppol->filename = options.parameter(
+          "dipole", std::regex_replace(
+                        filename, std::regex{"\\.[_[:alnum:]]*$"}, ".dip"));
     }
   }
 
@@ -56,12 +53,6 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   std::cout << "method = " << method << "\n";
   std::cout << "roots = " << nroots << "\n";
   if (ppol != nullptr) {
-//    if (fname_dip.size() == 0 ) {
-//      fname_dip = filename;
-//      fname_dip.resize(fname_dip.find_last_of("."));
-//      fname_dip += ".dip";
-//      ppol->filename = fname_dip;
-//    }
     std::cout << "dipole file = " << ppol->filename << "\n";
     std::cout << "polariton parameters:" << "\n";
     std::cout << "nmax = " << ppol->nmax << "\n";
