@@ -165,10 +165,10 @@ container<2,double> get_integral(std::string filename,
   std::unique_ptr<libtensor::bispace<2>> psp;
   if (o1 == o2) {
     libtensor::bispace<2> sp(v_sp[0]&v_sp[1]);
-    psp.reset(new libtensor::bispace<2>(sp));
+    psp = std::make_unique<libtensor::bispace<2>>(sp);
   } else {
     libtensor::bispace<2> sp(v_sp[0]|v_sp[1]);
-    psp.reset(new libtensor::bispace<2>(sp));
+    psp = std::make_unique<libtensor::bispace<2>>(sp);
   }
   container<2,double> integral(*psp);
   psp.release();
@@ -314,32 +314,32 @@ container<4,double> get_integral(std::string filename,
      if (orb_types[1] == orb_types[2]) {
        if (orb_types[2] == orb_types[3]) {
         libtensor::bispace<4> sp4(v_sp[0]&v_sp[1]&v_sp[2]&v_sp[3]);
-        p_sp4.reset(new libtensor::bispace<4>(sp4));
+        p_sp4 = std::make_unique<libtensor::bispace<4>>(sp4);
        } else {
         libtensor::bispace<4> sp4(v_sp[0]&v_sp[1]&v_sp[2]|v_sp[3]);
-        p_sp4.reset(new libtensor::bispace<4>(sp4));
+        p_sp4 = std::make_unique<libtensor::bispace<4>>(sp4);
        }
      } else if (orb_types[2] == orb_types[3]) {
         libtensor::bispace<4> sp4(v_sp[0]&v_sp[1]|v_sp[2]&v_sp[3]);
-        p_sp4.reset(new libtensor::bispace<4>(sp4));
+        p_sp4 = std::make_unique<libtensor::bispace<4>>(sp4);
        } else {
         libtensor::bispace<4> sp4(v_sp[0]&v_sp[1]|v_sp[2]|v_sp[3]);
-        p_sp4.reset(new libtensor::bispace<4>(sp4));
+        p_sp4 = std::make_unique<libtensor::bispace<4>>(sp4);
        }
     } else if (orb_types[1] == orb_types[2]) {
        if (orb_types[2] == orb_types[3]) {
         libtensor::bispace<4> sp4(v_sp[0]|v_sp[1]&v_sp[2]&v_sp[3]);
-        p_sp4.reset(new libtensor::bispace<4>(sp4));
+        p_sp4 = std::make_unique<libtensor::bispace<4>>(sp4);
        } else {
         libtensor::bispace<4> sp4(v_sp[0]|v_sp[1]&v_sp[2]|v_sp[3]);
-        p_sp4.reset(new libtensor::bispace<4>(sp4));
+        p_sp4 = std::make_unique<libtensor::bispace<4>>(sp4);
        }
      } else if (orb_types[2] == orb_types[3]) {
         libtensor::bispace<4> sp4(v_sp[0]|v_sp[1]|v_sp[2]&v_sp[3]);
-        p_sp4.reset(new libtensor::bispace<4>(sp4));
+        p_sp4 = std::make_unique<libtensor::bispace<4>>(sp4);
        } else {
         libtensor::bispace<4> sp4(v_sp[0]|v_sp[1]|v_sp[2]|v_sp[3]);
-        p_sp4.reset(new libtensor::bispace<4>(sp4));
+        p_sp4 = std::make_unique<libtensor::bispace<4>>(sp4);
        }
        
   
