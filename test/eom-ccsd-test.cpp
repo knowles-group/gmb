@@ -3,15 +3,9 @@
 
 #include "molpro/FCIdump.h"
 
-#include "../src/molpro/gmb/init.cpp"
-#include "../src/molpro/gmb/utils.cpp"
-#include "../src/molpro/gmb/get_integral.cpp"
-#include "../src/molpro/gmb/libtensor_utils.cpp"
-
-#include "../src/molpro/gmb/problem_ccsd.h"
-#include "../src/molpro/gmb/problem_eom-ccsd.h"
-// #include "../src/molpro/gmb/hamiltonian.h"
-#include "../src/molpro/gmb/amplitudes.h"
+#include <molpro/gmb/problem_ccsd.h>
+#include <molpro/gmb/problem_eom-ccsd.h>
+#include <molpro/gmb/init.h>
 
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <molpro/linalg/itsolv/SolverFactory.h>

@@ -1,27 +1,20 @@
-set(src 
-    main.cpp
-    init.cpp
-    utils.cpp
-    libtensor_utils.cpp
-    get_integral.cpp)
-
-
-add_executable(${PROJECT_NAME} ${src})
+LibraryManager_Append(${PROJECT_NAME}
+        PUBLIC_HEADER gmb.h
+        SOURCES gmb.cpp init.cpp utils.cpp libtensor_utils.cpp get_integral.cpp
+        )
 
 DependencyManager_Populate(Profiler)
 DependencyManager_Populate(utilities)
 DependencyManager_Populate(LinearAlgebra)
 DependencyManager_Populate(FCIdump)
 
-target_link_libraries(${PROJECT_NAME} tensor FCIdump molpro::LinearAlgebra)
 
-set(tests He-VDZ H2O-VDZ Li-VDZ-UHF)
+FetchContent_Declare(libtensor
+        #        GIT_REPOSITORY https://github.com/epifanovsky/libtensor
+        GIT_REPOSITORY https://github.com/pjknowles/libtensor
+        GIT_TAG gmb)
+set(LIBTENSOR_STANDALONE 1)
+FetchContent_MakeAvailable(libtensor)
+target_compile_definitions(tensor PUBLIC USE_PTHREADS)
 
-foreach(test ${tests})
-file(COPY ../../../test/${test}/${test}.fcidump DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-endforeach()
-
-file(COPY ../../../test/hubbard
-     DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
-
-              
+target_link_libraries(${PROJECT_NAME} PUBLIC tensor molpro::utilities molpro::Profiler molpro::FCIdump molpro::LinearAlgebra)
