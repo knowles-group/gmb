@@ -19,8 +19,10 @@ FetchContent_MakeAvailable(LibraryManager)
 add_subdirectory(dependencies)
 
 add_subdirectory(src)
-enable_testing()
-add_subdirectory(test)
+if (CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+    enable_testing()
+    add_subdirectory(test)
+endif ()
 #add_subdirectory(docs)
 
 
