@@ -110,7 +110,7 @@ void read_dump(std::string filename,
       space.split(v_norb[0][iot]); // split space alpha/beta
     if (ppol != nullptr && v_norb[2][iot] != 0) 
       space.split(v_norb[0][iot]+v_norb[1][iot]); // split space electrons/photons
-    v_sp.push_back(space);
+    v_sp.push_back(std::move(space));
   }
 
   for (auto &&ispin : v_spin) {
@@ -341,16 +341,12 @@ container<4,double> get_integral(std::string filename,
         libtensor::bispace<4> sp4(v_sp[0]|v_sp[1]|v_sp[2]|v_sp[3]);
         p_sp4 = std::make_unique<libtensor::bispace<4>>(sp4);
        }
-       
-  
   container<4, double> integral(*p_sp4);
   p_sp4.release();
 
   // set symmetry
-  // Request a control object
   libtensor::block_tensor_wr_ctrl<4, double> ctrl(integral);
   libtensor::symmetry<4, double> &sym = ctrl.req_symmetry();
-  // permutational symmetry
   libtensor::scalar_transf<double> tr(1.0);
   if (o1 == o2) {
     libtensor::permutation<4> p01; p01.permute(0, 1);
@@ -368,43 +364,18 @@ container<4,double> get_integral(std::string filename,
     sym.insert(se_0213);
   }
   gmb::zero(integral);
-  
-  if (false) {
-    std::cout << "In get_integral, integral:\n";
-    libtensor::bto_print<4, double>(std::cout).perform(integral);
-  }
 
   // Loop over all blocks using orbit_list
   libtensor::orbit_list<4, double> ol(ctrl.req_const_symmetry());
 
-#if 1
-  for (libtensor::orbit_list<4, double>::iterator it = ol.begin();
-         it != ol.end(); it++) {
-
-    // Obtain the index of the current block
+  for (libtensor::orbit_list<4, double>::iterator it = ol.begin(); it != ol.end(); it++) {
     libtensor::index<4> bidx;
-    
     ol.get_index(it, bidx);
-    if (false) {
-      std::cout << "bidx[0] = " << bidx[0]<< "\n";
-      std::cout << "bidx[1] = " << bidx[1]<< "\n";
-      std::cout << "bidx[2] = " << bidx[2]<< "\n";
-      std::cout << "bidx[3] = " << bidx[3]<< "\n";
-    }
-
     std::vector<size_t> bidx_cp(orb_types.size());
     for (size_t i = 0; i < orb_types.size(); i++) {
       bidx_cp[i] = bidx[i];
       if (!ssss[0][i]) ++bidx_cp[i]; // if alpha block doesn't 
     }
-
-    if (false) {
-      std::cout << "bidx_cp[0] = " << bidx_cp[0]<< "\n";
-      std::cout << "bidx_cp[1] = " << bidx_cp[1]<< "\n";
-      std::cout << "bidx_cp[2] = " << bidx_cp[2]<< "\n";
-      std::cout << "bidx_cp[3] = " << bidx_cp[3]<< "\n";
-    }
-    
     bool block1{true}, block2{true};
     auto itype = molpro::FCIdump::I2aa;
     spin spin1{alpha}, spin2{alpha}; 
@@ -435,128 +406,113 @@ container<4,double> get_integral(std::string filename,
         skip = true;
     } 
 
-      if (!skip) {
-      // Request tensor block from control object
+    if (!skip) {
       libtensor::dense_tensor_wr_i<4, double> &blk = ctrl.req_block(bidx);
       libtensor::dense_tensor_wr_ctrl<4, double> tc(blk);
-      // Obtain dimensions of tensor block
       const libtensor::dimensions<4> &tdims = blk.get_dims();
-      // Request data pointer
       double *ptr = tc.req_dataptr();
-
       molpro::FCIdump dump(filename);
       size_t i, j, k, l;
       unsigned int symi, symj, symk, syml;
       double value;
       molpro::FCIdump::integralType type;
-      dump.rewind();
-      
+      dump.rewind();     
+      // size_t njkl{v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3]}, nkl{v_norb[spin2][2]*v_norb[spin2][3]}, nl{v_norb[spin2][3]};
       while ((type = dump.nextIntegral(symi, i, symj, j, symk, k, syml, l, value)) != molpro::FCIdump::endOfFile) {
-        if (false) {
-        std::cout << "type: \n";
-            if (type == molpro::FCIdump::I2aa) std::cout << "I2aa\n";
-            if (type == molpro::FCIdump::I2ab) std::cout << "I2ab\n";
-            if (type == molpro::FCIdump::I2bb) std::cout << "I2bb\n";
-            std::cout << "i = " << i << " j = " << j << " k = " << k << " l = " << l<< "\n";
-            std::cout << "symi = " << symi << " symj = " << symj << " symk = " << symk << " syml = " << syml<< "\n";
-            std::cout << " value = " << value<< "\n";
-            std::cout << "v_psi[spin1][0].first[symi]: " << v_psi[spin1][0].first[symi]<< "\n";
-            std::cout << "v_psi[spin1][0].second[symi]: " << v_psi[spin1][0].second[symi]<< "\n";
+        if (type == itype) {
+          if (block1) {
+            // 1 (ij|kl)
+            if ( (((i) >= v_psi[spin1][0].first[symi] && (i) < v_psi[spin1][0].second[symi]) 
+              && ((j) >= v_psi[spin1][1].first[symj] && (j)<v_psi[spin1][1].second[symj]))
+              && (((k) >= v_psi[spin2][2].first[symk] && (k) < v_psi[spin2][2].second[symk]) 
+              && ((l) >= v_psi[spin2][3].first[syml] && (l)<v_psi[spin2][3].second[syml]))) {
+              // auto offset = gmb::get_offset(i+v_shift[spin1][0][symi], j+v_shift[spin1][1][symj], k+v_shift[spin2][2][symk], l+v_shift[spin2][3][syml],
+              //                       v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
+              size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(i+v_shift[spin1][0][symi])
+                            + (v_norb[spin2][2]*v_norb[spin2][3])*(j+v_shift[spin1][1][symj])
+                            + (v_norb[spin2][3])*(k+v_shift[spin2][2][symk])
+                            + (l+v_shift[spin2][3][syml]);
+              ptr[offset] = value;
+              if (false) std::cout << "1 offset = " << offset<< "\n";
+            }
+            // 2 (ji|lk)
+            if ( (((j) >= v_psi[spin1][0].first[symj] && (j) < v_psi[spin1][0].second[symj]) && ((i) >= v_psi[spin1][1].first[symi] && (i)<v_psi[spin1][1].second[symi]))
+              && (((l) >= v_psi[spin2][2].first[syml] && (l) < v_psi[spin2][2].second[syml]) && ((k) >= v_psi[spin2][3].first[symk] && (k)<v_psi[spin2][3].second[symk]))) {
+              // auto offset = gmb::get_offset(j+v_shift[spin1][0][symj], i+v_shift[spin1][1][symi], l+v_shift[spin2][2][syml], k+v_shift[spin2][3][symk],
+              //                       v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
+              size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(j+v_shift[spin1][0][symj])
+                            + (v_norb[spin2][2]*v_norb[spin2][3])*(i+v_shift[spin1][1][symi])
+                            + (v_norb[spin2][3])*(l+v_shift[spin2][2][syml])
+                            + (k+v_shift[spin2][3][symk]);
+              ptr[offset] = value;
+              if (false) std::cout << "3 offset = " << offset<< "\n";
+            }
+            // 3 (ji|kl)
+            if ( (((j) >= v_psi[spin1][0].first[symj] && (j) < v_psi[spin1][0].second[symj]) && ((i) >= v_psi[spin1][1].first[symi] && (i)<v_psi[spin1][1].second[symi]))
+              && (((k) >= v_psi[spin2][2].first[symk] && (k) < v_psi[spin2][2].second[symk]) && ((l) >= v_psi[spin2][3].first[syml] && (l)<v_psi[spin2][3].second[syml]))) {
+              // auto offset = gmb::get_offset(j+v_shift[spin1][0][symj], i+v_shift[spin1][1][symi], k+v_shift[spin2][2][symk], l+v_shift[spin2][3][syml],
+                                    // v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
+              size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(j+v_shift[spin1][0][symj])
+                            + (v_norb[spin2][2]*v_norb[spin2][3])*(i+v_shift[spin1][1][symi])
+                            + (v_norb[spin2][3])*(k+v_shift[spin2][2][symk])
+                            + (l+v_shift[spin2][3][syml]);
+              ptr[offset] = value;
+              if (false) std::cout << "5 offset = " << offset<< "\n";
+            }
+            // 4 (ij|lk)
+            if ( (((i) >= v_psi[spin1][0].first[symi] && (i) < v_psi[spin1][0].second[symi]) && ((j) >= v_psi[spin1][1].first[symj] && (j)<v_psi[spin1][1].second[symj]))
+              && (((l) >= v_psi[spin2][2].first[syml] && (l) < v_psi[spin2][2].second[syml]) && ((k) >= v_psi[spin2][3].first[symk] && (k)<v_psi[spin2][3].second[symk]))) {
+              size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(i+v_shift[spin1][0][symi])
+                            + (v_norb[spin2][2]*v_norb[spin2][3])*(j+v_shift[spin1][1][symj])
+                            + (v_norb[spin2][3])*(l+v_shift[spin2][2][syml])
+                            + (k+v_shift[spin2][3][symk]);
+              ptr[offset] = value;
+              if (false) std::cout << "7 offset = " << offset<< "\n";
+            }
+          }
+          if (block2) {
+            // 5 (kl|ij)
+            if ( (((k) >= v_psi[spin1][0].first[symk] && (k) < v_psi[spin1][0].second[symk]) && ((l) >= v_psi[spin1][1].first[syml] && (l)<v_psi[spin1][1].second[syml]))
+              && (((i) >= v_psi[spin2][2].first[symi] && (i) < v_psi[spin2][2].second[symi]) && ((j) >= v_psi[spin2][3].first[symj] && (j)<v_psi[spin2][3].second[symj]))) {
+              size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(k+v_shift[spin1][0][symk])
+                            + (v_norb[spin2][2]*v_norb[spin2][3])*(l+v_shift[spin1][1][syml])
+                            + (v_norb[spin2][3])*(i+v_shift[spin2][2][symi])
+                            + (j+v_shift[spin2][3][symj]);
+              ptr[offset] = value;
+              if (false) std::cout << "2 offset = " << offset<< "\n";
+            }
+            // 6 (lk|ji)
+            if ( (((l) >= v_psi[spin1][0].first[syml] && (l) < v_psi[spin1][0].second[syml]) && ((k) >= v_psi[spin1][1].first[symk] && (k)<v_psi[spin1][1].second[symk]))
+              && (((j) >= v_psi[spin2][2].first[symj] && (j) < v_psi[spin2][2].second[symj]) && ((i) >= v_psi[spin2][3].first[symi] && (i)<v_psi[spin2][3].second[symi])) ) {
+              size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(l+v_shift[spin1][0][syml])
+                            + (v_norb[spin2][2]*v_norb[spin2][3])*(k+v_shift[spin1][1][symk])
+                            + (v_norb[spin2][3])*(j+v_shift[spin2][2][symj])
+                            + (i+v_shift[spin2][3][symi]);
+              ptr[offset] = value;
+              if (false) std::cout << "4 offset = " << offset<< "\n";
+            }
+            // 7 (lk|ij)
+            if ( (((l) >= v_psi[spin1][0].first[syml] && (l) < v_psi[spin1][0].second[syml]) && ((k) >= v_psi[spin1][1].first[symk] && (k)<v_psi[spin1][1].second[symk]))
+              && (((i) >= v_psi[spin2][2].first[symi] && (i) < v_psi[spin2][2].second[symi]) && ((j) >= v_psi[spin2][3].first[symj] && (j)<v_psi[spin2][3].second[symj]))) {
+              size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(l+v_shift[spin1][0][syml])
+                            + (v_norb[spin2][2]*v_norb[spin2][3])*(k+v_shift[spin1][1][symk])
+                            + (v_norb[spin2][3])*(i+v_shift[spin2][2][symi])
+                            + (j+v_shift[spin2][3][symj]);
+              ptr[offset] = value;
+              if (false) std::cout << "6 offset = " << offset<< "\n";
+            }
+            // 8 (kl|ji)
+            if ( (((k) >= v_psi[spin1][0].first[symk] && (k) < v_psi[spin1][0].second[symk]) && ((l) >= v_psi[spin1][1].first[syml] && (l)<v_psi[spin1][1].second[syml]))
+              && (((j) >= v_psi[spin2][2].first[symj] && (j) < v_psi[spin2][2].second[symj]) && ((i) >= v_psi[spin2][3].first[symi] && (i)<v_psi[spin2][3].second[symi]))) {
+              size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(k+v_shift[spin1][0][symk])
+                            + (v_norb[spin2][2]*v_norb[spin2][3])*(l+v_shift[spin1][1][syml])
+                            + (v_norb[spin2][3])*(j+v_shift[spin2][2][symj])
+                            + (i+v_shift[spin2][3][symi]);
+              ptr[offset] = value;
+              if (false) std::cout << "8 offset = " << offset<< "\n";
+            }  
+          }
         }
-        if (block1) {
-        // 1 (ij|kl)
-        if ( (((i) >= v_psi[spin1][0].first[symi] && (i) < v_psi[spin1][0].second[symi]) 
-          && ((j) >= v_psi[spin1][1].first[symj] && (j)<v_psi[spin1][1].second[symj]))
-          && (((k) >= v_psi[spin2][2].first[symk] && (k) < v_psi[spin2][2].second[symk]) 
-          && ((l) >= v_psi[spin2][3].first[syml] && (l)<v_psi[spin2][3].second[syml]))
-          && type == itype ) {
-          size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(i+v_shift[spin1][0][symi])
-                        + (v_norb[spin2][2]*v_norb[spin2][3])*(j+v_shift[spin1][1][symj])
-                        + (v_norb[spin2][3])*(k+v_shift[spin2][2][symk])
-                        + (l+v_shift[spin2][3][syml]);
-          ptr[offset] = value;
-          if (false) std::cout << "1 offset = " << offset<< "\n";
-        }
-        // 2 (ji|lk)
-        if ( (((j) >= v_psi[spin1][0].first[symj] && (j) < v_psi[spin1][0].second[symj]) && ((i) >= v_psi[spin1][1].first[symi] && (i)<v_psi[spin1][1].second[symi]))
-          && (((l) >= v_psi[spin2][2].first[syml] && (l) < v_psi[spin2][2].second[syml]) && ((k) >= v_psi[spin2][3].first[symk] && (k)<v_psi[spin2][3].second[symk]))
-          && type == itype ) {
-          size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(j+v_shift[spin1][0][symj])
-                        + (v_norb[spin2][2]*v_norb[spin2][3])*(i+v_shift[spin1][1][symi])
-                        + (v_norb[spin2][3])*(l+v_shift[spin2][2][syml])
-                        + (k+v_shift[spin2][3][symk]);
-          ptr[offset] = value;
-          if (false) std::cout << "3 offset = " << offset<< "\n";
-        }
-        // 3 (ji|kl)
-        if ( (((j) >= v_psi[spin1][0].first[symj] && (j) < v_psi[spin1][0].second[symj]) && ((i) >= v_psi[spin1][1].first[symi] && (i)<v_psi[spin1][1].second[symi]))
-          && (((k) >= v_psi[spin2][2].first[symk] && (k) < v_psi[spin2][2].second[symk]) && ((l) >= v_psi[spin2][3].first[syml] && (l)<v_psi[spin2][3].second[syml]))
-          && type == itype ) {
-          size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(j+v_shift[spin1][0][symj])
-                        + (v_norb[spin2][2]*v_norb[spin2][3])*(i+v_shift[spin1][1][symi])
-                        + (v_norb[spin2][3])*(k+v_shift[spin2][2][symk])
-                        + (l+v_shift[spin2][3][syml]);
-          ptr[offset] = value;
-          if (false) std::cout << "5 offset = " << offset<< "\n";
-        }
-        // 4 (ij|lk)
-        if ( (((i) >= v_psi[spin1][0].first[symi] && (i) < v_psi[spin1][0].second[symi]) && ((j) >= v_psi[spin1][1].first[symj] && (j)<v_psi[spin1][1].second[symj]))
-          && (((l) >= v_psi[spin2][2].first[syml] && (l) < v_psi[spin2][2].second[syml]) && ((k) >= v_psi[spin2][3].first[symk] && (k)<v_psi[spin2][3].second[symk]))
-          && type == itype ) {
-          size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(i+v_shift[spin1][0][symi])
-                        + (v_norb[spin2][2]*v_norb[spin2][3])*(j+v_shift[spin1][1][symj])
-                        + (v_norb[spin2][3])*(l+v_shift[spin2][2][syml])
-                        + (k+v_shift[spin2][3][symk]);
-          ptr[offset] = value;
-          if (false) std::cout << "7 offset = " << offset<< "\n";
-        }
-        }
-        if (block2) {
-        // 5 (kl|ij)
-        if ( (((k) >= v_psi[spin1][0].first[symk] && (k) < v_psi[spin1][0].second[symk]) && ((l) >= v_psi[spin1][1].first[syml] && (l)<v_psi[spin1][1].second[syml]))
-          && (((i) >= v_psi[spin2][2].first[symi] && (i) < v_psi[spin2][2].second[symi]) && ((j) >= v_psi[spin2][3].first[symj] && (j)<v_psi[spin2][3].second[symj]))
-          && type == itype ) {
-          size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(k+v_shift[spin1][0][symk])
-                        + (v_norb[spin2][2]*v_norb[spin2][3])*(l+v_shift[spin1][1][syml])
-                        + (v_norb[spin2][3])*(i+v_shift[spin2][2][symi])
-                        + (j+v_shift[spin2][3][symj]);
-          ptr[offset] = value;
-          if (false) std::cout << "2 offset = " << offset<< "\n";
-        }
-        // 6 (lk|ji)
-        if ( (((l) >= v_psi[spin1][0].first[syml] && (l) < v_psi[spin1][0].second[syml]) && ((k) >= v_psi[spin1][1].first[symk] && (k)<v_psi[spin1][1].second[symk]))
-          && (((j) >= v_psi[spin2][2].first[symj] && (j) < v_psi[spin2][2].second[symj]) && ((i) >= v_psi[spin2][3].first[symi] && (i)<v_psi[spin2][3].second[symi])) 
-          && type == itype ) {
-          size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(l+v_shift[spin1][0][syml])
-                        + (v_norb[spin2][2]*v_norb[spin2][3])*(k+v_shift[spin1][1][symk])
-                        + (v_norb[spin2][3])*(j+v_shift[spin2][2][symj])
-                        + (i+v_shift[spin2][3][symi]);
-          ptr[offset] = value;
-          if (false) std::cout << "4 offset = " << offset<< "\n";
-        }
-        // 7 (lk|ij)
-        if ( (((l) >= v_psi[spin1][0].first[syml] && (l) < v_psi[spin1][0].second[syml]) && ((k) >= v_psi[spin1][1].first[symk] && (k)<v_psi[spin1][1].second[symk]))
-          && (((i) >= v_psi[spin2][2].first[symi] && (i) < v_psi[spin2][2].second[symi]) && ((j) >= v_psi[spin2][3].first[symj] && (j)<v_psi[spin2][3].second[symj]))
-          && type == itype ) {
-          size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(l+v_shift[spin1][0][syml])
-                        + (v_norb[spin2][2]*v_norb[spin2][3])*(k+v_shift[spin1][1][symk])
-                        + (v_norb[spin2][3])*(i+v_shift[spin2][2][symi])
-                        + (j+v_shift[spin2][3][symj]);
-          ptr[offset] = value;
-          if (false) std::cout << "6 offset = " << offset<< "\n";
-        }
-        // 8 (kl|ji)
-        if ( (((k) >= v_psi[spin1][0].first[symk] && (k) < v_psi[spin1][0].second[symk]) && ((l) >= v_psi[spin1][1].first[syml] && (l)<v_psi[spin1][1].second[syml]))
-          && (((j) >= v_psi[spin2][2].first[symj] && (j) < v_psi[spin2][2].second[symj]) && ((i) >= v_psi[spin2][3].first[symi] && (i)<v_psi[spin2][3].second[symi]))
-          && type == itype ) {
-          size_t offset = (v_norb[spin1][1]*v_norb[spin2][2]*v_norb[spin2][3])*(k+v_shift[spin1][0][symk])
-                        + (v_norb[spin2][2]*v_norb[spin2][3])*(l+v_shift[spin1][1][syml])
-                        + (v_norb[spin2][3])*(j+v_shift[spin2][2][symj])
-                        + (i+v_shift[spin2][3][symi]);
-          ptr[offset] = value;
-          if (false) std::cout << "8 offset = " << offset<< "\n";
-        }  
-      }
       }
       // Return data pointer
       tc.ret_dataptr(ptr);
@@ -611,7 +567,7 @@ container<4,double> get_integral(std::string filename,
       double *ptr = tc.req_dataptr();
 
       // read dipole integrals
-      std::string fname_dip{ppol->filename};
+      std::string fname_dip{ppol->fname_dip};
 
       gmb::check_file(fname_dip);
       molpro::FCIdump dump{fname_dip}; 
@@ -620,7 +576,6 @@ container<4,double> get_integral(std::string filename,
       double value;
       molpro::FCIdump::integralType type;
       dump.rewind();
-#if 1
       while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
         for (int r = 0; r < ppol->nmax + 1; r++) {
           s = r+1;
@@ -660,7 +615,6 @@ container<4,double> get_integral(std::string filename,
               if (help) std::cout << "2 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-          #if 1
           // 3
           // (pq|sr)
           if ((((p) >= v_psi[spin1][0].first[symp] && (p) < v_psi[spin1][0].second[symp]) 
@@ -689,7 +643,6 @@ container<4,double> get_integral(std::string filename,
               if (help) std::cout << "4 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-            #endif 
           }
           if (block2) {
           // 5
@@ -748,9 +701,9 @@ container<4,double> get_integral(std::string filename,
               if (help) std::cout << "8 off set = " << offset << std::endl;
               if (help) std::cout << "ptr[offset]  = " << ptr[offset]  << std::endl;
             }
-        }}
+          }
+        }
       }
-    #endif
     // Return data pointer
     tc.ret_dataptr(ptr);
     // Return the tensor block (mark as done)
@@ -758,7 +711,6 @@ container<4,double> get_integral(std::string filename,
   }
     } 
 
-  #endif
   if (false) {
     std::cout << "printing integral\n";
     libtensor::bto_print<4, double>(std::cout).perform(integral);
