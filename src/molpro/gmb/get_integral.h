@@ -21,7 +21,8 @@ struct polariton {
   double gamma{0.0};
   double omega{0.0};
   double lambd{0.0};
-  std::string filename;
+  std::string fname_dip;
+  std::string fname_sm;
 
   polariton() = default;
   polariton(sym_t nmax_, double gamma_, double omega_) 

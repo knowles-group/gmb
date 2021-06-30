@@ -2,55 +2,13 @@
 #include "expressions/fock_xx.h"
 #include "expressions/diag_xx.h"
 #include "expressions/anti.h"
+#include "expressions/add_d2.h"
 
-extern std::unique_ptr<polariton> ppol;
-extern std::string filename;
+// extern std::unique_ptr<polariton> ppol;
 
 namespace gmb {
 
-
-  void init(std::string filename, std::string method, hamiltonian<> &ham) {
-
-    // One-electron integrals
-    auto h1_oo = get_integral(filename,o,o);
-    auto h1_vv = get_integral(filename,v,v);
-
-    // Two-electron integrals <pq||rs> 
-    auto int_oooo = get_i(filename, o, o, o, o);
-    auto int_oovv = get_i(filename, o, o, v, v);
-    auto int_ovov = get_i(filename, o, v, o, v);
-
-    // getting fock matrix
-    auto d_oo = diag_xx(h1_oo);
-
-    ham.set(f_oo, fock_xx(d_oo, h1_oo, int_oooo));
-    ham.set(f_vv, fock_xx(d_oo, h1_vv, int_ovov));
-
-    ham.set(i_oooo, int_oooo);
-    ham.set(i_oovv, int_oovv);
-    ham.set(i_ovov, int_ovov);
-
-    if (method.find("cc") != std::string::npos) {
-
-      auto int_vvvv = get_i(filename, v, v, v, v);
-      ham.set(i_vvvv, int_vvvv);
-
-      if (method.find("ccsd") != std::string::npos) {
-        auto h1_ov = get_integral(filename,o,v);
-        auto int_ooov = get_i(filename, o, o, o, v);
-        auto int_ovvv = get_i(filename, o, v, v, v);
-
-        ham.set(i_ooov, int_ooov);
-        ham.set(i_ovvv, int_ovvv);
-  
-        // getting fock matrix - ov block
-        ham.set(f_ov, fock_xx(d_oo, h1_ov, int_ooov));
-
-      }
-    }
-  }
-
-  void init_pol(std::string filename, std::string method, hamiltonian<> &ham) {
+  void init(const std::string filename, const std::string method, hamiltonian<> &ham, const std::unique_ptr<polariton> &ppol) {
 
     // One-electron integrals
     auto h1_oo = get_integral(filename,o,o);
@@ -60,42 +18,44 @@ namespace gmb {
     auto int_oooo = get_i(filename, o, o, o, o);
     auto int_oovv = get_i(filename, o, o, v, v);
     auto int_ovov = get_i(filename, o, v, o, v);
+    
+    // add self-energy if needed
+    double fact{0};
+    std::unique_ptr<container<2>> pd_oo, pd_ov, pd_vo, pd_vv;
+    if (ppol != nullptr) { 
 
-    double fact = ppol->omega*ppol->gamma*ppol->gamma;
-    auto dip_oo = get_integral(ppol->filename,o,o,false);
-    auto dip_ov = get_integral(ppol->filename,o,v,false);
-    auto dip_vo = get_integral(ppol->filename,v,o,false);
-    auto dip_vv = get_integral(ppol->filename,v,v,false);
+      fact = ppol->omega*ppol->gamma*ppol->gamma;
 
-    if (ppol != nullptr) {
-      libtensor::letter p,q,r,s;
-      h1_oo(p|q) += fact*(contract(r,dip_oo(p|r),dip_oo(r|q))
-                        + contract(s,dip_ov(p|s),dip_vo(s|q)));
-      h1_vv(p|q) += fact*(contract(r,dip_vv(p|r),dip_vv(r|q))
-                        + contract(s,dip_vo(p|s),dip_ov(s|q)));
-      int_oooo(p|q|r|s) += fact*2.0*(dip_oo(p|r)*dip_oo(q|s)-dip_oo(q|r)*dip_oo(p|s));
-      int_oovv(p|q|r|s) += fact*2.0*(dip_ov(p|r)*dip_ov(q|s)-dip_ov(q|r)*dip_ov(p|s));
-      int_ovov(p|q|r|s) += fact*2.0*(dip_oo(p|r)*dip_vv(q|s)-dip_vo(q|r)*dip_ov(p|s));
+      // add second moment integrals to one-electron part
+      auto sm_oo = get_integral(ppol->fname_sm,o,o,false);
+      auto sm_vv = get_integral(ppol->fname_sm,v,v,false);
+      h1_oo.axpy(fact, sm_oo);
+      h1_vv.axpy(fact, sm_vv);
+
+      // add dipole integrals to two-electron part
+      pd_oo = std::make_unique<container<2>> (get_integral(ppol->fname_dip,o,o,false));
+      pd_ov = std::make_unique<container<2>> (get_integral(ppol->fname_dip,o,v,false));
+      pd_vo = std::make_unique<container<2>> (get_integral(ppol->fname_dip,v,o,false));
+      pd_vv = std::make_unique<container<2>> (get_integral(ppol->fname_dip,v,v,false));
+      add_d2(fact, *pd_oo, *pd_oo, *pd_oo, *pd_oo, int_oooo);
+      add_d2(fact, *pd_ov, *pd_ov, *pd_ov, *pd_ov, int_oovv);
+      add_d2(fact, *pd_oo, *pd_vv, *pd_vo, *pd_ov, int_ovov);
     }
-
-    // getting fock matrix
-    auto d_oo = diag_xx(h1_oo);
-
-    ham.set(f_oo, fock_xx(d_oo, h1_oo, int_oooo));
-    ham.set(f_vv, fock_xx(d_oo, h1_vv, int_ovov));
 
     ham.set(i_oooo, int_oooo);
     ham.set(i_oovv, int_oovv);
     ham.set(i_ovov, int_ovov);
 
+    // get fock matrix
+    auto d_oo = diag_xx(h1_oo);
+    ham.set(f_oo, fock_xx(d_oo, h1_oo, int_oooo));
+    ham.set(f_vv, fock_xx(d_oo, h1_vv, int_ovov));
+
     if (method.find("cc") != std::string::npos) {
 
       auto int_vvvv = get_i(filename, v, v, v, v);
-
-      if (ppol != nullptr) {
-        libtensor::letter p,q,r,s;
-        int_vvvv(p|q|r|s) += fact*2.0*(dip_vv(p|r)*dip_vv(q|s)-dip_vv(q|r)*dip_vv(p|s));
-      }
+      if (ppol != nullptr) 
+        add_d2(fact, *pd_vv, *pd_vv, *pd_vv, *pd_vv, int_vvvv);
       ham.set(i_vvvv, int_vvvv);
 
       if (method.find("ccsd") != std::string::npos) {
@@ -105,11 +65,10 @@ namespace gmb {
         auto int_ovvv = get_i(filename, o, v, v, v);
 
         if (ppol != nullptr) {
-          libtensor::letter p,q,r,s;
-          h1_ov(p|q) += fact*(contract(r,dip_oo(p|r),dip_ov(r|q))
-                            + contract(s,dip_ov(p|s),dip_vv(s|q)));
-          int_ooov(p|q|r|s) += fact*2.0*(dip_oo(p|r)*dip_ov(q|s)-dip_oo(q|r)*dip_ov(p|s));
-          int_ovvv(p|q|r|s) += fact*2.0*(dip_ov(p|r)*dip_vv(q|s)-dip_vv(q|r)*dip_ov(p|s));
+          auto sm_ov = get_integral(ppol->fname_sm,o,v,false);
+          h1_ov.axpy(fact, sm_ov);
+          add_d2(fact, *pd_oo, *pd_ov, *pd_oo, *pd_ov, int_ooov);
+          add_d2(fact, *pd_ov, *pd_vv, *pd_vv, *pd_ov, int_ovvv);
         }
         ham.set(i_ooov, int_ooov);
         ham.set(i_ovvv, int_ovvv);

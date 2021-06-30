@@ -35,7 +35,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   // parse arguments
   auto method = options.parameter("method","eom-ccsd");
   // syms_t states(8);
-  auto nroots = options.parameter("states", 7);
+  auto nroots = options.parameter("states", 3);
   {
     auto option_polariton_nmax = options.parameter("polariton_nmax", 0);
     if (option_polariton_nmax > 0) {
@@ -44,9 +44,11 @@ void molpro::gmb::gmb(const molpro::Options& options) {
       ppol = std::make_unique<polariton>(option_polariton_nmax,
                                          option_polariton_gamma,
                                          option_polariton_omega);
-      ppol->filename = options.parameter(
+      ppol->fname_dip = options.parameter(
           "dipole", std::regex_replace(
                         filename, std::regex{"\\.[_[:alnum:]]*$"}, ".dip"));
+      ppol->fname_sm = std::regex_replace(
+                        filename, std::regex{"\\.[_[:alnum:]]*$"}, ".sm");
     }
   }
 
@@ -55,7 +57,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   std::cout << "method = " << method << "\n";
   std::cout << "roots = " << nroots << "\n";
   if (ppol != nullptr) {
-    std::cout << "dipole file = " << ppol->filename << "\n";
+    std::cout << "dipole file = " << ppol->fname_dip << "\n";
     std::cout << "polariton parameters:" << "\n";
     std::cout << "nmax = " << ppol->nmax << "\n";
     std::cout << "gamma = " << ppol->gamma << "\n";
@@ -63,15 +65,12 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   }
 
   hamiltonian<> ham;
-  std::unique_ptr<amplitudes<>> ptampl(std::make_unique<amplitudes<>>());
+  std::unique_ptr<amplitudes<>> ptampl{std::make_unique<amplitudes<>>()};
   std::unique_ptr<problem_gen> problem;
   std::string method_gs, method_es;
 
   // initialise hamiltonian
-  if (ppol != nullptr)
-    init_pol(filename, method, ham);
-  else
-    init(filename, method, ham);
+  init(filename, method, ham, ppol);
     
 
 #if 1 // CCSD
@@ -88,9 +87,9 @@ void molpro::gmb::gmb(const molpro::Options& options) {
 
   // set problem
   if (method.find("ccsd") != std::string::npos)
-    problem.reset(new problem_ccsd(ham));
+    problem = std::make_unique<problem_ccsd>(ham);
   if (method.find("ccd") != std::string::npos)
-    problem.reset(new problem_ccd(ham));
+    problem = std::make_unique<problem_ccd>(ham);
 
   // set solver
   auto solver = molpro::linalg::itsolv::create_NonLinearEquations<amplitudes<>>("DIIS");
@@ -115,7 +114,8 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   std::vector<amplitudes<>> v_rampl(nroots);
   std::unique_ptr<problem_eom> problem_es;
 
-  problem_es.reset(new problem_eom_ccsd(ham, *ptampl));
+  problem_es = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
+  
   std::cout << "\n" << *problem_es << "\n";
   auto solver_es = molpro::linalg::itsolv::create_LinearEigensystem<amplitudes<>>("Davidson");
   auto residuals_es = v_rampl;

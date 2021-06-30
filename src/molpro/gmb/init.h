@@ -9,21 +9,14 @@
 namespace gmb {
 
   /**
-   * @brief Initialise calculation 
+   * @brief Initialise Hamiltonian 
    * 
    * @param filename 
    * @param method 
    * @param hamiltonian 
    */
-  void init(std::string filename, std::string method, hamiltonian<> &hamiltonian);
-  /**
-   * @brief Initialise calculation 
-   * 
-   * @param filename 
-   * @param method 
-   * @param hamiltonian 
-   */
-  void init_pol(std::string filename, std::string method, hamiltonian<> &hamiltonian);
+  void init(const std::string filename, const std::string method, hamiltonian<> &hamiltonian, const std::unique_ptr<polariton> &ppol);
+
 
   /**
    * @brief get anti-symmetrized two-electron integral
