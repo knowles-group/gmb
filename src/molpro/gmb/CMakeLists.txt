@@ -2,6 +2,7 @@ LibraryManager_Append(${PROJECT_NAME}
         PUBLIC_HEADER gmb.h
         SOURCES gmb.cpp init.cpp utils.cpp libtensor_utils.cpp get_integral.cpp
         )
+LibraryManager_LAPACK(${PROJECT_NAME} PRIVATE Intel10_64lp)
 
 DependencyManager_Populate(Profiler)
 DependencyManager_Populate(utilities)
@@ -17,7 +18,7 @@ else ()
     FetchContent_Declare(libtensor
             #        GIT_REPOSITORY https://github.com/epifanovsky/libtensor
             GIT_REPOSITORY https://github.com/pjknowles/libtensor
-            GIT_TAG 320e8750d4086858253be9bcfea6fce6b1ed99b2
+            GIT_TAG 5a74fe3c
             )
     set(LIBTENSOR_STANDALONE 1)
     set(BUILD_SHARED_LIBS ON)
