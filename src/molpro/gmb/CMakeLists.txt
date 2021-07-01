@@ -12,7 +12,6 @@ find_package(libtensor)
 if (libtensor_FOUND)
     message(STATUS "using installed libtensor")
     target_compile_definitions(libtensor::tensor INTERFACE USE_PTHREADS)
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 else ()
     message(STATUS "building libtensor")
     FetchContent_Declare(libtensor
