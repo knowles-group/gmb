@@ -8,6 +8,8 @@ build:
 #  only:
 #    refs:
 #      - master
+  tags:
+    - group-cluster
   script:
     - procs=$(lscpu -p | egrep -v '^#' | wc -l || echo 1); echo $procs processors available
     - TOP=$PWD
