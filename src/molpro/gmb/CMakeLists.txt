@@ -17,7 +17,8 @@ else ()
     FetchContent_Declare(libtensor
             #        GIT_REPOSITORY https://github.com/epifanovsky/libtensor
             GIT_REPOSITORY https://github.com/pjknowles/libtensor
-            GIT_TAG ec5a2f7ae3643c5511e6c14537c481699670dac5)
+            GIT_TAG 320e8750d4086858253be9bcfea6fce6b1ed99b2
+            )
     set(LIBTENSOR_STANDALONE 1)
     set(BUILD_SHARED_LIBS ON)
     FetchContent_MakeAvailable(libtensor)
