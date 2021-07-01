@@ -8,7 +8,7 @@
 
 namespace gmb {
 
-  void init(const std::string filename, const std::string method, hamiltonian<> &ham, const std::unique_ptr<polariton> &ppol) {
+  void init(const std::string &filename, const std::string &method, hamiltonian<> &ham, const std::unique_ptr<polariton> &ppol) {
 
     // One-electron integrals
     auto h1_oo = get_integral(filename,o,o);

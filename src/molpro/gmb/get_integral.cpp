@@ -11,7 +11,7 @@ bool zerophoton{false}; // to test - zeroing photonic parts
 extern std::unique_ptr<polariton> ppol;
 
 // get nuclear energy
-double get_integral(std::string filename) {
+double get_integral(const std::string &filename) {
   gmb::check_file(filename);
   molpro::FCIdump dump(filename);
   int i, j, k, l;
@@ -26,7 +26,7 @@ double get_integral(std::string filename) {
   return integral;
 }
 
-void read_dump(std::string filename, 
+void read_dump(const std::string &filename, 
                const std::vector<orb_type>& orb_types, 
                const std::vector<spin>& v_spin,
                std::vector<std::vector<std::pair<syms_t, syms_t>>>& v_psi, 
@@ -139,11 +139,11 @@ void read_dump(std::string filename,
 }
 
 // get one-electron integral
-container<2,double> get_integral(std::string filename, 
-                                 orb_type o1, 
-                                 orb_type o2,
-                                 bool pol,
-                                 bool so_basis) {
+container<2,double> get_integral(const std::string &filename, 
+                                 const orb_type &o1, 
+                                 const orb_type &o2,
+                                 const bool &pol,
+                                 const bool &so_basis) {
                                  
   std::vector<spin> v_spin = {alpha}; // vector containing possible spins
   if (so_basis) 
@@ -277,12 +277,12 @@ container<2,double> get_integral(std::string filename,
 }
 
 // get two-electron integral
-container<4,double> get_integral(std::string filename, 
-                                 orb_type o1, 
-                                 orb_type o2, 
-                                 orb_type o3, 
-                                 orb_type o4,
-                                 bool so_basis) {
+container<4,double> get_integral(const std::string &filename, 
+                                 const orb_type &o1, 
+                                 const orb_type &o2, 
+                                 const orb_type &o3, 
+                                 const orb_type &o4,
+                                 const bool &so_basis) {
                                  
   std::vector<spin> v_spin = {alpha}; // vector containing possible spins
   if (so_basis) 

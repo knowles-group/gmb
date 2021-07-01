@@ -32,7 +32,7 @@ TEST(CCSD,energy) {
   std::string method_gs = "ccsd";
 
  // initialise hamiltonian
-  gmb::init(filename, method_gs, hamiltonian);
+  gmb::init(filename, method_gs, hamiltonian, ppol);
 
   // initialise T amplitudes
   ptampl->set(t1, container(hamiltonian.m2get(f_ov).get_space()));

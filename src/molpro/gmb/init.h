@@ -15,7 +15,7 @@ namespace gmb {
    * @param method 
    * @param hamiltonian 
    */
-  void init(const std::string filename, const std::string method, hamiltonian<> &hamiltonian, const std::unique_ptr<polariton> &ppol);
+  void init(const std::string &filename, const std::string &method, hamiltonian<> &hamiltonian, const std::unique_ptr<polariton> &ppol);
 
 
   /**
