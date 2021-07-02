@@ -33,7 +33,7 @@ namespace gmb {
     infile.close();
   }
 
-  size_t get_offset(size_t i, size_t j, size_t k, size_t l, size_t ni, size_t nj, size_t nk, size_t nl) {
+  size_t get_offset(size_t i, size_t j, size_t k, size_t l, size_t nj, size_t nk, size_t nl) {
     size_t offset = i*(nj*nk*nl) + j*(nk*nl) + k*nl + l;
     return offset;
   }
@@ -41,6 +41,17 @@ namespace gmb {
   size_t get_offset(size_t i, size_t j, size_t nj) {
     size_t offset = i*nj + j;
     return offset;
+  }
+
+  bool is_in_range(size_t i, size_t j,  size_t k, size_t l,
+          size_t ni_min, size_t nj_min,  size_t nk_min, size_t nl_min,
+          size_t ni_max, size_t nj_max,  size_t nk_max, size_t nl_max) {
+    bool in_range{false};
+    if ( ((ni_min <= i && i < ni_max) && (nj_min <= j && j < nj_max))
+      && ((nk_min <= k && k < nk_max) && (nl_min <= l && l < nl_max))) {
+        in_range = true;
+    }
+    return in_range;
   }
 
 template void get_polval(std::stringstream &ss, unsigned int &value); 

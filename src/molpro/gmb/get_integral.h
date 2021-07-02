@@ -21,7 +21,8 @@ struct polariton {
   double gamma{0.0};
   double omega{0.0};
   double lambd{0.0};
-  std::string filename;
+  std::string fname_dip;
+  std::string fname_sm;
 
   polariton() = default;
   polariton(sym_t nmax_, double gamma_, double omega_) 
@@ -33,10 +34,10 @@ struct polariton {
 };
 
 // get nuclear energy
-double get_integral(std::string filename);
+double get_integral(const std::string &filename);
 
 // read fcidump file
-void read_dump(std::string filename, 
+void read_dump(const std::string &filename, 
                const std::vector<orb_type>& orb_types, 
                const std::vector<spin>& v_spin,
                std::vector<std::vector<std::pair<syms_t, syms_t>>>& v_psi, 
@@ -46,19 +47,19 @@ void read_dump(std::string filename,
                std::vector<std::vector<bool>>& ssss);
                
 // get one-electron integral
-container<2,double> get_integral(std::string filename, 
-                                 orb_type o1, 
-                                 orb_type o2,
-                                 bool pol = true,
-                                 bool so_basis = true);
+container<2,double> get_integral(const std::string &filename, 
+                                 const orb_type &o1, 
+                                 const orb_type &o2,
+                                 const bool &pol = true,
+                                 const bool &so_basis = true);
 
 // get two-electron integral
-container<4,double> get_integral(std::string filename, 
-                                 orb_type o1, 
-                                 orb_type o2, 
-                                 orb_type o3, 
-                                 orb_type o4,
-                                 bool so_basis = true);
+container<4,double> get_integral(const std::string &filename, 
+                                 const orb_type &o1, 
+                                 const orb_type &o2, 
+                                 const orb_type &o3, 
+                                 const orb_type &o4,
+                                 const bool &so_basis = true);
 
 
 #endif //GMB_GET_INTEGRAL_H
