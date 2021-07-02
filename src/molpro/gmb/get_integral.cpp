@@ -577,6 +577,7 @@ container<4,double> get_integral(const std::string &filename,
       molpro::FCIdump::integralType type;
       dump.rewind();
       while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
+        if (type != molpro::FCIdump::I0)
         for (int r = 0; r < ppol->nmax + 1; r++) {
           s = r+1;
           if (help) {
