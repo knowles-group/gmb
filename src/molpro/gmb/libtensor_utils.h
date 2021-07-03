@@ -1,7 +1,7 @@
 #ifndef GMB_LIBTENSOR_UTILS_H
 #define GMB_LIBTENSOR_UTILS_H
 
-#include <libtensor/libtensor.h>
+#include "libtensor/libtensor.h"
 
 // support libtensor functions 
 namespace gmb {
