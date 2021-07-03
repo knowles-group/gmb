@@ -5,6 +5,7 @@ LibraryManager_Append(${PROJECT_NAME}
 
 DependencyManager_Populate(Profiler)
 DependencyManager_Populate(utilities)
+set(LINEARALGEBRA_ARRAY_HDF5 OFF)
 DependencyManager_Populate(LinearAlgebra)
 DependencyManager_Populate(FCIdump)
 
