@@ -17,6 +17,8 @@ build-image:
     - docker push $CI_REGISTRY/knowles-group/gmb:latest
   services:
     - docker.dind
+  tags:
+    - group-cluster
   only:
 #    refs:
 #      - master
