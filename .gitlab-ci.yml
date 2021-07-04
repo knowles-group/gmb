@@ -16,8 +16,8 @@ build-image:
   only:
 #    refs:
 #      - master
-    changes:
-      - Dockerfile
+#    changes:
+#      - Dockerfile
 build:
   image: registry.gitlab.com/knowles-group/secondquantization
 #  only:
