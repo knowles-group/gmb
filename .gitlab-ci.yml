@@ -2,9 +2,24 @@ cache:
   key: ${CI_PROJECT_NAME}
   paths:
     - public
-image: registry.gitlab.com/knowles-group/secondquantization
 
+build-image:
+  image: docker:stable
+  services:
+    - docker.dind
+  stage: prepare
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - cd .meta
+    - docker build -t $CI_REGISTRY/knowles-group/gmb:latest .
+    - docker push $CI_REGISTRY/knowles-group/gmb:latest
+  only:
+#    refs:
+#      - master
+    changes:
+      - Dockerfile
 build:
+  image: registry.gitlab.com/knowles-group/secondquantization
 #  only:
 #    refs:
 #      - master
