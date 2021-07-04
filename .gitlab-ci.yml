@@ -1,3 +1,6 @@
+stages:
+  - image
+  - test
 cache:
   key: ${CI_PROJECT_NAME}
   paths:
@@ -7,7 +10,7 @@ build-image:
   image: docker:stable
   services:
     - docker.dind
-  stage: .pre
+  stage: image
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - cd .meta
@@ -16,9 +19,10 @@ build-image:
   only:
 #    refs:
 #      - master
-#    changes:
-#      - Dockerfile
-build:
+    changes:
+      - Dockerfile
+test:
+  stage: test
   image: registry.gitlab.com/knowles-group/secondquantization
 #  only:
 #    refs:
