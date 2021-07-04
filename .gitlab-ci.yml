@@ -9,8 +9,10 @@ cache:
 build-image:
   image: docker:stable
   stage: image
+  before-script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY
   script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build -t $CI_REGISTRY/knowles-group/gmb:latest .
     - docker push $CI_REGISTRY/knowles-group/gmb:latest
   services:
