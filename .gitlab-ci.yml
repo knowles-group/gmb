@@ -7,14 +7,22 @@ cache:
     - public
 
 build-image:
-  image: docker:stable
+#  image: docker:stable
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY/knowles-group/gmb:latest
+    rules:
   stage: image
 #  before_script:
 #    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY
-  script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY/knowles-group/gmb:latest .
-    - docker push $CI_REGISTRY/knowles-group/gmb:latest
+#  script:
+#    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#    - docker build -t $CI_REGISTRY/knowles-group/gmb:latest .
+#    - docker push $CI_REGISTRY/knowles-group/gmb:latest
   services:
     - docker:dind
   tags:
