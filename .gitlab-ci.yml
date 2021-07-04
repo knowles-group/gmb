@@ -16,7 +16,7 @@ build-image:
     - docker build -t $CI_REGISTRY/knowles-group/gmb:latest .
     - docker push $CI_REGISTRY/knowles-group/gmb:latest
   services:
-    - docker.dind
+    - docker:dind
   tags:
     - group-cluster
   only:
