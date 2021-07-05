@@ -13,4 +13,4 @@ RUN update-alternatives --config gcc
 
 RUN wget https://github.com/GlobalArrays/ga/releases/download/v5.8/ga-5.8.tar.gz && tar xzf ga-5.8.tar.gz && cd ga-5.8 && ./configure --disable-f77 --with-mpi3 && make install && cd .. && rm -rf ga-5.8*
 RUN git clone https://github.com/pjknowles/libtensor && cd libtensor && git checkout gmb && mkdir cmake-build && cd cmake-build && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DLIBTENSOR_STANDALONE=ON -DUSE_MKL=1 -G Ninja .. && ninja && ninja install && cd ../.. && rm -rf libtensor
-RUN rm -rf /opt/intel/oneapi/{ipp,intelpython,dnnl,conda_channel,itac,vtune,dal,advisor,clck,inspector,ccl}
+RUN cd /opt/intel/oneapi && rm -rf ipp intelpython dnnl conda_channel itac vtune dal advisor clck inspector ccl
