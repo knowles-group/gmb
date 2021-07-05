@@ -83,7 +83,7 @@ public:
    * @brief print container
    * 
    */
-  const void print() { libtensor::bto_print<N, T>(std::cout).perform(*this);};
+  void print() { libtensor::bto_print<N, T>(std::cout).perform(*this);};
 
 
   std::map<size_t, value_type> select_max_dot(size_t n, const container& y) const {throw std::logic_error("container::select_max_dot unimplemented");}
