@@ -1,10 +1,56 @@
+stages:
+  - image
+  - test
 cache:
   key: ${CI_PROJECT_NAME}
   paths:
     - public
-image: registry.gitlab.com/knowles-group/secondquantization
 
-build:
+build-image:
+#  image: docker:stable
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
+  timeout: 3h
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY/knowles-group/gmb:latest
+#    rules:
+  stage: image
+#  before_script:
+#    - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER $CI_REGISTRY
+#  script:
+#    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#    - docker build -t $CI_REGISTRY/knowles-group/gmb:latest .
+#    - docker push $CI_REGISTRY/knowles-group/gmb:latest
+#  services:
+#    - docker:dind
+  tags:
+    - group-cluster
+  only:
+#    refs:
+#      - master
+    changes:
+      - Dockerfile
+gcc:
+  stage: test
+  image: registry.gitlab.com/knowles-group/gmb
+  #  only:
+  #    refs:
+  #      - master
+  tags:
+    - group-cluster
+  script:
+    - procs=$(lscpu -p | egrep -v '^#' | wc -l || echo 1); echo $procs processors available
+    - TOP=$PWD
+    - git checkout $CI_COMMIT_SHA # because of cache
+    - git reset --hard
+    - git clean -f src test dependencies
+    - cd $TOP; BUILD=build-gcc; mkdir -p $BUILD && cd $BUILD && pwd && CC=mpicc CXX=mpicxx cmake -DMPIOPTIONS="--allow-run-as-root" $TOP ; cmake --build . -- -j ${procs} ; cd test;  ctest -V -j ${procs}
+intel:
+  stage: test
+  image: registry.gitlab.com/knowles-group/gmb
 #  only:
 #    refs:
 #      - master
@@ -16,4 +62,4 @@ build:
     - git checkout $CI_COMMIT_SHA # because of cache
     - git reset --hard
     - git clean -f src test dependencies
-    - cd $TOP; BUILD=build; mkdir -p $BUILD && cd $BUILD && pwd && CC=mpicc CXX=mpicxx cmake -DMPIOPTIONS="--allow-run-as-root" $TOP ; cmake --build . -- -j ${procs} ; cd test;  ctest -V -j ${procs}
+    - cd $TOP; BUILD=build-intel; mkdir -p $BUILD && cd $BUILD && pwd && CC=mpiicc CXX=mpiicpc cmake -DMPIOPTIONS="--allow-run-as-root" $TOP ; cmake --build . -- -j ${procs} ; cd test;  ctest -V -j ${procs}
