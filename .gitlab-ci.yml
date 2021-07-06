@@ -29,10 +29,10 @@ build-image:
   tags:
     - group-cluster
   only:
-#    refs:
-#      - master
-    changes:
-      - Dockerfile
+   refs:
+     - master
+   changes:
+     - Dockerfile
 gcc:
   stage: test
   image: registry.gitlab.com/knowles-group/gmb
