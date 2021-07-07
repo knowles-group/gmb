@@ -23,7 +23,9 @@ public:
   void set_energy(std::vector<double> eigval) {m_energy = eigval;}
 
   std::vector<double> get_energy() const {return m_energy;}  
-
+  
+  virtual void create_guess(std::vector<amplitudes<>>& v_rampl) {};
+  
   friend
   std::ostream& operator<<(std::ostream& s, const problem_eom& problem) ;
 

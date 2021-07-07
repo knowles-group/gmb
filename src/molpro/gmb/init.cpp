@@ -8,7 +8,7 @@
 
 namespace gmb {
 
-  void init(const std::string &filename, const std::string &method, hamiltonian<> &ham, const std::vector<std::unique_ptr<polariton>> &v_ppol) {
+  void init(const std::string &filename, const std::string &method, hamiltonian<> &ham, const std::vector<std::shared_ptr<polariton>> &v_ppol) {
 
 #if 1
     // One-particle integrals
@@ -52,7 +52,7 @@ namespace gmb {
   }
 
   container<2,double> get_integral(const std::string &fname_integrals, const std::string &fname_header, 
-    const std::vector<std::unique_ptr<polariton>> &v_ppol, const orb_type &o1, const orb_type &o2, bool add_ph) 
+    const std::vector<std::shared_ptr<polariton>> &v_ppol, const orb_type &o1, const orb_type &o2, bool add_ph) 
   {
     std::vector<orb_type> v_orb_type = {o1,o2}; // vector containing orbital types
 
@@ -88,7 +88,7 @@ namespace gmb {
 
 
   container<4,double> get_i(const std::string &filename, 
-                            const std::vector<std::unique_ptr<polariton>> &v_ppol,
+                            const std::vector<std::shared_ptr<polariton>> &v_ppol,
                             const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4) {
   
   std::shared_ptr<container<4>> tmp_o1o2o3o4, h2_o1o3o2o4, h2_o1o4o2o3;
@@ -151,7 +151,7 @@ namespace gmb {
 }
 
   void read_dump(const std::string &filename, 
-               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::shared_ptr<polariton>> &v_ppol,
                std::vector<std::vector<bool>>& v_exist,
                std::vector<std::vector<size_t>>& v_norb,
                const std::vector<orb_type>& v_orb_type, 
@@ -334,7 +334,7 @@ namespace gmb {
   }
 
   void get_one_photon_part(container<2,double> &integral, 
-               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::shared_ptr<polariton>> &v_ppol,
                const std::vector<std::vector<bool>>& v_exist,
                const std::vector<orb_type>& v_orb_type) 
   {
@@ -557,7 +557,7 @@ namespace gmb {
   }
 
   void get_electron_photon_part(container<4,double> &integral, 
-               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::shared_ptr<polariton>> &v_ppol,
                const std::vector<std::vector<bool>> &v_exist,
                const std::vector<std::vector<size_t>>& v_norb,
                const std::vector<orb_type> &v_orb_type, 
@@ -764,7 +764,7 @@ namespace gmb {
   }
 
   container<4,double> get_integral(const std::string &filename, 
-    const std::vector<std::unique_ptr<polariton>> &v_ppol,
+    const std::vector<std::shared_ptr<polariton>> &v_ppol,
     const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4) {
                                  
   std::vector<spin> v_spin = {alpha, beta}; // vector containing possible spins

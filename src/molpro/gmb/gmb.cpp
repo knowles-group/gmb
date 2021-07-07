@@ -18,16 +18,16 @@
 using namespace gmb;
 
 // test case
-std::string filename;
-std::string test_case = "hubbard";
-std::unique_ptr<polariton> ppol;
+// std::string filename;
+// std::string test_case = "hubbard";
+// std::unique_ptr<polariton> ppol;
 
 extern molpro::Profiler prof;
 extern "C" void general_many_body() { molpro::gmb::gmb();}
 
 void molpro::gmb::gmb(const molpro::Options& options) {
 
-  filename = options.parameter("dump",std::string{""});
+  std::string filename = options.parameter("dump",std::string{""});
   auto expected_results = options.parameter("results",std::vector<double>{});
   std::vector<bool> found_expected_results(expected_results.size(),false);
 
@@ -40,7 +40,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   auto nroots = options.parameter("states", 3);
   auto ncav = options.parameter("polariton_modes", 0);
 
-  std::vector<std::unique_ptr<polariton>> v_ppol(ncav);
+  std::vector<std::shared_ptr<polariton>> v_ppol(ncav);
   if (ncav > 0) {
     std::vector<int> v_option_polariton_nmax(ncav, 1); 
     v_option_polariton_nmax = options.parameter("polariton_nmax", v_option_polariton_nmax);
@@ -49,7 +49,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
     std::vector<double> v_option_polariton_omega(ncav, 1.028);
     v_option_polariton_omega = options.parameter("polariton_omega", v_option_polariton_omega);
     for (size_t i = 0; i < ncav; i++) {
-      v_ppol[i] = std::make_unique<polariton>(v_option_polariton_nmax[i],
+      v_ppol[i] = std::make_shared<polariton>(v_option_polariton_nmax[i],
                                               v_option_polariton_gamma[i],
                                               v_option_polariton_omega[i]);
       v_ppol[i]->fname_dip = options.parameter(
@@ -87,7 +87,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   // initialise hamiltonian
   init(filename, method, ham, v_ppol);
 
-#if 0 // CCSD
+#if 1 // CCSD
   auto vnn = get_integral(filename);
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
   std::cout << "HF energy: " << std::setprecision(12) << hf_energy << "\n";
@@ -123,11 +123,15 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   for (int i=0; i<expected_results.size(); ++i)
     if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
 
-#if 1 // Excited State
-  std::vector<amplitudes<>> v_rampl(nroots);
-  std::unique_ptr<problem_eom> problem_es;
 
+  std::unique_ptr<problem_eom> problem_es;
   problem_es = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
+  // set EOM-CCSD amplitudes
+  std::unique_ptr<amplitudes<>> prampl{std::make_unique<amplitudes<>>()};
+  prampl->set(r1, container(ptampl->m2get(t1).get_space()));
+  prampl->set(r2, container(ptampl->m4get(t2).get_space()));
+  std::vector<amplitudes<>> v_rampl(nroots, *prampl);
+  problem_es->create_guess(v_rampl);
   
   std::cout << "\n" << *problem_es << "\n";
 
@@ -141,7 +145,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   solver_es->set_convergence_threshold(1.0e-7);
 
   // solve
-  solver_es->solve(v_rampl, residuals_es, *problem_es, true);
+  solver_es->solve(v_rampl, residuals_es, *problem_es, false);
   problem_es->set_energy(solver_es->eigenvalues());
   for (const auto& ev : solver_es->eigenvalues())
     for (int i=0; i<expected_results.size(); ++i)
@@ -153,6 +157,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   for (auto &i : energies)
     std::cout << i << " \n";
 
+#if 0 // Excited State
   #endif
   #endif
 
