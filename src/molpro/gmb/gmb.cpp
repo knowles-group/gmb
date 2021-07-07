@@ -111,7 +111,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
     // solver options
   solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
   // solver->set_max_iter(110);
-  solver->set_convergence_threshold(1.0e-7);
+  // solver->set_convergence_threshold(1.0e-7);
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);
   problem->energy(*ptampl);
