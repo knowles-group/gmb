@@ -62,12 +62,15 @@ void molpro::gmb::gmb(const molpro::Options& options) {
 
   // print arguments
   std::cout << "Required calculation: " << "\n\n";
-  std::cout << "fcidump = " << filename << "\n";
-  std::cout << "method = " << method << "\n";
-  std::cout << "roots = " << nroots << "\n";
+  check_file(filename, "fcidump");
+  std::cout << " fcidump = " << filename << "\n";
+  std::cout << " method = " << method << "\n";
+  std::cout << " roots = " << nroots << "\n";
   if (v_ppol.size() > 0) {
-    std::cout << "dipole file = " << v_ppol[0]->fname_dip << "\n";
-    std::cout << "second moment of charges file = " << v_ppol[0]->fname_sm << "\n";
+    check_file(v_ppol[0]->fname_dip, "dipole");
+    std::cout << " dipole file = " << v_ppol[0]->fname_dip << "\n";
+    check_file(v_ppol[0]->fname_sm, "second moment of charges");
+    std::cout << " second moment of charges file = " << v_ppol[0]->fname_sm << "\n";
 
     std::cout << "\nPolariton parameters: \n";
     std::cout << "modes: " << ncav << "\n";
@@ -75,7 +78,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
       std::cout << "\n mode " << i << "\n";
       std::cout << " nmax = " << v_ppol[i]->nmax << "\n";
       std::cout << " gamma = " << v_ppol[i]->gamma << "\n";
-      std::cout << " omega = " << v_ppol[i]->omega << "\n";
+      std::cout << " omega = " << v_ppol[i]->omega << "\n\n";
     }
   }
 
@@ -124,14 +127,15 @@ void molpro::gmb::gmb(const molpro::Options& options) {
     if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
 
 
-  std::unique_ptr<problem_eom> problem_es;
-  problem_es = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
+#if 1 // Excited State
+
   // set EOM-CCSD amplitudes
   std::unique_ptr<amplitudes<>> prampl{std::make_unique<amplitudes<>>()};
   prampl->set(r1, container(ptampl->m2get(t1).get_space()));
   prampl->set(r2, container(ptampl->m4get(t2).get_space()));
   std::vector<amplitudes<>> v_rampl(nroots, *prampl);
-  problem_es->create_guess(v_rampl);
+  std::unique_ptr<problem_eom> problem_es;
+  problem_es = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
   
   std::cout << "\n" << *problem_es << "\n";
 
@@ -145,7 +149,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   solver_es->set_convergence_threshold(1.0e-7);
 
   // solve
-  solver_es->solve(v_rampl, residuals_es, *problem_es, false);
+  solver_es->solve(v_rampl, residuals_es, *problem_es, true);
   problem_es->set_energy(solver_es->eigenvalues());
   for (const auto& ev : solver_es->eigenvalues())
     for (int i=0; i<expected_results.size(); ++i)
@@ -157,7 +161,6 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   for (auto &i : energies)
     std::cout << i << " \n";
 
-#if 0 // Excited State
   #endif
   #endif
 

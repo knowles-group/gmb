@@ -25,9 +25,6 @@ public:
 
   void init() {
 
-    // auto p = prof.push("eom-ccsd init");
-    // auto p = pprof->push("eom-ccsd init");
-
     auto tau = ccsd_tau(m_tampl.m2get(t1), m_tampl.m4get(t2));
     auto if_oo = eom_ccsd_if_oo(m_tampl.m2get(t1), m_tampl.m4get(t2), m_ham.m2get(f_oo), m_ham.m2get(f_ov),
                    m_ham.m4get(i_ooov), m_ham.m4get(i_oovv));    
@@ -61,8 +58,6 @@ public:
   }
 
   bool diagonals(container_t &d) const override {
-    // auto p = prof.push("eom-ccsd diagonals");
-    // auto p = pprof->push("eom-ccsd diagonals");
     auto d_ov = diag_ov(m_int.m2get("if_oo"), m_int.m2get("if_ov"), m_int.m2get("if_vv"));
     auto d_oovv = diag_oovv(d_ov, m_ham.m4get(i_oovv));
     auto id_oo = id_xx(m_ham.m2get(f_oo));
@@ -74,22 +69,9 @@ public:
     return true;
   }
 
-  void create_guess(std::vector<amplitudes<>>& v_rampl) {
-    auto diag = v_rampl[0];
-    diagonals(diag);
-    auto map = diag.select(v_rampl.size());
-    size_t k{0};
-      for (auto const& [key, val] : map) {
-        v_rampl[k].fill_guess(key);
-        k++;
-      }
-  }
-
   void precondition(const VecRef<container_t>& residual, 
                     const std::vector<value_t>& shift, 
                     const container_t& diagonals) const override {
-    // auto p = pprof->push("eom-ccsd precondition");
-    // auto p = prof.push("eom-ccsd precondition");
     for (int k = 0; k < residual.size(); k++) {
       auto &a = residual[k].get();   
       auto &d = const_cast<container_t&> (diagonals);  
@@ -103,10 +85,7 @@ public:
   }
 
   void action(const CVecRef<container_t> &parameters, const VecRef<container_t> &actions) const override {
-    // auto p = pprof->push("eom-ccsd action");
-    // auto p = prof.push("eom-ccsd action");
     for (int k = 0; k < parameters.size(); k++) {
-      // auto pk = pprof->push("eom-ccsd action: "+std::to_string(k));
       auto &ccp = const_cast<container_t&> (parameters[k].get());     
       auto &a = actions[k].get();  
       // compute intermediates
@@ -116,27 +95,16 @@ public:
       auto ir2_vv = eom_ccsd_ir2_vv(m_ham.m2get(f_vv),ccp.m4get(r2),m_ham.m4get(i_oovv));          
       // compute r1
       {
-      // auto pr1 = pprof->push("compute r1");
       auto r1_new = eom_ccsd_r1(ccp.m2get(r1), ccp.m4get(r2), m_int.m2get("if_oo"), m_int.m2get("if_ov"), m_int.m2get("if_vv"),  
                     m_int.m4get("iw_ovov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw2_ovvv"));
-
-      // project out cross terms
-      libtensor::block_tensor_wr_ctrl<2, double> ctrl(r1_new);
-      libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
-      for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
-        libtensor::index<2> bidx;
-        ol.get_index(it, bidx);
-          if ((bidx[0] != bidx[1])) 
-            ctrl.req_zero_block(bidx);
-      }
       a.set(r1, r1_new);
       }
       // compute r2
       {
-      // auto pr2 = pprof->push("compute r2");
       auto r2_new = eom_ccsd_r2(ccp.m2get(r1), ccp.m4get(r2), m_tampl.m4get(t2), m_int.m2get("if_oo"), m_int.m2get("if_vv"),  
                     ir1_oo, ir2_oo, ir1_vv, ir2_vv, 
                     m_ham.m4get(i_oovv), m_int.m4get("iw_oooo"), m_int.m4get("iw_ooov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw_ovov"), m_int.m4get("iw_ovvv"), m_int.m4get("iw2_ovvv"), m_int.m4get("iw_vvvv"));  
+      
       a.set(r2, r2_new);
       }
     }

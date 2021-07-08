@@ -22,13 +22,16 @@ namespace gmb {
    * 
    * @param file 
    */
-  void check_file(std::string file) {
+  void check_file(const std::string &file, const std::string &str) {
     std::ifstream infile;
     infile.open(file);
     //send error if file not found
     if (!infile) {
-        std::cerr << "Unable to open file: " << file << "\n";
-        exit(1); // terminate with error
+      if (file.size() == 0) 
+        std::cerr << "No " << str << " file was provided.\n";
+      else 
+        std::cerr << "Unable to open " << str << " file: \"" << file << "\"\n";
+      exit(1); // terminate with error
     }
     infile.close();
   }

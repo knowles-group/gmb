@@ -28,7 +28,6 @@ public:
   amplitudes() 
   : supercontainer<T>() {}
   
-#if 0 // old 
 /**
  * @brief Construct a new amplitudes object to be used as guess vector.
  * 
@@ -36,40 +35,33 @@ public:
  * 
  * @param source map containing position and value to be added
  */
-  amplitudes(const std::map<size_t,value_type>& source) {
-    for (auto &imin : source) {
-      // auto r1_guess = get_integral(filename,o,v);
-      auto r1_guess = gmb::get_integral(m_filename,m_filename,m_vppol,o,v);
-      gmb::zero(r1_guess);
-      libtensor::block_tensor_wr_ctrl<2, double> ctrl(r1_guess);
-      libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
-      size_t count(0);
-      for (libtensor::orbit_list<2, double>::iterator it = ol.begin();
-           it != ol.end(); it++) {
-        libtensor::index<2> bidx;
-        ol.get_index(it, bidx);
-        libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
-        libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
-        const libtensor::dimensions<2> &tdims = blk.get_dims();
-        double *ptr = tc.req_dataptr();
-        for (size_t i = 0; i < tdims.get_size(); i++) {
-          if (count == imin.first) 
-            ptr[i] = imin.second;
-          ++count;
+  amplitudes& operator=(const std::map<size_t,value_type>& source) {
+    for (auto &&im2 : this->m_m2) {
+      gmb::zero(*im2.second);
+      libtensor::block_tensor_wr_ctrl<2, double> ctrl(*im2.second);
+      for (auto &imin : source) {
+        libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
+        size_t count(0);
+        for (libtensor::orbit_list<2, double>::iterator it = ol.begin();
+             it != ol.end(); it++) {
+          libtensor::index<2> bidx;
+          ol.get_index(it, bidx);
+          libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
+          libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
+          const libtensor::dimensions<2> &tdims = blk.get_dims();
+          double *ptr = tc.req_dataptr();
+          for (size_t i = 0; i < tdims.get_size(); i++) {
+            if (count == imin.first) 
+              ptr[i] = imin.second;
+            ++count;
+          }
+          tc.ret_dataptr(ptr);
+          ctrl.ret_block(bidx);
         }
-        tc.ret_dataptr(ptr);
-        ctrl.ret_block(bidx);
       }
-      r1_guess.print();
-      this->m_m2.insert(std::make_pair("r1", new container<2,T> (r1_guess)));
-      // auto r2_guess = get_integral(m_filename,o,o,v,v);
-      std::cout << "m_filename: " << m_filename << std::endl;
-      auto r2_guess = gmb::get_i(m_filename, m_vppol, o, o, v, v);
-      gmb::zero(r2_guess);
-      this->m_m4.insert(std::make_pair("r2", new container<4,T> (r2_guess)));
     }
+    return *this;
   }
-  #endif
 
   void set(ampl key, const container<2,T> &c2) { supercontainer<T>::set(str(key), c2); };
   void set(ampl key, const container<4,T> &c4) { supercontainer<T>::set(str(key), c4); };
@@ -120,30 +112,6 @@ public:
     return m;
   }
 
-  void fill_guess(const size_t &position) {
-    for (auto &&im2 : this->m_m2) {
-      gmb::zero(*im2.second);
-      libtensor::block_tensor_wr_ctrl<2, double> ctrl(*im2.second);
-      libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
-      size_t count(0);
-      for (libtensor::orbit_list<2, double>::iterator it = ol.begin();
-           it != ol.end(); it++) {
-        libtensor::index<2> bidx;
-        ol.get_index(it, bidx);
-        libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
-        libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
-        const libtensor::dimensions<2> &tdims = blk.get_dims();
-        double *ptr = tc.req_dataptr();
-        for (size_t i = 0; i < tdims.get_size(); i++) {
-          if (count == position) 
-            ptr[i] = 1.0;
-          ++count;
-        }
-        tc.ret_dataptr(ptr);
-        ctrl.ret_block(bidx);
-      }
-    }
-  }
 };
 
 #endif //GMB_AMPLITUDES_H
