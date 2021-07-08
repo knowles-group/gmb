@@ -3,15 +3,12 @@
 
 #include "supercontainer.h"
 
-extern std::string filename;
-
-enum ampl {t1, t2, r1, r2, l1, l2};
-
+enum ampl {t1, t2, r1, r2};
 
 template<typename T=double>
 class amplitudes : public supercontainer<T> {
 private:
-  bool triplets = false;
+  bool triplets{false};
 public:
   std::string str(ampl key) {
     std::string str;
@@ -30,7 +27,7 @@ public:
 
   amplitudes() 
   : supercontainer<T>() {}
-
+  
 /**
  * @brief Construct a new amplitudes object to be used as guess vector.
  * 
@@ -38,34 +35,32 @@ public:
  * 
  * @param source map containing position and value to be added
  */
-  amplitudes(const std::map<size_t,value_type>& source) {
-    for (auto &imin : source) {
-      auto r1_guess = get_integral(filename,o,v);
-      gmb::zero(r1_guess);
-      libtensor::block_tensor_wr_ctrl<2, double> ctrl(r1_guess);
-      libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
-      size_t count(0);
-      for (libtensor::orbit_list<2, double>::iterator it = ol.begin();
-           it != ol.end(); it++) {
-        libtensor::index<2> bidx;
-        ol.get_index(it, bidx);
-        libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
-        libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
-        const libtensor::dimensions<2> &tdims = blk.get_dims();
-        double *ptr = tc.req_dataptr();
-        for (size_t i = 0; i < tdims.get_size(); i++) {
-          if (count == imin.first) 
-            ptr[i] = imin.second;
-          ++count;
+  amplitudes& operator=(const std::map<size_t,value_type>& source) {
+    for (auto &&im2 : this->m_m2) {
+      gmb::zero(*im2.second);
+      libtensor::block_tensor_wr_ctrl<2, double> ctrl(*im2.second);
+      for (auto &imin : source) {
+        libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
+        size_t count(0);
+        for (libtensor::orbit_list<2, double>::iterator it = ol.begin();
+             it != ol.end(); it++) {
+          libtensor::index<2> bidx;
+          ol.get_index(it, bidx);
+          libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
+          libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
+          const libtensor::dimensions<2> &tdims = blk.get_dims();
+          double *ptr = tc.req_dataptr();
+          for (size_t i = 0; i < tdims.get_size(); i++) {
+            if (count == imin.first) 
+              ptr[i] = imin.second;
+            ++count;
+          }
+          tc.ret_dataptr(ptr);
+          ctrl.ret_block(bidx);
         }
-        tc.ret_dataptr(ptr);
-        ctrl.ret_block(bidx);
       }
-      this->m_m2.insert(std::make_pair("r1", new container<2,T> (r1_guess)));
-      auto r2_guess = get_integral(filename,o,o,v,v);
-      gmb::zero(r2_guess);
-      this->m_m4.insert(std::make_pair("r2", new container<4,T> (r2_guess)));
     }
+    return *this;
   }
 
   void set(ampl key, const container<2,T> &c2) { supercontainer<T>::set(str(key), c2); };
@@ -86,7 +81,6 @@ public:
   std::map<size_t, T> select(size_t n, bool max = false, bool ignore_sign = false) const {
     std::map<size_t, T> m;
     size_t count{0};
-
     // for now only singles
     for (auto &&im2 : this->m_m2) {
       // number of roots needed
@@ -94,8 +88,7 @@ public:
         m.insert(std::make_pair(1e6+ir, 1e6+ir));
       libtensor::block_tensor_rd_ctrl<2, double> ctrl(*im2.second);
       libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
-      for (libtensor::orbit_list<2, double>::iterator it = ol.begin();
-           it != ol.end(); it++) {
+      for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
         libtensor::index<2> bidx;
         ol.get_index(it, bidx);
         libtensor::dense_tensor_rd_i<2, double> &blk = ctrl.req_const_block(bidx);
@@ -116,9 +109,9 @@ public:
         if (!triplets) break; // only alpha-alpha excitations
       }
     }
-
     return m;
   }
+
 };
 
 #endif //GMB_AMPLITUDES_H

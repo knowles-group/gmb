@@ -6,6 +6,9 @@
 #include "expressions/eom-ccsd/eom-ccsd.h"
 #include "expressions/update.h"
 
+extern molpro::Profiler prof;
+// extern std::unique_ptr<molpro::Profiler> pprof;
+
 /**
  * @brief EOM-CCSD
  * 
@@ -21,6 +24,7 @@ public:
   }
 
   void init() {
+
     auto tau = ccsd_tau(m_tampl.m2get(t1), m_tampl.m4get(t2));
     auto if_oo = eom_ccsd_if_oo(m_tampl.m2get(t1), m_tampl.m4get(t2), m_ham.m2get(f_oo), m_ham.m2get(f_ov),
                    m_ham.m4get(i_ooov), m_ham.m4get(i_oovv));    
@@ -90,14 +94,19 @@ public:
       auto ir2_oo = eom_ccsd_ir2_oo(m_ham.m2get(f_oo),ccp.m4get(r2),m_ham.m4get(i_oovv));          
       auto ir2_vv = eom_ccsd_ir2_vv(m_ham.m2get(f_vv),ccp.m4get(r2),m_ham.m4get(i_oovv));          
       // compute r1
+      {
       auto r1_new = eom_ccsd_r1(ccp.m2get(r1), ccp.m4get(r2), m_int.m2get("if_oo"), m_int.m2get("if_ov"), m_int.m2get("if_vv"),  
                     m_int.m4get("iw_ovov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw2_ovvv"));
       a.set(r1, r1_new);
+      }
       // compute r2
+      {
       auto r2_new = eom_ccsd_r2(ccp.m2get(r1), ccp.m4get(r2), m_tampl.m4get(t2), m_int.m2get("if_oo"), m_int.m2get("if_vv"),  
                     ir1_oo, ir2_oo, ir1_vv, ir2_vv, 
-                    m_ham.m4get(i_oovv), m_int.m4get("iw_oooo"), m_int.m4get("iw_ooov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw_ovov"), m_int.m4get("iw_ovvv"), m_int.m4get("iw2_ovvv"), m_int.m4get("iw_vvvv"));
+                    m_ham.m4get(i_oovv), m_int.m4get("iw_oooo"), m_int.m4get("iw_ooov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw_ovov"), m_int.m4get("iw_ovvv"), m_int.m4get("iw2_ovvv"), m_int.m4get("iw_vvvv"));  
+      
       a.set(r2, r2_new);
+      }
     }
   }
 
