@@ -39,13 +39,17 @@ public:
     for (auto &&im2 : this->m_m2) {
       gmb::zero(*im2.second);
       libtensor::block_tensor_wr_ctrl<2, double> ctrl(*im2.second);
+      size_t count{0};
       for (auto &imin : source) {
         libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
-        size_t count(0);
-        for (libtensor::orbit_list<2, double>::iterator it = ol.begin();
-             it != ol.end(); it++) {
+        for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
           libtensor::index<2> bidx;
           ol.get_index(it, bidx);
+          // if (bidx[0] != bidx[1] || bidx[0] > 1)
+          if (bidx[0] != bidx[1])
+            continue;
+          if (bidx[0] == 1)
+            count = 0;
           libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
           libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
           const libtensor::dimensions<2> &tdims = blk.get_dims();
@@ -80,7 +84,6 @@ public:
    */
   std::map<size_t, T> select(size_t n, bool max = false, bool ignore_sign = false) const {
     std::map<size_t, T> m;
-    size_t count{0};
     // for now only singles
     for (auto &&im2 : this->m_m2) {
       // number of roots needed
@@ -88,9 +91,12 @@ public:
         m.insert(std::make_pair(1e6+ir, 1e6+ir));
       libtensor::block_tensor_rd_ctrl<2, double> ctrl(*im2.second);
       libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
+      size_t count{0};
       for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
         libtensor::index<2> bidx;
         ol.get_index(it, bidx);
+        if (bidx[0] != bidx[1] || bidx[1] == 1)
+          continue;
         libtensor::dense_tensor_rd_i<2, double> &blk = ctrl.req_const_block(bidx);
         libtensor::dense_tensor_rd_ctrl<2, double> tc(blk);
         const libtensor::dimensions<2> &tdims = blk.get_dims();
@@ -106,7 +112,7 @@ public:
         }
         tc.ret_const_dataptr(ptr);
         ctrl.ret_const_block(bidx);
-        if (!triplets) break; // only alpha-alpha excitations
+        // if (!triplets) break; // only alpha-alpha excitations
       }
     }
     return m;
