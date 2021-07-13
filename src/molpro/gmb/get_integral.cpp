@@ -274,14 +274,16 @@ double get_integral(const std::string &filename) {
       spin spin{alpha};
       auto itype = molpro::FCIdump::I1a;
       bool skip{false};
-      if (bidx_cp[0] == 0 && bidx_cp[1] == 0) { // aa
+      if (bidx_cp[0] !=  bidx_cp[1] ) { 
+          ctrl.req_zero_block(bidx);
+          continue;
+      } else if (bidx_cp[0] == alpha) { 
         itype = molpro::FCIdump::I1a;
         spin = alpha; 
-      } else if (bidx_cp[0] == 1 && bidx_cp[1] == 1) { // bb
+      } else if (bidx_cp[0] == beta) { 
         if (uhf) itype = molpro::FCIdump::I1b;
         spin = beta;
-      } else { 
-          ctrl.req_zero_block(bidx);
+      } else if (bidx_cp[0] > beta) { 
           continue;
       }
       
@@ -421,7 +423,10 @@ double get_integral(const std::string &filename) {
       } else if (bidx_cp[0] == beta && bidx_cp[1] == beta  && bidx_cp[2] == beta && bidx_cp[3] == beta) { 
           if (uhf) itype = molpro::FCIdump::I2bb;
           spin1 = beta;
-          spin2 = beta;
+          spin2 = beta;   
+      } else if (!(bidx_cp[0] <= beta && bidx_cp[1] > beta  && bidx_cp[2] <= beta && bidx_cp[3] > beta)
+        || !((bidx_cp[0] > beta && bidx_cp[1] <= beta  && bidx_cp[2] > beta && bidx_cp[3] <= beta))){
+          continue;
       } else {
           ctrl.req_zero_block(bidx);
           continue;
