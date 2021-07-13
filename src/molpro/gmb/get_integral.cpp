@@ -424,8 +424,8 @@ double get_integral(const std::string &filename) {
           if (uhf) itype = molpro::FCIdump::I2bb;
           spin1 = beta;
           spin2 = beta;   
-      } else if (!(bidx_cp[0] <= beta && bidx_cp[1] > beta  && bidx_cp[2] <= beta && bidx_cp[3] > beta)
-        || !((bidx_cp[0] > beta && bidx_cp[1] <= beta  && bidx_cp[2] > beta && bidx_cp[3] <= beta))){
+      } else if ((bidx_cp[0] <= beta && bidx_cp[1] <= beta  && bidx_cp[2] > beta && bidx_cp[3] > beta)
+        || ((bidx_cp[0] > beta && bidx_cp[1] > beta  && bidx_cp[2] <= beta && bidx_cp[3] <= beta))){
           continue;
       } else {
           ctrl.req_zero_block(bidx);
