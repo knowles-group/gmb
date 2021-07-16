@@ -108,7 +108,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
     problem = std::make_unique<problem_ccd>(ham);
 
   // set solver
-  auto solver = molpro::linalg::itsolv::create_NonLinearEquations<amplitudes<>>("DIIS");
+  auto solver = molpro::linalg::itsolv::create_NonLinearEquations<amplitudes<>>("DIIS", "max_size_qspace=10");
   auto residual = *ptampl;
 
     // solver options
