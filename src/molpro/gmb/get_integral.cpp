@@ -3,11 +3,10 @@
 #include "expressions/anti.h"
 #include "expressions/add_d2.h"
 
-// get nuclear energy
 double get_integral(const std::string &filename) {
   molpro::FCIdump dump(filename);
   int i, j, k, l;
-  double integral(0.0);
+  double integral{0.0};
   molpro::FCIdump::integralType type;
   dump.rewind();
   while ((type = dump.nextIntegral(i, j, k, l, integral)) != molpro::FCIdump::endOfFile) {
@@ -41,11 +40,13 @@ double get_integral(const std::string &filename) {
     if (v_ppol.size() > 0 && add_ph) {
       get_one_photon_part(integral, v_ppol, v_exist, v_orb_type);
       for (size_t i = 0; i < v_ppol.size(); i++) {
-        // add_self_energy
-        auto sm = integral; // second moment of charges
+        #if 1 // add self-energy
+        container<2> sm(integral.get_space()); // second moment of charges
+        gmb::zero(sm);
         get_one_electron_part(sm, v_ppol[i]->fname_sm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
         double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
         integral.axpy(fact, sm);
+        #endif
       }
     }
   
@@ -96,7 +97,7 @@ double get_integral(const std::string &filename) {
 
   anti(h2_o1o2o3o4, *h2_o1o3o2o4, *h2_o1o4o2o3);
   
-  // add self-energy if needed
+  #if 1// add self-energy if needed
   for (size_t i = 0; i < v_ppol.size(); i++) {
     std::unique_ptr<container<2>> pd_o1o3, pd_o2o4, pd_o2o3, pd_o1o4;
     double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
@@ -126,11 +127,7 @@ double get_integral(const std::string &filename) {
 
     add_d2(fact, *pd_o1o3, *pd_o2o4, *pd_o2o3, *pd_o1o4, h2_o1o2o3o4);
   }
-
-  if (false) {
-    std::cout << "printing integral " << o1 << o2 << o3 << o4 <<"\n";
-    libtensor::bto_print<4, double>(std::cout).perform(h2_o1o2o3o4);
-  }  
+  #endif
   
   return h2_o1o2o3o4;
 }
@@ -188,7 +185,6 @@ double get_integral(const std::string &filename) {
       nv.push_back(v_ppol[i]->nmax);
       occ.push_back({empty, fermi_ph});
       vir.push_back({fermi_ph, full_ph});
-      std::pair<syms_t, syms_t> bas_ph = {empty, full_ph}; // idk if needeed, but just in case
     }
   }
 
@@ -557,6 +553,7 @@ double get_integral(const std::string &filename) {
           ctrl.req_zero_block(bidx);
           continue;
         }   
+    #if 1 // zero out coupling
       libtensor::dense_tensor_wr_i<4, double> &blk = ctrl.req_block(bidx);
       libtensor::dense_tensor_wr_ctrl<4, double> tc(blk);
       const libtensor::dimensions<4> &tdims = blk.get_dims();
@@ -571,7 +568,6 @@ double get_integral(const std::string &filename) {
       double value;
       molpro::FCIdump::integralType type;
       dump.rewind();
-    
       double fact{v_ppol[spin2-2]->gamma*v_ppol[spin2-2]->omega};
       while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
         if (type != molpro::FCIdump::I0)
@@ -643,6 +639,7 @@ double get_integral(const std::string &filename) {
       }
     tc.ret_dataptr(ptr);
     ctrl.ret_block(bidx);
+    #endif
     }
   }
 
@@ -650,15 +647,15 @@ double get_integral(const std::string &filename) {
     const std::vector<std::shared_ptr<polariton>> &v_ppol,
     const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4) {
                                  
-  std::vector<spin> v_spin = {alpha, beta}; // vector containing possible spins
+  std::vector<spin> v_spin = {alpha, beta}; // possible spins
   for (size_t i = 0; i < v_ppol.size(); i++)
     v_spin.push_back(photon);
-  std::vector<orb_type> v_orb_type = {o1,o2,o3,o4}; // vector containing orbital types
-  std::vector<std::vector<std::pair<syms_t, syms_t>>> v_psi(v_spin.size(), std::vector<std::pair<syms_t, syms_t>> (v_orb_type.size())); // vector containing bra and ket
-  std::vector<std::vector<size_t>> v_norb(v_spin.size(), std::vector<size_t> (v_orb_type.size())); // vector containing number of orbitals in each bra/ket
-  std::vector<std::vector<std::vector<int>>> v_shift(v_spin.size(), std::vector<std::vector<int>> (v_orb_type.size(), std::vector<int> (8,0))); // vector containing symmetry shift 
-  std::vector<libtensor::bispace<1>> v_sp; // vector containing 1D spaces for each bra/ket
-  std::vector<std::vector<bool>> v_exist(v_spin.size(), std::vector<bool> (v_orb_type.size(), true)); // vector containing if block s or not
+  std::vector<orb_type> v_orb_type = {o1,o2,o3,o4}; // orbital types
+  std::vector<std::vector<std::pair<syms_t, syms_t>>> v_psi(v_spin.size(), std::vector<std::pair<syms_t, syms_t>> (v_orb_type.size())); // bra and ket
+  std::vector<std::vector<size_t>> v_norb(v_spin.size(), std::vector<size_t> (v_orb_type.size())); // number of orbitals in each bra/ket
+  std::vector<std::vector<std::vector<int>>> v_shift(v_spin.size(), std::vector<std::vector<int>> (v_orb_type.size(), std::vector<int> (8,0))); // symmetry shift 
+  std::vector<libtensor::bispace<1>> v_sp; // 1D spaces for each bra/ket
+  std::vector<std::vector<bool>> v_exist(v_spin.size(), std::vector<bool> (v_orb_type.size(), true)); // if block exists or not
   bool uhf{false};
 
   read_dump(filename, v_ppol, v_exist, v_norb, v_orb_type, v_psi,  v_shift, v_sp, v_spin, uhf);
