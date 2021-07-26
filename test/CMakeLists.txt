@@ -18,5 +18,5 @@ file(COPY He-VDZ H2O-VDZ Li-VDZ-UHF hubbard DESTINATION "${CMAKE_CURRENT_BINARY_
 # endforeach ()
 
 add_test(NAME hubbard-electronic-ccsd COMMAND main results=-1.438005955234,1.03130920079263 dump=hubbard/hubbard.fcidump)
-add_test(NAME hubbard-weak-polaritonic-ccsd COMMAND main results=-1.437954981264,1.01865251190516 dump=hubbard/hubbard.fcidump polariton_modes=1 polariton_nmax=1 polariton_gamma=.01 polariton_omega=1.028])
+add_test(NAME hubbard-weak-polaritonic-ccsd COMMAND main results=-1.437954983515,1.01859157154317 dump=hubbard/hubbard.fcidump polariton_modes=1 polariton_nmax=1 polariton_gamma=.01 polariton_omega=1.028])
 
