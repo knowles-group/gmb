@@ -17,13 +17,11 @@
 
 using namespace gmb;
 
-// test case
-// std::string filename;
-// std::string test_case = "hubbard";
-// std::unique_ptr<polariton> ppol;
-
 extern molpro::Profiler prof;
 extern "C" void general_many_body() { molpro::gmb::gmb();}
+
+double rnuc{11.905274583};
+// double rnuc{0.0};
 
 void molpro::gmb::gmb(const molpro::Options& options) {
 
@@ -52,9 +50,9 @@ void molpro::gmb::gmb(const molpro::Options& options) {
       v_ppol[i] = std::make_shared<polariton>(v_option_polariton_nmax[i],
                                               v_option_polariton_gamma[i],
                                               v_option_polariton_omega[i]);
-      v_ppol[i]->fname_dip = options.parameter(
+      v_ppol[i]->fname_dm = options.parameter(
           "dipole", std::regex_replace(
-                        filename, std::regex{"\\.[_[:alnum:]]*$"}, ".dip"));
+                        filename, std::regex{"\\.[_[:alnum:]]*$"}, ".dm"));
       v_ppol[i]->fname_sm = std::regex_replace(
                         filename, std::regex{"\\.[_[:alnum:]]*$"}, ".sm");
     }
@@ -67,8 +65,8 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   std::cout << " method = " << method << "\n";
   std::cout << " roots = " << nroots << "\n";
   if (v_ppol.size() > 0) {
-    check_file(v_ppol[0]->fname_dip, "dipole");
-    std::cout << " dipole file = " << v_ppol[0]->fname_dip << "\n";
+    check_file(v_ppol[0]->fname_dm, "dipole");
+    std::cout << " dipole file = " << v_ppol[0]->fname_dm << "\n";
     check_file(v_ppol[0]->fname_sm, "second moment of charges");
     std::cout << " second moment of charges file = " << v_ppol[0]->fname_sm << "\n";
 
@@ -90,11 +88,22 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   // initialise hamiltonian
   init(filename, method, ham, v_ppol);
 
-#if 1 // CCSD
   auto vnn = get_integral(filename);
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
+  for (size_t i = 0; i < ncav; i++) {
+      hf_energy += v_ppol[i]->gamma*v_ppol[i]->gamma*v_ppol[i]->omega*rnuc*rnuc;
+    }
+  // auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
+  // std::cout << "f_oo" << std::endl;
+  // ham.m2get(f_oo).print();
+  // std::cout << "i_oooo" << std::endl;
+  // ham.m4get(i_oooo).print();
   std::cout << "HF energy: " << std::setprecision(12) << hf_energy << "\n";
 
+#if 1 // CCSD
+  // if (method.find("cc")) {
+    std::cout << "Running Coupled-Cluster (CC) method" << std::endl;
+    // run_cc(ham, method, problem, ptampl);
   // set CCSD amplitudes
   if (method.find("ccs") != std::string::npos)
     ptampl->set(t1, container(ham.m2get(f_ov).get_space()));
@@ -114,18 +123,20 @@ void molpro::gmb::gmb(const molpro::Options& options) {
     // solver options
   solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
   // solver->set_max_iter(110);
-  // solver->set_convergence_threshold(1.0e-7);
+  // solver->set_convergence_threshold(1.0e-14);
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);
   problem->energy(*ptampl);
+// }
 
   // print results
   std::cout << *problem << " correlation energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
+  double ccsd_energy = problem->get_energy() + hf_energy;
   std::cout << *problem  << " total energy: " << std::setprecision(13)
-            << problem->get_energy() + hf_energy<< "\n";
+            << ccsd_energy << "\n";
   for (int i=0; i<expected_results.size(); ++i)
     if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
-
+ 
 
 #if 1 // Excited State
 
@@ -146,7 +157,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   // set options
   solver_es->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
   solver_es->set_n_roots(nroots);
-  solver_es->set_convergence_threshold(1.0e-7);
+  solver_es->set_convergence_threshold(1.0e-5);
 
   // solve
   solver_es->solve(v_rampl, residuals_es, *problem_es, true);
@@ -157,13 +168,18 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   auto energies = problem_es->get_energy();
 
   // print results
-  std::cout << "\n" << *problem_es << " excitation energies (Ha) \n";
+  std::cout << "\n" << *problem_es << " excitation energies: \n";
+  std::cout << "       Excitation energy                     Total energy  \n";
+  std::cout << "       (Ha)        (eV)                    (Ha)        (eV)  \n";
   for (auto &i : energies)
-    std::cout << i << " \n";
+    std::cout << std::setw(14) << std::setprecision(7) << i << "   " 
+              << std::setw(14) << i*27.2114 << "   " 
+              << std::setw(14) << ccsd_energy+i << "    " 
+              << std::setw(14) << (ccsd_energy+i)*27.2114 << " \n";
 
   #endif
-  #endif
 
+  #endif
   // std::cout << *pprof << std::endl;
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end - start;
@@ -174,6 +190,33 @@ void molpro::gmb::gmb(const molpro::Options& options) {
     if (not found_expected_results[i])
       throw std::runtime_error("Did not match expected result "+std::to_string(expected_results[i]));
 
+}
+
+
+void run_cc(hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_gen> &problem, std::unique_ptr<amplitudes<>> &ptampl) {
+  // set CCSD amplitudes
+  if (method.find("ccs") != std::string::npos)
+    ptampl->set(t1, container(ham.m2get(f_ov).get_space()));
+  if ((method.find("ccsd") != std::string::npos) || (method.find("ccd") != std::string::npos))
+    ptampl->set(t2, container(ham.m4get(i_oovv).get_space()));
+
+  // set problem
+  if (method.find("ccsd") != std::string::npos)
+    problem = std::make_unique<problem_ccsd>(ham);
+  if (method.find("ccd") != std::string::npos)
+    problem = std::make_unique<problem_ccd>(ham);
+
+  // set solver
+  auto solver = molpro::linalg::itsolv::create_NonLinearEquations<amplitudes<>>("DIIS", "max_size_qspace=10");
+  auto residual = *ptampl;
+
+    // solver options
+  solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
+  // solver->set_max_iter(110);
+  // solver->set_convergence_threshold(1.0e-14);
+  solver->solve(*ptampl, residual, *problem);
+  solver->solution(*ptampl, residual);
+  problem->energy(*ptampl);
 }
 
 #include <molpro/linalg/itsolv/SolverFactory-implementation.h>

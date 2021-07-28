@@ -3,6 +3,8 @@
 #include "expressions/anti.h"
 #include "expressions/add_d2.h"
 
+extern double rnuc;
+
 double get_integral(const std::string &filename) {
   molpro::FCIdump dump(filename);
   int i, j, k, l;
@@ -42,10 +44,14 @@ double get_integral(const std::string &filename) {
       for (size_t i = 0; i < v_ppol.size(); i++) {
         #if 1 // add self-energy
         container<2> sm(integral.get_space()); // second moment of charges
+        container<2> dm(integral.get_space()); // dipole moment 
         gmb::zero(sm);
+        gmb::zero(dm);
         get_one_electron_part(sm, v_ppol[i]->fname_sm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
+        get_one_electron_part(dm, v_ppol[i]->fname_dm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
         double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
         integral.axpy(fact, sm);
+        integral.axpy(fact*2*rnuc, dm);
         #endif
       }
     }
@@ -103,18 +109,18 @@ double get_integral(const std::string &filename) {
     double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
 
     // add dipole integrals to two-electron part
-    pd_o1o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dip, filename, v_ppol, o1, o3, false));
+    pd_o1o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o3, false));
     if (o1 == o2 && o3 == o4)
       pd_o2o4 = std::make_unique<container<2>> (*pd_o1o3);
     else 
-      pd_o2o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dip, filename, v_ppol, o2, o4, false));
+      pd_o2o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o4, false));
 
     if (o1 == o2)
       pd_o2o3 = std::make_unique<container<2>> (*pd_o1o3);
     else if(o3 == o4)
       pd_o2o3 = std::make_unique<container<2>> (*pd_o2o4);
     else
-      pd_o2o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dip, filename, v_ppol, o2, o3, false));
+      pd_o2o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o3, false));
 
     if (o3 == o4)
       pd_o1o4 = std::make_unique<container<2>> (*pd_o1o3);
@@ -123,7 +129,7 @@ double get_integral(const std::string &filename) {
     else if (o1 == o2 && o3 == o4)
       pd_o1o4 = std::make_unique<container<2>> (*pd_o2o3);
     else
-      pd_o1o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dip, filename, v_ppol, o1, o4, false));
+      pd_o1o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o4, false));
 
     add_d2(fact, *pd_o1o3, *pd_o2o4, *pd_o2o3, *pd_o1o4, h2_o1o2o3o4);
   }
@@ -326,14 +332,16 @@ double get_integral(const std::string &filename) {
       ol.get_index(it, bidx);
       if (bidx[0] != bidx[1] || bidx[0] < 2) 
         continue;
-      if (v_orb_type[0] != v_orb_type[1]) {
-        ctrl.req_zero_block(bidx);
-        continue;
-      }
       libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
       libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
       const libtensor::dimensions<2> &tdims = blk.get_dims();
       double *ptr = tc.req_dataptr();
+      if (v_orb_type[0] != v_orb_type[1]) {
+        // ctrl.req_zero_block(bidx);
+        for (size_t i = 0; i < 1; i++) 
+          ptr[0] = - v_ppol[0]->omega*v_ppol[0]->gamma*rnuc;
+      } else {
+
       switch (v_orb_type[0]) {
       case (o):
         for (size_t i = 0; i < 1; i++) 
@@ -347,6 +355,7 @@ double get_integral(const std::string &filename) {
         for (size_t i = 0; i < 1+v_ppol[bidx[0]-2]->nmax; i++) 
             ptr[i+i*v_ppol[bidx[0]-2]->nmax] = v_ppol[bidx[0]-2]->omega*(i);        
         break;
+      }
       }
       tc.ret_dataptr(ptr);
       ctrl.ret_block(bidx);
@@ -533,19 +542,19 @@ double get_integral(const std::string &filename) {
       else if (!((bidx_cp[0] == bidx_cp[1]) && (bidx_cp[2] == bidx_cp[3]))) {
           ctrl.req_zero_block(bidx);
           continue;
-      } else if ((bidx_cp[0] == alpha) && (bidx_cp[2] > 1)) { //aapp
+      } else if ((bidx_cp[0] == alpha) && (bidx_cp[2] >= photon)) { //aapp
           spin1 = alpha;
           spin2 = bidx_cp[2];
           block2 = false;
-        } else if (bidx_cp[0] > 1  && bidx_cp[2] == alpha ) {// ppaa
+        } else if ((bidx_cp[0] >= photon)  && (bidx_cp[2] == alpha)) {// ppaa
           spin2 = bidx_cp[0];
           spin1 = alpha;
           block1 = false;
-        } else if (bidx_cp[0] == 1 && bidx_cp[2] > 1 ) {// bbpp
+        } else if ((bidx_cp[0] == beta) && (bidx_cp[2] >= photon)) {// bbpp
           spin1 = beta;
           spin2 = bidx_cp[2];
           block2 = false;
-        } else if (bidx_cp[0] > 1 && bidx_cp[2] == 1) {// ppbb
+        } else if ((bidx_cp[0] >= photon) && (bidx_cp[2] == beta)) {// ppbb
           spin2 = bidx_cp[0];
           spin1 = beta;
           block1 = false;
@@ -560,9 +569,9 @@ double get_integral(const std::string &filename) {
       double *ptr = tc.req_dataptr();
 
       // read dipole integrals
-      std::string fname_dip{v_ppol[0]->fname_dip};
+      std::string fname_dm{v_ppol[0]->fname_dm};
 
-      molpro::FCIdump dump{fname_dip}; 
+      molpro::FCIdump dump{fname_dm}; 
       size_t p, q, r, s;
       unsigned int symp, symq, symr, syms;
       double value;
