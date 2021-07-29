@@ -147,7 +147,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   problem_es->set_energy(solver_es->eigenvalues());
   for (const auto& ev : solver_es->eigenvalues())
     for (int i=0; i<expected_results.size(); ++i)
-      if (std::abs(ev-expected_results[i])<1e-10) found_expected_results[i]=true;
+      if (std::abs(ev-expected_results[i])<1e-9) found_expected_results[i]=true;
   auto energies = problem_es->get_energy();
 
   // print results
