@@ -103,18 +103,18 @@ double get_integral(const std::string &filename) {
     double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
 
     // add dipole integrals to two-electron part
-    pd_o1o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dip, filename, v_ppol, o1, o3, false));
+    pd_o1o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o3, false));
     if (o1 == o2 && o3 == o4)
       pd_o2o4 = std::make_unique<container<2>> (*pd_o1o3);
     else 
-      pd_o2o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dip, filename, v_ppol, o2, o4, false));
+      pd_o2o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o4, false));
 
     if (o1 == o2)
       pd_o2o3 = std::make_unique<container<2>> (*pd_o1o3);
     else if(o3 == o4)
       pd_o2o3 = std::make_unique<container<2>> (*pd_o2o4);
     else
-      pd_o2o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dip, filename, v_ppol, o2, o3, false));
+      pd_o2o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o3, false));
 
     if (o3 == o4)
       pd_o1o4 = std::make_unique<container<2>> (*pd_o1o3);
@@ -123,7 +123,7 @@ double get_integral(const std::string &filename) {
     else if (o1 == o2 && o3 == o4)
       pd_o1o4 = std::make_unique<container<2>> (*pd_o2o3);
     else
-      pd_o1o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dip, filename, v_ppol, o1, o4, false));
+      pd_o1o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o4, false));
 
     add_d2(fact, *pd_o1o3, *pd_o2o4, *pd_o2o3, *pd_o1o4, h2_o1o2o3o4);
   }
@@ -560,9 +560,9 @@ double get_integral(const std::string &filename) {
       double *ptr = tc.req_dataptr();
 
       // read dipole integrals
-      std::string fname_dip{v_ppol[0]->fname_dip};
+      std::string fname_dm{v_ppol[0]->fname_dm};
 
-      molpro::FCIdump dump{fname_dip}; 
+      molpro::FCIdump dump{fname_dm}; 
       size_t p, q, r, s;
       unsigned int symp, symq, symr, syms;
       double value;

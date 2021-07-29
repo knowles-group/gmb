@@ -17,11 +17,6 @@
 
 using namespace gmb;
 
-// test case
-// std::string filename;
-// std::string test_case = "hubbard";
-// std::unique_ptr<polariton> ppol;
-
 extern molpro::Profiler prof;
 extern "C" void general_many_body() { molpro::gmb::gmb();}
 
@@ -33,7 +28,6 @@ void molpro::gmb::gmb(const molpro::Options& options) {
 
   std::ios_base::sync_with_stdio(false);
   auto start = std::chrono::system_clock::now();
-  // pprof = std::make_unique<molpro::Profiler> ("main");
 
   // parse arguments
   auto method = options.parameter("method","eom-ccsd");
@@ -52,9 +46,9 @@ void molpro::gmb::gmb(const molpro::Options& options) {
       v_ppol[i] = std::make_shared<polariton>(v_option_polariton_nmax[i],
                                               v_option_polariton_gamma[i],
                                               v_option_polariton_omega[i]);
-      v_ppol[i]->fname_dip = options.parameter(
+      v_ppol[i]->fname_dm = options.parameter(
           "dipole", std::regex_replace(
-                        filename, std::regex{"\\.[_[:alnum:]]*$"}, ".dip"));
+                        filename, std::regex{"\\.[_[:alnum:]]*$"}, ".dm"));
       v_ppol[i]->fname_sm = std::regex_replace(
                         filename, std::regex{"\\.[_[:alnum:]]*$"}, ".sm");
     }
@@ -67,8 +61,8 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   std::cout << " method = " << method << "\n";
   std::cout << " roots = " << nroots << "\n";
   if (v_ppol.size() > 0) {
-    check_file(v_ppol[0]->fname_dip, "dipole");
-    std::cout << " dipole file = " << v_ppol[0]->fname_dip << "\n";
+    check_file(v_ppol[0]->fname_dm, "dipole");
+    std::cout << " dipole file = " << v_ppol[0]->fname_dm << "\n";
     check_file(v_ppol[0]->fname_sm, "second moment of charges");
     std::cout << " second moment of charges file = " << v_ppol[0]->fname_sm << "\n";
 

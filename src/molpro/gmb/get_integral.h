@@ -22,7 +22,7 @@ struct polariton {
   double gamma{0.0};
   double omega{0.0};
   double lambd{0.0};
-  std::string fname_dip;
+  std::string fname_dm;
   std::string fname_sm;
 
   polariton() = default;
