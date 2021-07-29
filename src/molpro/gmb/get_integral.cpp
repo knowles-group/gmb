@@ -349,7 +349,7 @@ double get_integral(const std::string &filename) {
             break;
           case (v): // vv block
             // for (size_t i = 0; i < v_ppol[bidx[0]-2]->nmax; i++) 
-            for (int p = 1; p < v_ppol[bidx[0]-2]->nmax; p++) {
+            for (int p = 1; p < v_ppol[bidx[0]-2]->nmax+1; p++) {
               auto q = p+1;
               // index in block
               auto ip = p-1; 
@@ -362,7 +362,7 @@ double get_integral(const std::string &filename) {
             }
             break;
           case (b):
-            for (int p = 0; p < v_ppol[bidx[0]-2]->nmax ; p++) {
+            for (int p = 0; p < v_ppol[bidx[0]-2]->nmax + 1; p++) {
               auto q = p+1;
               // diagonal 
               ptr[p+p*v_ppol[bidx[0]-2]->nmax] = v_ppol[bidx[0]-2]->omega*(p);        
