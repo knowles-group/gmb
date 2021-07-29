@@ -135,7 +135,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   prampl->set(r2, container(ptampl->m4get(t2).get_space()));
   std::vector<amplitudes<>> v_rampl(nroots, *prampl);
   std::unique_ptr<problem_eom> problem_es;
-  problem_es = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
+  problem_es = std::make_unique<problem_eom_ccsd>(ham, *ptampl, nroots);
   
   std::cout << "\n" << *problem_es << "\n";
 

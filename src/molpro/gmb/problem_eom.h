@@ -12,11 +12,12 @@ protected:
   std::vector<double> m_energy;    ///> energy
   mutable hamiltonian<> m_ham;     ///> Hamiltonian
   mutable amplitudes<> m_tampl;    ///> T amplitudes
+  size_t m_nroots;    ///> energy
 public:
   using Problem::container_t;
   using Problem::value_t;
-  problem_eom(const hamiltonian<> &ham, const amplitudes<> &tampl)
-  : m_ham(ham), m_tampl(tampl) {}
+  problem_eom(const hamiltonian<> &ham, const amplitudes<> &tampl, const size_t &nroots)
+  : m_ham(ham), m_tampl(tampl), m_nroots(nroots) {}
 
   virtual ~problem_eom() {}
 
@@ -32,6 +33,9 @@ public:
   virtual 
   void print(std::ostream& s) const {}
 
+  void eigenvectors(const size_t &k, const amplitudes<>& rampl) const {
+    std::cout << "this is k: " << k << std::endl;
+  };
 };
 
 std::ostream& operator<<(std::ostream& s, const problem_eom& problem) {
