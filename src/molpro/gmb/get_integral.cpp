@@ -42,15 +42,15 @@ double get_integral(const std::string &filename) {
     if (v_ppol.size() > 0 && add_ph) {
       get_one_photon_part(integral, v_ppol, v_exist, v_orb_type);
       for (size_t i = 0; i < v_ppol.size(); i++) {
+        double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
         #if 1 // add self-energy
         container<2> sm(integral.get_space()); // second moment of charges
-        container<2> dm(integral.get_space()); // dipole moment 
         gmb::zero(sm);
-        gmb::zero(dm);
         get_one_electron_part(sm, v_ppol[i]->fname_sm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
-        get_one_electron_part(dm, v_ppol[i]->fname_dm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
-        double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
         integral.axpy(fact, sm);
+        container<2> dm(integral.get_space()); // dipole moment 
+        gmb::zero(dm);
+        get_one_electron_part(dm, v_ppol[i]->fname_dm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
         integral.axpy(fact*2*rnuc, dm);
         #endif
       }
@@ -327,35 +327,51 @@ double get_integral(const std::string &filename) {
   {
     libtensor::block_tensor_wr_ctrl<2, double> ctrl(integral);
     libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
+    std::cout << "rnuc = " << rnuc << std::endl;
     for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
       libtensor::index<2> bidx;
       ol.get_index(it, bidx);
-      if (bidx[0] != bidx[1] || bidx[0] < 2) 
+      if (bidx[0] != bidx[1] || bidx[0] < photon) 
         continue;
       libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
       libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
       const libtensor::dimensions<2> &tdims = blk.get_dims();
       double *ptr = tc.req_dataptr();
-      if (v_orb_type[0] != v_orb_type[1]) {
-        // ctrl.req_zero_block(bidx);
+      double fact{v_ppol[bidx[0]-2]->gamma*v_ppol[bidx[0]-2]->omega};
+      if (v_orb_type[0] != v_orb_type[1]) { // ov block - only one element
         for (size_t i = 0; i < 1; i++) 
-          ptr[0] = - v_ppol[0]->omega*v_ppol[0]->gamma*rnuc;
+           ptr[0] = - fact*rnuc;
       } else {
-
-      switch (v_orb_type[0]) {
-      case (o):
-        for (size_t i = 0; i < 1; i++) 
-            ptr[i+i*v_ppol[bidx[0]-2]->nmax] = v_ppol[bidx[0]-2]->omega*(i);          
-        break;
-      case (v):
-        for (size_t i = 0; i < v_ppol[bidx[0]-2]->nmax; i++) 
-            ptr[i+i*v_ppol[bidx[0]-2]->nmax] = v_ppol[bidx[0]-2]->omega*(1+i);        
-        break;
-      case (b):
-        for (size_t i = 0; i < 1+v_ppol[bidx[0]-2]->nmax; i++) 
-            ptr[i+i*v_ppol[bidx[0]-2]->nmax] = v_ppol[bidx[0]-2]->omega*(i);        
-        break;
-      }
+        switch (v_orb_type[0]) {
+          case (o): // oo block - only one diagonal element
+            for (size_t i = 0; i < 1; i++) 
+              ptr[i+i*v_ppol[bidx[0]-2]->nmax] = v_ppol[bidx[0]-2]->omega*(i);          
+            break;
+          case (v): // vv block
+            // for (size_t i = 0; i < v_ppol[bidx[0]-2]->nmax; i++) 
+            for (int p = 1; p < v_ppol[bidx[0]-2]->nmax; p++) {
+              auto q = p+1;
+              // index in block
+              auto ip = p-1; 
+              auto iq = q-1;
+              // diagonal elements 
+              ptr[ip*v_ppol[bidx[0]-2]->nmax + ip] = v_ppol[bidx[0]-2]->omega*(p);        
+              // off-diagonal elements
+              ptr[ip*v_ppol[bidx[0]-2]->nmax + iq] = - fact*rnuc*sqrt(q);
+              ptr[iq*v_ppol[bidx[0]-2]->nmax + ip] = - fact*rnuc*sqrt(p+1);
+            }
+            break;
+          case (b):
+            for (int p = 0; p < v_ppol[bidx[0]-2]->nmax ; p++) {
+              auto q = p+1;
+              // diagonal 
+              ptr[p+p*v_ppol[bidx[0]-2]->nmax] = v_ppol[bidx[0]-2]->omega*(p);        
+              // off-diagonal 
+              ptr[p*v_ppol[bidx[0]-2]->nmax + q] = - fact*rnuc*sqrt(q);
+              ptr[q*v_ppol[bidx[0]-2]->nmax + p+1] = - fact*rnuc*sqrt(p+1);
+            }      
+          break;  
+        }
       }
       tc.ret_dataptr(ptr);
       ctrl.ret_block(bidx);
