@@ -304,14 +304,13 @@ double get_integral(const std::string &filename) {
         if (type == itype) {
           if ((((i) >= v_psi[spin][0].first[symi] & (i) < v_psi[spin][0].second[symi]) 
             && ((j) >= v_psi[spin][1].first[symj] & (j) < v_psi[spin][1].second[symj]))) {
-          auto offset = gmb::get_offset(i+v_shift[spin][0][symi], j+v_shift[spin][1][symj], v_norb[spin][1]);
-          ptr[offset] = value;
+            ptr[gmb::get_offset(i+v_shift[spin][0][symi], j+v_shift[spin][1][symj], v_norb[spin][1])] 
+            = value;
           }
           if ((((i) >= v_psi[spin][1].first[symi] & (i) < v_psi[spin][1].second[symi])
-            && ((j) >= v_psi[spin][0].first[symj] & (j) < v_psi[spin][0].second[symj]))
-            && type == itype) {
-            auto offset = gmb::get_offset(j+v_shift[spin][0][symj], i+v_shift[spin][1][symi], v_norb[spin][1]);
-            ptr[offset] = value;
+            && ((j) >= v_psi[spin][0].first[symj] & (j) < v_psi[spin][0].second[symj]))) {
+            ptr[gmb::get_offset(j+v_shift[spin][0][symj], i+v_shift[spin][1][symi], v_norb[spin][1])] 
+              = value;
           }
         }
       }
@@ -337,6 +336,8 @@ double get_integral(const std::string &filename) {
       const libtensor::dimensions<2> &tdims = blk.get_dims();
       double *ptr = tc.req_dataptr();
       double fact{v_ppol[bidx[0]-2]->gamma*v_ppol[bidx[0]-2]->omega};
+      auto nmax = v_ppol[bidx[0]-2]->nmax;
+      auto omega = v_ppol[bidx[0]-2]->omega;
       if (v_orb_type[0] != v_orb_type[1]) { // ov block - only one element
         for (size_t i = 0; i < 1; i++) 
            ptr[0] = - fact*rnuc;
@@ -344,33 +345,32 @@ double get_integral(const std::string &filename) {
         switch (v_orb_type[0]) {
           case (o): // oo block - only one diagonal element
             for (size_t i = 0; i < 1; i++) 
-              ptr[i+i*v_ppol[bidx[0]-2]->nmax] = v_ppol[bidx[0]-2]->omega*(i);          
+              ptr[gmb::get_offset(i,i,nmax)] = i*omega;          
             break;
           case (v): // vv block
-            // for (size_t i = 0; i < v_ppol[bidx[0]-2]->nmax; i++) 
-            for (int p = 1; p < v_ppol[bidx[0]-2]->nmax + 1; p++) {
+            for (int p = 1; p < nmax + 1; p++) {
               auto q = p+1;
               // index in block
               auto ip = p-1; 
               auto iq = q-1;
               // diagonal elements 
-              ptr[ip*v_ppol[bidx[0]-2]->nmax + ip] = v_ppol[bidx[0]-2]->omega*(p);        
+              ptr[gmb::get_offset(ip,ip,nmax)] = p*omega;        
               // off-diagonal elements
-              if (!(q > v_ppol[bidx[0]-2]->nmax)) {
-                ptr[ip*v_ppol[bidx[0]-2]->nmax + iq] = - fact*rnuc*sqrt(q);
-                ptr[iq*v_ppol[bidx[0]-2]->nmax + ip] = - fact*rnuc*sqrt(p+1);
+              if (!(q > nmax)) {
+                ptr[gmb::get_offset(ip,iq,nmax)] = - fact*rnuc*sqrt(q);
+                ptr[gmb::get_offset(iq,ip,nmax)] = - fact*rnuc*sqrt(p+1);
               }
             }
             break;
           case (b):
-            for (int p = 0; p < v_ppol[bidx[0]-2]->nmax + 1; p++) {
+            for (int p = 0; p < nmax + 1; p++) {
               auto q = p+1;
               // diagonal 
-              ptr[p+p*v_ppol[bidx[0]-2]->nmax] = v_ppol[bidx[0]-2]->omega*(p);        
+              ptr[p+p*nmax] = p*omega;        
               // off-diagonal 
-              if (!(q > v_ppol[bidx[0]-2]->nmax)) {
-                ptr[p*v_ppol[bidx[0]-2]->nmax + q] = - fact*rnuc*sqrt(q);
-                ptr[q*v_ppol[bidx[0]-2]->nmax + p+1] = - fact*rnuc*sqrt(p+1);
+              if (!(q > nmax)) {
+                ptr[gmb::get_offset(p,q,nmax)] = - fact*rnuc*sqrt(q);
+                ptr[gmb::get_offset(q,p,nmax)] = - fact*rnuc*sqrt(p+1);
               }
             }      
           break;  
@@ -472,60 +472,60 @@ double get_integral(const std::string &filename) {
           // 1 (ij|kl)
           if ( ((v_psi[spin1][0].first[symi] <= i && i < v_psi[spin1][0].second[symi]) && (v_psi[spin1][1].first[symj] <= j && j < v_psi[spin1][1].second[symj]))
             && ((v_psi[spin2][2].first[symk] <= k && k < v_psi[spin2][2].second[symk]) && (v_psi[spin2][3].first[syml] <= l && l < v_psi[spin2][3].second[syml]))) {
-            auto offset = gmb::get_offset(i+v_shift[spin1][0][symi], j+v_shift[spin1][1][symj], k+v_shift[spin2][2][symk], l+v_shift[spin2][3][syml],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-            ptr[offset] = value;
+            ptr[gmb::get_offset(i+v_shift[spin1][0][symi], j+v_shift[spin1][1][symj], k+v_shift[spin2][2][symk], l+v_shift[spin2][3][syml],
+                                v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+              = value;
           }
           // 2 (ji|lk)
           if ( ((v_psi[spin1][0].first[symj] <= j && j < v_psi[spin1][0].second[symj]) && (v_psi[spin1][1].first[symi] <= i && i < v_psi[spin1][1].second[symi]))
             && ((v_psi[spin2][2].first[syml] <= l && l < v_psi[spin2][2].second[syml]) && (v_psi[spin2][3].first[symk] <= k && k < v_psi[spin2][3].second[symk]))) {
-            auto offset = gmb::get_offset(j+v_shift[spin1][0][symj], i+v_shift[spin1][1][symi], l+v_shift[spin2][2][syml], k+v_shift[spin2][3][symk],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-            ptr[offset] = value;
+            ptr[gmb::get_offset(j+v_shift[spin1][0][symj], i+v_shift[spin1][1][symi], l+v_shift[spin2][2][syml], k+v_shift[spin2][3][symk],
+                                v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+              = value;
           }
           // 3 (ji|kl)
           if ( ((v_psi[spin1][0].first[symj] <= j && j < v_psi[spin1][0].second[symj]) && (v_psi[spin1][1].first[symi] <= i && i < v_psi[spin1][1].second[symi]))
             && ((v_psi[spin2][2].first[symk] <= k && k < v_psi[spin2][2].second[symk]) && (v_psi[spin2][3].first[syml] <= l && l < v_psi[spin2][3].second[syml]))) {
-            auto offset = gmb::get_offset(j+v_shift[spin1][0][symj], i+v_shift[spin1][1][symi], k+v_shift[spin2][2][symk], l+v_shift[spin2][3][syml],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-            ptr[offset] = value;
+            ptr[gmb::get_offset(j+v_shift[spin1][0][symj], i+v_shift[spin1][1][symi], k+v_shift[spin2][2][symk], l+v_shift[spin2][3][syml],
+                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+              = value;
           }
           // 4 (ij|lk)
           if ( ((v_psi[spin1][0].first[symi] <= i && i < v_psi[spin1][0].second[symi]) && (v_psi[spin1][1].first[symj] <= j && j < v_psi[spin1][1].second[symj]))
             && ((v_psi[spin2][2].first[syml] <= l && l < v_psi[spin2][2].second[syml]) && (v_psi[spin2][3].first[symk] <= k && k < v_psi[spin2][3].second[symk]))) {
-            auto offset = gmb::get_offset(i+v_shift[spin1][0][symi], j+v_shift[spin1][1][symj], l+v_shift[spin2][2][syml], k+v_shift[spin2][3][symk],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-            ptr[offset] = value;
+            ptr[gmb::get_offset(i+v_shift[spin1][0][symi], j+v_shift[spin1][1][symj], l+v_shift[spin2][2][syml], k+v_shift[spin2][3][symk],
+                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+              = value;
           }
         }
         if (block2) {
           // 5 (kl|ij)
           if ( ((v_psi[spin1][0].first[symk] <= k && k < v_psi[spin1][0].second[symk]) && (v_psi[spin1][1].first[syml] <= l && l < v_psi[spin1][1].second[syml]))
             && ((v_psi[spin2][2].first[symi] <= i && i < v_psi[spin2][2].second[symi]) && (v_psi[spin2][3].first[symj] <= j && j < v_psi[spin2][3].second[symj]))) {
-            auto offset = gmb::get_offset(k+v_shift[spin1][0][symk], l+v_shift[spin1][1][syml], i+v_shift[spin2][2][symi], j+v_shift[spin2][3][symj],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-            ptr[offset] = value;
+            ptr[gmb::get_offset(k+v_shift[spin1][0][symk], l+v_shift[spin1][1][syml], i+v_shift[spin2][2][symi], j+v_shift[spin2][3][symj],
+                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+              = value;
           }
           // 6 (lk|ji)
           if ( ((v_psi[spin1][0].first[syml] <= l && l < v_psi[spin1][0].second[syml]) && (v_psi[spin1][1].first[symk] <= k && k < v_psi[spin1][1].second[symk]))
             && ((v_psi[spin2][2].first[symj] <= j && j < v_psi[spin2][2].second[symj]) && (v_psi[spin2][3].first[symi] <= i && i < v_psi[spin2][3].second[symi])) ) {
-            auto offset = gmb::get_offset(l+v_shift[spin1][0][syml], k+v_shift[spin1][1][symk], j+v_shift[spin2][2][symj], i+v_shift[spin2][3][symi],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-            ptr[offset] = value;
+            ptr[gmb::get_offset(l+v_shift[spin1][0][syml], k+v_shift[spin1][1][symk], j+v_shift[spin2][2][symj], i+v_shift[spin2][3][symi],
+                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+              = value;
           }
           // 7 (lk|ij)
           if ( ((v_psi[spin1][0].first[syml] <= l && l < v_psi[spin1][0].second[syml]) && (v_psi[spin1][1].first[symk] <= k && k < v_psi[spin1][1].second[symk]))
             && ((v_psi[spin2][2].first[symi] <= i && i < v_psi[spin2][2].second[symi]) && (v_psi[spin2][3].first[symj] <= j && j < v_psi[spin2][3].second[symj]))) {
-            auto offset = gmb::get_offset(l+v_shift[spin1][0][syml], k+v_shift[spin1][1][symk], i+v_shift[spin2][2][symi], j+v_shift[spin2][3][symj],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-            ptr[offset] = value;
+            ptr[gmb::get_offset(l+v_shift[spin1][0][syml], k+v_shift[spin1][1][symk], i+v_shift[spin2][2][symi], j+v_shift[spin2][3][symj],
+                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+              = value;
           }
           // 8 (kl|ji)
           if ( ((v_psi[spin1][0].first[symk] <= k && k < v_psi[spin1][0].second[symk]) && (v_psi[spin1][1].first[syml] <= l && l < v_psi[spin1][1].second[syml]))
             && ((v_psi[spin2][2].first[symj] <= j && j < v_psi[spin2][2].second[symj]) && (v_psi[spin2][3].first[symi] <= i && i < v_psi[spin2][3].second[symi]))) {
-            auto offset = gmb::get_offset(k+v_shift[spin1][0][symk], l+v_shift[spin1][1][syml], j+v_shift[spin2][2][symj], i+v_shift[spin2][3][symi],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-            ptr[offset] = value;
+            ptr[gmb::get_offset(k+v_shift[spin1][0][symk], l+v_shift[spin1][1][syml], j+v_shift[spin2][2][symj], i+v_shift[spin2][3][symi],
+                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+              = value;
           }  
         }
       }
@@ -607,60 +607,60 @@ double get_integral(const std::string &filename) {
           if (block1) { // ppee
           if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
             && ((v_psi[spin2][2].first[symr] <= r && r < v_psi[spin2][2].second[symr]) && (v_psi[spin2][3].first[syms] <= s && s < v_psi[spin2][3].second[syms]))) {
-              auto offset = gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-              ptr[offset] = - fact*sqrt(s)*value;
+              ptr[gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
+                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                = - fact*sqrt(s)*value;
             }
           //2 (qp|rs)
           if (((v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]) && (v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]))
             && ((v_psi[spin2][2].first[symr] <= r && r < v_psi[spin2][2].second[symr]) && (v_psi[spin2][3].first[syms] <= s && s < v_psi[spin2][3].second[syms]))) {
-              auto offset = gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-              ptr[offset] = - fact*sqrt(s)*value;
+              ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
+                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                = - fact*sqrt(s)*value;
             }
           // 3 (pq|sr)
           if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
             && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
-              auto offset = gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-              ptr[offset] = - fact*sqrt(s)*value;
+              ptr[gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
+                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                = - fact*sqrt(s)*value;
             }
           // 4 (qp|sr)  
           if (((v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]) && (v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]))
             && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
-              auto offset = gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3]);
-              ptr[offset] = - fact*sqrt(s)*value;
+              ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
+                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                = - fact*sqrt(s)*value;
             }
           }
           if (block2) {
           // 5 (rs|pq)
           if (((v_psi[spin1][2].first[symp] <= p && p < v_psi[spin1][2].second[symp]) && (v_psi[spin1][3].first[symq] <= q && q < v_psi[spin1][3].second[symq]))
             && ((v_psi[spin2][0].first[symr] <= r && r < v_psi[spin2][0].second[symr]) && (v_psi[spin2][1].first[syms] <= s && s < v_psi[spin2][1].second[syms]))) {
-              auto offset = gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
-                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3]);
-              ptr[offset] = - fact*sqrt(s)*value;
+              ptr[gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
+                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                = - fact*sqrt(s)*value;
             }
           // 6 (sr|pq)
           if (((v_psi[spin1][2].first[symp] <= p && p < v_psi[spin1][2].second[symp]) && (v_psi[spin1][3].first[symq] <= q && q < v_psi[spin1][3].second[symq]))
             && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
-              auto offset = gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
-                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3]);
-              ptr[offset] = - fact*sqrt(s)*value;
+              ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
+                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                = - fact*sqrt(s)*value;
             }
           // 7 (rs|qp)
           if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
             && ((v_psi[spin2][0].first[symr] <= r && r < v_psi[spin2][0].second[symr]) && (v_psi[spin2][1].first[syms] <= s && s < v_psi[spin2][1].second[syms]))) {
-               auto offset = gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
-                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3]);
-              ptr[offset] = - fact*sqrt(s)*value;
+              ptr[gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
+                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                = - fact*sqrt(s)*value;
             }
           // 8 (sr|qp)
           if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
             && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
-               auto offset = gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
-                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3]);
-              ptr[offset] = - fact*sqrt(s)*value;
+              ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
+                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                = - fact*sqrt(s)*value;
             }
           }
         }
