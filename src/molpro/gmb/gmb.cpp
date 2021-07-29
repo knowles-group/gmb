@@ -118,7 +118,7 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   std::cout << *problem  << " total energy: " << std::setprecision(13)
             << problem->get_energy() + hf_energy<< "\n";
   for (int i=0; i<expected_results.size(); ++i)
-    if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
+    if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-9) found_expected_results[i]=true;
 
 
 #if 1 // Excited State
