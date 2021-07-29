@@ -327,7 +327,6 @@ double get_integral(const std::string &filename) {
   {
     libtensor::block_tensor_wr_ctrl<2, double> ctrl(integral);
     libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
-    std::cout << "rnuc = " << rnuc << std::endl;
     for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
       libtensor::index<2> bidx;
       ol.get_index(it, bidx);
@@ -349,7 +348,7 @@ double get_integral(const std::string &filename) {
             break;
           case (v): // vv block
             // for (size_t i = 0; i < v_ppol[bidx[0]-2]->nmax; i++) 
-            for (int p = 1; p < v_ppol[bidx[0]-2]->nmax+1; p++) {
+            for (int p = 1; p < v_ppol[bidx[0]-2]->nmax + 1; p++) {
               auto q = p+1;
               // index in block
               auto ip = p-1; 
@@ -357,8 +356,10 @@ double get_integral(const std::string &filename) {
               // diagonal elements 
               ptr[ip*v_ppol[bidx[0]-2]->nmax + ip] = v_ppol[bidx[0]-2]->omega*(p);        
               // off-diagonal elements
-              ptr[ip*v_ppol[bidx[0]-2]->nmax + iq] = - fact*rnuc*sqrt(q);
-              ptr[iq*v_ppol[bidx[0]-2]->nmax + ip] = - fact*rnuc*sqrt(p+1);
+              if (!(q > v_ppol[bidx[0]-2]->nmax)) {
+                ptr[ip*v_ppol[bidx[0]-2]->nmax + iq] = - fact*rnuc*sqrt(q);
+                ptr[iq*v_ppol[bidx[0]-2]->nmax + ip] = - fact*rnuc*sqrt(p+1);
+              }
             }
             break;
           case (b):
@@ -367,8 +368,10 @@ double get_integral(const std::string &filename) {
               // diagonal 
               ptr[p+p*v_ppol[bidx[0]-2]->nmax] = v_ppol[bidx[0]-2]->omega*(p);        
               // off-diagonal 
-              ptr[p*v_ppol[bidx[0]-2]->nmax + q] = - fact*rnuc*sqrt(q);
-              ptr[q*v_ppol[bidx[0]-2]->nmax + p+1] = - fact*rnuc*sqrt(p+1);
+              if (!(q > v_ppol[bidx[0]-2]->nmax)) {
+                ptr[p*v_ppol[bidx[0]-2]->nmax + q] = - fact*rnuc*sqrt(q);
+                ptr[q*v_ppol[bidx[0]-2]->nmax + p+1] = - fact*rnuc*sqrt(p+1);
+              }
             }      
           break;  
         }
