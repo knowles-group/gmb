@@ -18,7 +18,12 @@
 using namespace gmb;
 
 extern molpro::Profiler prof;
-extern "C" void general_many_body() { molpro::gmb::gmb(); }
+extern "C" void general_many_body(int64_t &nstate, double *energies) {
+  auto ev = molpro::gmb::gmb();
+  nstate = ev.size();
+  for (size_t i=0; i<nstate; ++i)
+    energies[i] = ev[i];
+}
 
 std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 
