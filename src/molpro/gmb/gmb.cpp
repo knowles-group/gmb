@@ -93,11 +93,11 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   for (size_t i = 0; i < ncav; i++) {
       hf_energy += v_ppol[i]->gamma*v_ppol[i]->gamma*v_ppol[i]->omega*rnuc*rnuc;
     }
-  std::cout << "HF energy: " << std::setprecision(12) << hf_energy << "\n";
+  std::cout << "\nHF energy: " << std::setprecision(12) << hf_energy << "\n\n";
 
 #if 1 // CCSD
-  if (method.find("cc")) {
-    run_cc(ham, method, problem, ptampl);
+  if (!(method.find("hf") != std::string::npos)) {
+    run_gs(ham, method, problem, ptampl);
     // print results
     std::cout << *problem << " correlation energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
     double ccsd_energy = problem->get_energy() + hf_energy;
@@ -107,18 +107,17 @@ void molpro::gmb::gmb(const molpro::Options& options) {
       if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
 
 #if 1 // Excited State
-    if ( method.find("eom") != std::string::npos ) {
+    if (method.find("eom") != std::string::npos) {
 
       std::unique_ptr<problem_eom> problem_es;
-      run_eom(ham, method, problem_es, ptampl, nroots);
-      // for (const auto& ev : solver_es->eigenvalues())
+      run_es(ham, method, problem_es, ptampl, nroots);
       for (const auto& ev : problem_es->get_energy())
         for (int i=0; i<expected_results.size(); ++i)
           if (std::abs(ev-expected_results[i])<1e-10) found_expected_results[i]=true;
       
       auto energies = problem_es->get_energy();
       // print results
-      std::cout << "       Excitation energy                     Total energy  \n";
+      std::cout << "\n       Excitation energy                     Total energy  \n";
       std::cout << "       (Ha)        (eV)                    (Ha)        (eV)  \n";
       for (auto &i : energies)
         std::cout << std::setw(14) << std::setprecision(7) << i << "   " 
