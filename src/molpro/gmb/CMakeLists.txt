@@ -1,6 +1,6 @@
 LibraryManager_Append(${PROJECT_NAME}
         PUBLIC_HEADER gmb.h
-        SOURCES gmb.cpp init.cpp utils.cpp libtensor_utils.cpp get_integral.cpp
+        SOURCES gmb.cpp init.cpp utils.cpp libtensor_utils.cpp get_integral.cpp problem_gen.cpp run_method.cpp
         )
 LibraryManager_LAPACK(${PROJECT_NAME} PRIVATE Intel10_64lp)
 

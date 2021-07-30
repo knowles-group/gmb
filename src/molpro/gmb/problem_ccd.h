@@ -44,6 +44,10 @@ public:
     }
   }
 
+  void energy(container_t x) {
+      m_energy = 0.25 * x.m4get(t2).dot(m_ham.m4get(i_oovv));
+  }
+
   friend
   std::ostream& operator<<(std::ostream& s, const problem_ccd& problem) ;
 
