@@ -3,10 +3,10 @@
 
 #include "container.h"
 #include "get_integral.h"
-#include <string>
-#include <memory>
 #include <map>
-
+#include <memory>
+#include <molpro/iostream.h>
+#include <string>
 
 template<typename T=double>
 class supercontainer {
@@ -61,12 +61,12 @@ public:
   const std::map<std::string, std::unique_ptr<container<4,T>>>& get_m4() const { return m_m4; };
 
   container<2,T>& m2get(std::string key) {
-    if (m_m2.find(key) == m_m2.end()) std::cout << key <<" not found!\n";
+    if (m_m2.find(key) == m_m2.end()) molpro::cout << key <<" not found!\n";
     return *m_m2[key];
   };
 
   container<4,T>& m4get(std::string key) {
-    if (m_m4.find(key) == m_m4.end()) std::cout << key <<" not found!\n";
+    if (m_m4.find(key) == m_m4.end()) molpro::cout << key <<" not found!\n";
     return *m_m4[key]; 
   };
 

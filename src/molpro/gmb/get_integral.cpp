@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "expressions/anti.h"
 #include "expressions/add_d2.h"
+#include <molpro/iostream.h>
 
 double get_integral(const std::string &filename) {
   molpro::FCIdump dump(filename);
@@ -231,7 +232,7 @@ double get_integral(const std::string &filename) {
           ++count;
         if (count == 8) {
           v_exist[ispin][iot] = false;
-          std::cout << "orb number: " << iot 
+          molpro::cout << "orb number: " << iot
                     << " ispin: " << ispin
                     << " does not exist."
                     << "\n";

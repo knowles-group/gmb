@@ -14,6 +14,7 @@
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <molpro/linalg/itsolv/SolverFactory.h>
 #include <regex>
+#include <molpro/iostream.h>
 
 using namespace gmb;
 
@@ -65,26 +66,26 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   }
 
   // print arguments
-  std::cout << "Required calculation: "
+  molpro::cout << "Required calculation: "
             << "\n\n";
   check_file(filename, "fcidump");
-  std::cout << " fcidump = " << filename << "\n";
-  std::cout << " method = " << method << "\n";
-  std::cout << " roots = " << nroots << "\n";
+  molpro::cout << " fcidump = " << filename << "\n";
+  molpro::cout << " method = " << method << "\n";
+  molpro::cout << " roots = " << nroots << "\n";
   if (v_ppol.size() > 0) {
     check_file(v_ppol[0]->fname_dm, "dipole");
-    std::cout << " dipole file = " << v_ppol[0]->fname_dm << "\n";
+    molpro::cout << " dipole file = " << v_ppol[0]->fname_dm << "\n";
     check_file(v_ppol[0]->fname_sm, "second moment of charges");
-    std::cout << " second moment of charges file = " << v_ppol[0]->fname_sm
+    molpro::cout << " second moment of charges file = " << v_ppol[0]->fname_sm
               << "\n";
 
-    std::cout << "\nPolariton parameters: \n";
-    std::cout << "modes: " << ncav << "\n";
+    molpro::cout << "\nPolariton parameters: \n";
+    molpro::cout << "modes: " << ncav << "\n";
     for (size_t i = 0; i < ncav; i++) {
-      std::cout << "\n mode " << i << "\n";
-      std::cout << " nmax = " << v_ppol[i]->nmax << "\n";
-      std::cout << " gamma = " << v_ppol[i]->gamma << "\n";
-      std::cout << " omega = " << v_ppol[i]->omega << "\n\n";
+      molpro::cout << "\n mode " << i << "\n";
+      molpro::cout << " nmax = " << v_ppol[i]->nmax << "\n";
+      molpro::cout << " gamma = " << v_ppol[i]->gamma << "\n";
+      molpro::cout << " omega = " << v_ppol[i]->omega << "\n\n";
     }
   }
 
@@ -99,7 +100,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 #if 1 // CCSD
   auto vnn = get_integral(filename);
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo), ham.m4get(i_oooo));
-  std::cout << "HF energy: " << std::setprecision(12) << hf_energy << "\n";
+  molpro::cout << "HF energy: " << std::setprecision(12) << hf_energy << "\n";
 
   // set CCSD amplitudes
   if (method.find("ccs") != std::string::npos)
@@ -128,9 +129,9 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   problem->energy(*ptampl);
 
   // print results
-  std::cout << *problem << " correlation energy: " << std::setprecision(12)
+  molpro::cout << *problem << " correlation energy: " << std::setprecision(12)
             << problem->get_energy() << "\n";
-  std::cout << *problem << " total energy: " << std::setprecision(13)
+  molpro::cout << *problem << " total energy: " << std::setprecision(13)
             << problem->get_energy() + hf_energy << "\n";
   for (int i = 0; i < expected_results.size(); ++i)
     if (std::abs(problem->get_energy() + hf_energy - expected_results[i]) <
@@ -148,7 +149,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   std::unique_ptr<problem_eom> problem_es;
   problem_es = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
 
-  std::cout << "\n" << *problem_es << "\n";
+  molpro::cout << "\n" << *problem_es << "\n";
 
   // set solver
   auto solver_es =
@@ -171,20 +172,20 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   auto excitation_energies = problem_es->get_energy();
 
   // print results
-  std::cout << "\n" << *problem_es << " excitation energies (Ha) \n";
+  molpro::cout << "\n" << *problem_es << " excitation energies (Ha) \n";
   for (auto &i : excitation_energies) {
-    std::cout << i << " \n";
+    molpro::cout << i << " \n";
     energies.push_back(energies.front() + i);
   }
 
 #endif
 #endif
 
-  // std::cout << *pprof << std::endl;
+  // molpro::cout << *pprof << std::endl;
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end - start;
   std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-  std::cout << "\nFinished computation at " << std::ctime(&end_time)
+  molpro::cout << "\nFinished computation at " << std::ctime(&end_time)
             << "Elapsed time: " << elapsed_seconds.count() << "s\n";
   for (int i = 0; i < expected_results.size(); ++i)
     if (not found_expected_results[i])

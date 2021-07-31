@@ -5,6 +5,7 @@
 #include <libtensor/libtensor.h>
 #include "libtensor_utils.h"
 #include <libtensor/block_tensor/bto_set.h>
+#include <molpro/iostream.h>
 
 // using namespace libtensor; 
 /**
@@ -83,7 +84,7 @@ public:
    * @brief print container
    * 
    */
-  void print() { libtensor::bto_print<N, T>(std::cout).perform(*this);};
+  void print() { libtensor::bto_print<N, T>(molpro::cout).perform(*this);};
 
 
   std::map<size_t, value_type> select_max_dot(size_t n, const container& y) const {throw std::logic_error("container::select_max_dot unimplemented");}
