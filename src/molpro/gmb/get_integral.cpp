@@ -45,7 +45,7 @@ double get_integral(const std::string &filename) {
         container<2> sm(integral.get_space()); // second moment of charges
         gmb::zero(sm);
         get_one_electron_part(sm, v_ppol[i]->fname_sm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
-        double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
+        double fact = - v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
         integral.axpy(fact, sm);
         #endif
       }
