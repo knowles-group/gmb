@@ -11,10 +11,10 @@
 #include <ctime>
 #include <memory>
 #include <molpro/Options.h>
+#include <molpro/iostream.h>
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <molpro/linalg/itsolv/SolverFactory.h>
 #include <regex>
-#include <molpro/iostream.h>
 
 using namespace gmb;
 
@@ -22,7 +22,7 @@ extern molpro::Profiler prof;
 extern "C" void general_many_body(int64_t &nstate, double *energies) {
   auto ev = molpro::gmb::gmb();
   nstate = ev.size();
-  for (size_t i=0; i<nstate; ++i)
+  for (size_t i = 0; i < nstate; ++i)
     energies[i] = ev[i];
 }
 
@@ -67,7 +67,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 
   // print arguments
   molpro::cout << "Required calculation: "
-            << "\n\n";
+               << "\n\n";
   check_file(filename, "fcidump");
   molpro::cout << " fcidump = " << filename << "\n";
   molpro::cout << " method = " << method << "\n";
@@ -77,7 +77,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     molpro::cout << " dipole file = " << v_ppol[0]->fname_dm << "\n";
     check_file(v_ppol[0]->fname_sm, "second moment of charges");
     molpro::cout << " second moment of charges file = " << v_ppol[0]->fname_sm
-              << "\n";
+                 << "\n";
 
     molpro::cout << "\nPolariton parameters: \n";
     molpro::cout << "modes: " << ncav << "\n";
@@ -130,9 +130,9 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 
   // print results
   molpro::cout << *problem << " correlation energy: " << std::setprecision(12)
-            << problem->get_energy() << "\n";
+               << problem->get_energy() << "\n";
   molpro::cout << *problem << " total energy: " << std::setprecision(13)
-            << problem->get_energy() + hf_energy << "\n";
+               << problem->get_energy() + hf_energy << "\n";
   for (int i = 0; i < expected_results.size(); ++i)
     if (std::abs(problem->get_energy() + hf_energy - expected_results[i]) <
         1e-9)
@@ -174,7 +174,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   // print results
   molpro::cout << "\n" << *problem_es << " excitation energies (Ha) \n";
   for (auto &i : excitation_energies) {
-    molpro::cout << i << " \n";
+    molpro::cout << i << std::endl;
     energies.push_back(energies.front() + i);
   }
 
@@ -186,7 +186,8 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   std::chrono::duration<double> elapsed_seconds = end - start;
   std::time_t end_time = std::chrono::system_clock::to_time_t(end);
   molpro::cout << "\nFinished computation at " << std::ctime(&end_time)
-            << "Elapsed time: " << elapsed_seconds.count() << "s\n";
+               << "Elapsed time: " << elapsed_seconds.count() < < < <
+      "s" << std::endl;
   for (int i = 0; i < expected_results.size(); ++i)
     if (not found_expected_results[i])
       throw std::runtime_error("Did not match expected result " +
