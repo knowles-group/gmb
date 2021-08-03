@@ -186,8 +186,8 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   std::chrono::duration<double> elapsed_seconds = end - start;
   std::time_t end_time = std::chrono::system_clock::to_time_t(end);
   molpro::cout << "\nFinished computation at " << std::ctime(&end_time)
-               << "Elapsed time: " << elapsed_seconds.count() < < < <
-      "s" << std::endl;
+               << "Elapsed time: " << elapsed_seconds.count() 
+               << "s" << std::endl;
   for (int i = 0; i < expected_results.size(); ++i)
     if (not found_expected_results[i])
       throw std::runtime_error("Did not match expected result " +
