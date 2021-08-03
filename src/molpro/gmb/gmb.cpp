@@ -20,8 +20,6 @@ using namespace gmb;
 extern molpro::Profiler prof;
 extern "C" void general_many_body() { molpro::gmb::gmb();}
 
-double rnuc{0.0};
-
 void molpro::gmb::gmb(const molpro::Options& options) {
 
   std::string filename = options.parameter("dump",std::string{""});
@@ -32,7 +30,6 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   auto start = std::chrono::system_clock::now();
 
   // parse arguments
-  rnuc = options.parameter("rnuc",0.0);
   auto method = options.parameter("method","eom-ccsd");
   auto nroots = options.parameter("states", 3);
   auto ncav = options.parameter("polariton_modes", 0);
@@ -63,7 +60,6 @@ void molpro::gmb::gmb(const molpro::Options& options) {
   std::cout << " fcidump = " << filename << "\n";
   std::cout << " method = " << method << "\n";
   std::cout << " roots = " << nroots << "\n";
-  std::cout << " rnuc = " << rnuc << "\n";
   if (v_ppol.size() > 0) {
     check_file(v_ppol[0]->fname_dm, "dipole");
     std::cout << " dipole file = " << v_ppol[0]->fname_dm << "\n";
@@ -90,9 +86,13 @@ void molpro::gmb::gmb(const molpro::Options& options) {
 
   auto vnn = get_integral(filename);
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
+  #if 1 // self-energy
   for (size_t i = 0; i < ncav; i++) {
-      hf_energy += v_ppol[i]->gamma*v_ppol[i]->gamma*v_ppol[i]->omega*rnuc*rnuc;
-    }
+    auto rnuc = get_integral(v_ppol[i]->fname_dm);
+    std::cout << " rnuc = " << rnuc << "\n";
+    hf_energy += v_ppol[i]->gamma*v_ppol[i]->gamma*v_ppol[i]->omega*rnuc*rnuc;
+  }
+  #endif
   std::cout << "\nHF energy: " << std::setprecision(12) << hf_energy << "\n\n";
 
 #if 1 // CCSD

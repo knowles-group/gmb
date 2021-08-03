@@ -3,8 +3,6 @@
 #include "expressions/anti.h"
 #include "expressions/add_d2.h"
 
-extern double rnuc;
-
 double get_integral(const std::string &filename) {
   molpro::FCIdump dump(filename);
   int i, j, k, l;
@@ -43,6 +41,7 @@ double get_integral(const std::string &filename) {
       get_one_photon_part(integral, v_ppol, v_exist, v_orb_type);
       for (size_t i = 0; i < v_ppol.size(); i++) {
         double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
+        auto rnuc = get_integral(v_ppol[i]->fname_dm);
         #if 1 // add self-energy
         container<2> sm(integral.get_space()); // second moment of charges
         gmb::zero(sm);
@@ -51,7 +50,7 @@ double get_integral(const std::string &filename) {
         container<2> dm(integral.get_space()); // dipole moment 
         gmb::zero(dm);
         get_one_electron_part(dm, v_ppol[i]->fname_dm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
-        integral.axpy(fact*2*rnuc, dm);
+        integral.axpy(2.0*fact*rnuc, dm);
         #endif
       }
     }
@@ -103,7 +102,7 @@ double get_integral(const std::string &filename) {
 
   anti(h2_o1o2o3o4, *h2_o1o3o2o4, *h2_o1o4o2o3);
   
-  #if 1// add self-energy if needed
+  #if 1 // add self-energy if needed
   for (size_t i = 0; i < v_ppol.size(); i++) {
     std::unique_ptr<container<2>> pd_o1o3, pd_o2o4, pd_o2o3, pd_o1o4;
     double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
@@ -338,9 +337,12 @@ double get_integral(const std::string &filename) {
       double fact{v_ppol[bidx[0]-2]->gamma*v_ppol[bidx[0]-2]->omega};
       auto nmax = v_ppol[bidx[0]-2]->nmax;
       auto omega = v_ppol[bidx[0]-2]->omega;
+      auto rnuc = get_integral(v_ppol[bidx[0]-2]->fname_dm);
       if (v_orb_type[0] != v_orb_type[1]) { // ov block - only one element
+        #if 1 //coupling
         for (size_t i = 0; i < 1; i++) 
            ptr[0] = - fact*rnuc;
+        #endif
       } else {
         switch (v_orb_type[0]) {
           case (o): // oo block - only one diagonal element
@@ -356,10 +358,12 @@ double get_integral(const std::string &filename) {
               // diagonal elements 
               ptr[gmb::get_offset(ip,ip,nmax)] = p*omega;        
               // off-diagonal elements
+              #if 1 //coupling
               if (!(q > nmax)) {
                 ptr[gmb::get_offset(ip,iq,nmax)] = - fact*rnuc*sqrt(q);
                 ptr[gmb::get_offset(iq,ip,nmax)] = - fact*rnuc*sqrt(p+1);
               }
+              #endif
             }
             break;
           case (b):
