@@ -47,7 +47,7 @@ gcc:
     - git checkout $CI_COMMIT_SHA # because of cache
     - git reset --hard
     - git clean -f src test dependencies
-    - cd $TOP; BUILD=build-gcc; mkdir -p $BUILD && cd $BUILD && pwd && CC=mpicc CXX=mpicxx cmake -DMPIOPTIONS="--allow-run-as-root" $TOP ; cmake --build . -- -j ${procs} ; cd test;  ctest -V -j ${procs}
+    - cd $TOP; BUILD=build-gcc; mkdir -p $BUILD && cd $BUILD && pwd && CC=mpicc CXX=mpicxx cmake -DMPIOPTIONS="--allow-run-as-root" $TOP ; cmake --build . -- -j ${procs} ; cd test;  ctest -j ${procs} || ctest -V -j 1
 intel:
   stage: test
   image: registry.gitlab.com/knowles-group/gmb
