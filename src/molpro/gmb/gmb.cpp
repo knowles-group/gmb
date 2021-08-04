@@ -29,7 +29,6 @@ extern "C" void general_many_body(int64_t &nstate, double *energies) {
 
 std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 
-  std::vector<double> energies;
 
   std::string filename = options.parameter("dump", std::string{""});
   auto expected_results = options.parameter("results", std::vector<double>{});
@@ -108,6 +107,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   }
   #endif
   molpro::cout << "\nHF energy: " << std::setprecision(12) << hf_energy << "\n\n";
+  std::vector<double> all_energies;
 
 #if 1 // CCSD
   if (!(method.find("hf") != std::string::npos)) {
@@ -115,6 +115,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     // print results
     molpro::cout << *problem << " correlation energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
     double ccsd_energy = problem->get_energy() + hf_energy;
+    all_energies.push_back(ccsd_energy);
     molpro::cout << *problem  << " total energy: " << std::setprecision(13)
               << ccsd_energy << "\n";
     for (int i=0; i<expected_results.size(); ++i)
@@ -133,11 +134,14 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
       // print results
       molpro::cout << "\n       Excitation energy                     Total energy  \n";
       molpro::cout << "       (Ha)        (eV)                    (Ha)        (eV)  \n";
-      for (auto &i : energies)
+      constexpr double inverse_electron_volt{27.211386245988};
+      for (auto &i : energies) {
+        all_energies.push_back(ccsd_energy+i);
         molpro::cout << std::setw(14) << std::setprecision(7) << i << "   "
                   << std::setw(14) << i*27.2114 << "   "
                   << std::setw(14) << ccsd_energy+i << "    "
-                  << std::setw(14) << (ccsd_energy+i)*27.2114 << " \n";
+                  << std::setw(14) << (ccsd_energy+i)*inverse_electron_volt << " \n";
+      }
     }
   #endif
   }
@@ -152,8 +156,8 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   for (int i = 0; i < expected_results.size(); ++i)
     if (not found_expected_results[i])
       throw std::runtime_error("Did not match expected result " +
-                               std::to_string(expected_results[i]));
-  return energies;
+          std::to_string(expected_results[i]));
+  return all_energies;
 }
 
 
