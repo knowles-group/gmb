@@ -3,9 +3,10 @@
 #include "expressions/energy_hf.h"
 #include "hamiltonian.h"
 #include "init.h"
-#include "problem_ccd.h"
-#include "problem_ccsd.h"
-#include "problem_eom-ccsd.h"
+#include "run_method.h"
+#include "hamiltonian.h"
+#include "amplitudes.h"
+#include "expressions/energy_hf.h"
 #include "utils.h"
 #include <chrono>
 #include <ctime>
@@ -97,91 +98,51 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   // initialise hamiltonian
   init(filename, method, ham, v_ppol);
 
-#if 1 // CCSD
   auto vnn = get_integral(filename);
-  auto hf_energy = vnn + energy_hf(ham.m2get(f_oo), ham.m4get(i_oooo));
-  molpro::cout << "HF energy: " << std::setprecision(12) << hf_energy << "\n";
+  auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
+  #if 1 // self-energy
+  for (size_t i = 0; i < ncav; i++) {
+    auto rnuc = get_integral(v_ppol[i]->fname_dm);
+    molpro::cout << " rnuc = " << rnuc << "\n";
+    hf_energy += v_ppol[i]->gamma*v_ppol[i]->gamma*v_ppol[i]->omega*rnuc*rnuc;
+  }
+  #endif
+  molpro::cout << "\nHF energy: " << std::setprecision(12) << hf_energy << "\n\n";
 
-  // set CCSD amplitudes
-  if (method.find("ccs") != std::string::npos)
-    ptampl->set(t1, container(ham.m2get(f_ov).get_space()));
-  if ((method.find("ccsd") != std::string::npos) ||
-      (method.find("ccd") != std::string::npos))
-    ptampl->set(t2, container(ham.m4get(i_oovv).get_space()));
-
-  // set problem
-  if (method.find("ccsd") != std::string::npos)
-    problem = std::make_unique<problem_ccsd>(ham);
-  if (method.find("ccd") != std::string::npos)
-    problem = std::make_unique<problem_ccd>(ham);
-
-  // set solver
-  auto solver = molpro::linalg::itsolv::create_NonLinearEquations<amplitudes<>>(
-      "DIIS", "max_size_qspace=8");
-  auto residual = *ptampl;
-
-  // solver options
-  solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
-  // solver->set_max_iter(110);
-  // solver->set_convergence_threshold(1.0e-7);
-  solver->solve(*ptampl, residual, *problem);
-  solver->solution(*ptampl, residual);
-  problem->energy(*ptampl);
-
-  // print results
-  molpro::cout << *problem << " correlation energy: " << std::setprecision(12)
-               << problem->get_energy() << "\n";
-  molpro::cout << *problem << " total energy: " << std::setprecision(13)
-               << problem->get_energy() + hf_energy << "\n";
-  for (int i = 0; i < expected_results.size(); ++i)
-    if (std::abs(problem->get_energy() + hf_energy - expected_results[i]) <
-        1e-9)
-      found_expected_results[i] = true;
-  energies.push_back(problem->get_energy() + hf_energy);
+#if 1 // CCSD
+  if (!(method.find("hf") != std::string::npos)) {
+    run_gs(ham, method, problem, ptampl);
+    // print results
+    molpro::cout << *problem << " correlation energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
+    double ccsd_energy = problem->get_energy() + hf_energy;
+    molpro::cout << *problem  << " total energy: " << std::setprecision(13)
+              << ccsd_energy << "\n";
+    for (int i=0; i<expected_results.size(); ++i)
+      if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
 
 #if 1 // Excited State
+    if (method.find("eom") != std::string::npos) {
 
-  // set EOM-CCSD amplitudes
-  std::unique_ptr<amplitudes<>> prampl{std::make_unique<amplitudes<>>()};
-  prampl->set(r1, container(ptampl->m2get(t1).get_space()));
-  prampl->set(r2, container(ptampl->m4get(t2).get_space()));
-  std::vector<amplitudes<>> v_rampl(nroots, *prampl);
-  std::unique_ptr<problem_eom> problem_es;
-  problem_es = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
+      std::unique_ptr<problem_eom> problem_es;
+      run_es(ham, method, problem_es, ptampl, nroots);
+      for (const auto& ev : problem_es->get_energy())
+        for (int i=0; i<expected_results.size(); ++i)
+          if (std::abs(ev-expected_results[i])<1e-10) found_expected_results[i]=true;
 
-  molpro::cout << "\n" << *problem_es << "\n";
-
-  // set solver
-  auto solver_es =
-      molpro::linalg::itsolv::create_LinearEigensystem<amplitudes<>>(
-          "Davidson");
-  auto residuals_es = v_rampl;
-
-  // set options
-  solver_es->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
-  solver_es->set_n_roots(nroots);
-  solver_es->set_convergence_threshold(1.0e-7);
-
-  // solve
-  solver_es->solve(v_rampl, residuals_es, *problem_es, true);
-  problem_es->set_energy(solver_es->eigenvalues());
-  for (const auto &ev : solver_es->eigenvalues())
-    for (int i = 0; i < expected_results.size(); ++i)
-      if (std::abs(ev - expected_results[i]) < 1e-9)
-        found_expected_results[i] = true;
-  auto excitation_energies = problem_es->get_energy();
-
-  // print results
-  molpro::cout << "\n" << *problem_es << " excitation energies (Ha) \n";
-  for (auto &i : excitation_energies) {
-    molpro::cout << i << std::endl;
-    energies.push_back(energies.front() + i);
+      auto energies = problem_es->get_energy();
+      // print results
+      molpro::cout << "\n       Excitation energy                     Total energy  \n";
+      molpro::cout << "       (Ha)        (eV)                    (Ha)        (eV)  \n";
+      for (auto &i : energies)
+        molpro::cout << std::setw(14) << std::setprecision(7) << i << "   "
+                  << std::setw(14) << i*27.2114 << "   "
+                  << std::setw(14) << ccsd_energy+i << "    "
+                  << std::setw(14) << (ccsd_energy+i)*27.2114 << " \n";
+    }
+  #endif
   }
+  #endif
 
-#endif
-#endif
-
-  // molpro::cout << *pprof << std::endl;
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end - start;
   std::time_t end_time = std::chrono::system_clock::to_time_t(end);
@@ -195,8 +156,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   return energies;
 }
 
+
+
 #include <molpro/linalg/itsolv/SolverFactory-implementation.h>
-// template class molpro::linalg::itsolv::SolverFactory<amplitudes<>,
-// amplitudes<>>;
-template class molpro::linalg::itsolv::SolverFactory<amplitudes<>,
-                                                     amplitudes<>>;
+template class molpro::linalg::itsolv::SolverFactory<amplitudes<>, amplitudes<>>;

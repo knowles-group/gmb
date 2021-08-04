@@ -7,6 +7,8 @@
 #include "hamiltonian.h"
 #include "supercontainer.h"
 
+#include <memory>
+
 namespace gmb {
 
   /**
@@ -17,7 +19,7 @@ namespace gmb {
    * @param hamiltonian 
    */
   void init(const std::string &filename, const std::string &method, hamiltonian<> &hamiltonian, const std::vector<std::shared_ptr<polariton>> &ppol);
-
+  
 
 } // namespace gmb
 

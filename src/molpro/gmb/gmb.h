@@ -1,5 +1,6 @@
 #ifndef GMB_SRC_MOLPRO_GMB_GMB_H_
 #define GMB_SRC_MOLPRO_GMB_GMB_H_
+
 #include <molpro/Options.h>
 #include <vector>
 namespace molpro::gmb {

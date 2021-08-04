@@ -8,7 +8,6 @@
 #include "expressions/eom-ccsd/precond_ov.h"
 #include "expressions/diag_oovv.h"
 #include "expressions/diag_ov.h"
-#include "expressions/update.h"
 
 
 class problem_ccsd : public problem_gen {
@@ -64,6 +63,10 @@ public:
   }
 
   void action(const CVecRef<container_t> &parameters, const VecRef<container_t> &actions) const override {}
+
+  void energy(container_t x) {
+    m_energy = ccsd_energy(x.m2get(t1), x.m4get(t2), m_ham.m2get(f_ov), m_ham.m4get(i_oovv));
+  }
 
   void print(std::ostream& s) const {
     s << "CCSD";
