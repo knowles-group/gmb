@@ -173,7 +173,7 @@ namespace gmb {
   }
 
   void zero(libtensor::btensor<2,double> &tensor) {
-	if (false) std::cout << "copying a two-dimensional tensor\n";
+	if (false) molpro::cout << "copying a two-dimensional tensor\n";
 
   libtensor::block_tensor_wr_ctrl<2, double> ctrl(tensor);
 
@@ -206,8 +206,8 @@ namespace gmb {
   }
 
   if (false) {
-  std::cout << "printing t\n";
-  libtensor::bto_print<2, double>(std::cout).perform(tensor);
+  molpro::cout << "printing t\n";
+  libtensor::bto_print<2, double>(molpro::cout).perform(tensor);
   }
 }
 
@@ -241,8 +241,8 @@ namespace gmb {
     ctrl.ret_block(bidx);
   }
   if (false) {
-  std::cout << "printing t\n";
-  libtensor::bto_print<4, double>(std::cout).perform(tensor);
+  molpro::cout << "printing t\n";
+  libtensor::bto_print<4, double>(molpro::cout).perform(tensor);
   }
 }
 

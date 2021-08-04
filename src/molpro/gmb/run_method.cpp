@@ -26,7 +26,7 @@ void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<probl
   else if (method.find("mp2") != std::string::npos)
     problem = std::make_unique<problem_mp2>(ham);
 
-  std::cout << "Running " << *problem << std::endl;
+  molpro::cout << "Running " << *problem << std::endl;
 
   // set solver
   auto solver = molpro::linalg::itsolv::create_NonLinearEquations<amplitudes<>>("DIIS", "max_size_qspace=8");
@@ -42,7 +42,7 @@ void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<probl
 }
 
 void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots) {
-  std::cout << "\nRunning EOM-CCSD" << std::endl;
+  molpro::cout << "\nRunning EOM-CCSD" << std::endl;
   
   // set EOM-CCSD amplitudes
   problem = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
