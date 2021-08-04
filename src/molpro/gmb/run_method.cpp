@@ -8,6 +8,8 @@
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <molpro/linalg/itsolv/SolverFactory.h>
 
+#include <molpro/iostream.h>
+
 void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_gen> &problem, std::unique_ptr<amplitudes<>> &ptampl) {
 
   // set CCSD amplitudes
