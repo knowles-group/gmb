@@ -21,7 +21,7 @@ public:
                     const std::vector<value_t> &shift) const override {
     for (int k = 0; k < g.size(); k++) {
       auto &a = g[k].get();     
-      auto d_ov = diag_ov(m_ham.m2get(f_oo), m_ham.m2get(f_ov), m_ham.m2get(f_vv));
+      auto d_ov = diag_ov(m_ham.m2get(f_oo_e), m_ham.m2get(f_ov), m_ham.m2get(f_vv_e));
       auto d_oovv = diag_oovv(d_ov, m_ham.m4get(i_oovv));
       auto t1_new = precond_ov(a.m2get(t1), d_ov, 0.0);
       auto t2_new = precond_oovv(a.m4get(t2),d_oovv, 0.0);

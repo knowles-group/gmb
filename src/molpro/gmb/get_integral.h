@@ -82,7 +82,7 @@ void read_dump(const std::string &filename,
    */
   container<4,double> get_i(const std::string &filename, 
                const std::vector<std::shared_ptr<polariton>> &v_ppol,
-               const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4);
+               const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4, const bool &add_ph = true);
 
   void get_one_electron_part(container<2,double> &integral, 
                const std::string &filename, 

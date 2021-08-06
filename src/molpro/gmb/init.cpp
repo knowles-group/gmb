@@ -25,6 +25,12 @@ namespace gmb {
     ham.set(f_oo, fock_xx(d_oo, h1_oo, int_oooo));
     ham.set(f_vv, fock_xx(d_oo, h1_vv, int_ovov));
 
+    // for preconditioner
+    auto int_oooo_e = get_i(filename,v_ppol, o, o, o, o, false);
+    auto int_ovov_e = get_i(filename,v_ppol, o, v, o, v, false);
+    ham.set(f_oo_e, fock_xx(d_oo, h1_oo, int_oooo_e));
+    ham.set(f_vv_e, fock_xx(d_oo, h1_vv, int_ovov_e));
+
     if (method.find("cc") != std::string::npos) {
 
       auto int_vvvv = get_i(filename, v_ppol, v, v, v, v);

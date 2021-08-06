@@ -64,7 +64,7 @@ double get_integral(const std::string &filename) {
 
   container<4,double> get_i(const std::string &filename, 
                             const std::vector<std::shared_ptr<polariton>> &v_ppol,
-                            const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4) {
+                            const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4, const bool &add_ph) {
   
   std::shared_ptr<container<4>> tmp_o1o2o3o4, h2_o1o3o2o4, h2_o1o4o2o3;
   
@@ -106,34 +106,36 @@ double get_integral(const std::string &filename) {
   anti(h2_o1o2o3o4, *h2_o1o3o2o4, *h2_o1o4o2o3);
   
   #if 1 // add self-energy if needed
-  for (size_t i = 0; i < v_ppol.size(); i++) {
-    std::unique_ptr<container<2>> pd_o1o3, pd_o2o4, pd_o2o3, pd_o1o4;
-    double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
+  if (add_ph) {
+    for (size_t i = 0; i < v_ppol.size(); i++) {
+      std::unique_ptr<container<2>> pd_o1o3, pd_o2o4, pd_o2o3, pd_o1o4;
+      double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
 
-    // add dipole integrals to two-electron part
-    pd_o1o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o3, false));
-    if (o1 == o2 && o3 == o4)
-      pd_o2o4 = std::make_unique<container<2>> (*pd_o1o3);
-    else 
-      pd_o2o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o4, false));
+      // add dipole integrals to two-electron part
+      pd_o1o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o3, false));
+      if (o1 == o2 && o3 == o4)
+        pd_o2o4 = std::make_unique<container<2>> (*pd_o1o3);
+      else 
+        pd_o2o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o4, false));
 
-    if (o1 == o2)
-      pd_o2o3 = std::make_unique<container<2>> (*pd_o1o3);
-    else if(o3 == o4)
-      pd_o2o3 = std::make_unique<container<2>> (*pd_o2o4);
-    else
-      pd_o2o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o3, false));
+      if (o1 == o2)
+        pd_o2o3 = std::make_unique<container<2>> (*pd_o1o3);
+      else if(o3 == o4)
+        pd_o2o3 = std::make_unique<container<2>> (*pd_o2o4);
+      else
+        pd_o2o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o3, false));
 
-    if (o3 == o4)
-      pd_o1o4 = std::make_unique<container<2>> (*pd_o1o3);
-    else if (o1 == o2)
-      pd_o1o4 = std::make_unique<container<2>> (*pd_o2o4);
-    else if (o1 == o2 && o3 == o4)
-      pd_o1o4 = std::make_unique<container<2>> (*pd_o2o3);
-    else
-      pd_o1o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o4, false));
+      if (o3 == o4)
+        pd_o1o4 = std::make_unique<container<2>> (*pd_o1o3);
+      else if (o1 == o2)
+        pd_o1o4 = std::make_unique<container<2>> (*pd_o2o4);
+      else if (o1 == o2 && o3 == o4)
+        pd_o1o4 = std::make_unique<container<2>> (*pd_o2o3);
+      else
+        pd_o1o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o4, false));
 
-    add_d2(fact, *pd_o1o3, *pd_o2o4, *pd_o2o3, *pd_o1o4, h2_o1o2o3o4);
+      add_d2(fact, *pd_o1o3, *pd_o2o4, *pd_o2o3, *pd_o1o4, h2_o1o2o3o4);
+    }
   }
   #endif
   
