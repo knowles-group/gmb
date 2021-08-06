@@ -2,7 +2,9 @@
 #include "utils.h"
 #include "expressions/anti.h"
 #include "expressions/add_d2.h"
+
 #include <molpro/iostream.h>
+#include <numeric>
 
 double get_integral(const std::string &filename) {
   molpro::FCIdump dump(filename);
@@ -154,11 +156,8 @@ double get_integral(const std::string &filename) {
   molpro::FCIdump dump{filename};
   unsigned int nb = dump.parameter("NORB")[0];
   unsigned int nel = dump.parameter("NELEC")[0];
-  unsigned int nbeta = nel/2;
-  unsigned int nalpha = nel - nbeta;
   std::vector<unsigned int> nphoton(v_ppol.size(), 1); // occupied is always 1 (vacuum orbital)
 
-  std::vector<size_t> no = {nalpha, nbeta}, nv = {nb - nalpha, nb - nbeta};
 
   std::vector<int> orbsym = dump.parameter("ORBSYM");
   // size_t ms2 = dump.parameter("MS2")[0];
@@ -174,6 +173,10 @@ double get_integral(const std::string &filename) {
   
   syms_t full(8);
   for (auto &&os : orbsym) full[os-1] += 1;
+
+  unsigned int nalpha = std::accumulate(fermi.begin(),fermi.end(),0);
+  unsigned int nbeta =std::accumulate(closed.begin(),closed.end(),0);
+  std::vector<size_t> no = {nalpha, nbeta}, nv = {nb - nalpha, nb - nbeta};
 
   std::vector<std::pair<syms_t, syms_t>> 
     occ = {{empty, fermi},{empty, closed}}, 
