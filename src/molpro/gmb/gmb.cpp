@@ -66,7 +66,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   }
 
   // print arguments
-  molpro::cout << "Required calculation: "
+  molpro::cout << "\nRequired calculation: "
                << "\n\n";
   check_file(filename, "fcidump");
   molpro::cout << " fcidump = " << filename << "\n";

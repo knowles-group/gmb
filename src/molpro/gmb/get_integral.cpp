@@ -215,8 +215,6 @@ double get_integral(const std::string &filename) {
           v_norb[ispin][iot] = nb; 
           v_psi[ispin][iot] = bas; 
         } break;
-        default: 
-          break;
       }
     }
     size_t sp{0};
