@@ -44,16 +44,13 @@ public:
     }
   }
 
-  friend
-  std::ostream& operator<<(std::ostream& s, const problem_ccd& problem) ;
+  void energy(container_t x) {
+      m_energy = 0.25 * x.m4get(t2).dot(m_ham.m4get(i_oovv));
+  }
 
     void print(std::ostream& s) const {
     s << "CCD";
   }
 };
 
-std::ostream& operator<<(std::ostream& s, const problem_ccd& problem) {
-  s<<"Problem: CCD ";
-  return s;
-}
 #endif //GMB_PROBLEM_CCD_H_

@@ -4,7 +4,7 @@
 #include "supercontainer.h"
 
 // one-electron (oe) part
-enum oe_part {f_oo, f_ov, f_vv};
+enum oe_part {f_oo, f_ov, f_vv, f_oo_e, f_vv_e};
 // two-electron (te) part
 enum te_part {i_oooo, i_ooov, i_oovv, i_ovvv, i_ovov, i_vvvv};
 
@@ -15,8 +15,10 @@ public:
     std::string str;
     switch (key) {
       case f_oo: str = "f_oo"; break;
+      case f_oo_e: str = "f_oo_e"; break;
       case f_ov: str = "f_ov"; break;
       case f_vv: str = "f_vv"; break;
+      case f_vv_e: str = "f_vv_e"; break;
     }
     return str;
   }

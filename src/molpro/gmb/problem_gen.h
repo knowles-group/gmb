@@ -4,12 +4,10 @@
 #include <vector>
 #include "hamiltonian.h"
 #include "amplitudes.h"
-#include "expressions/ccsd/energy.h"
-
 
 class problem_gen : public molpro::linalg::itsolv::Problem<amplitudes<>> {
 protected:
-  mutable double m_energy = 0; ///> energy
+  double m_energy{0.0}; ///> energy
   mutable hamiltonian<> m_ham; ///> Hamiltonian
 public:
   using Problem::container_t;
@@ -19,14 +17,12 @@ public:
 
   virtual ~problem_gen() = default;
 
-  void energy(container_t x) const {
-    if (x.get_m2().find("t1") == x.get_m2().end())
-      m_energy = 0.25 * x.m4get(t2).dot(m_ham.m4get(i_oovv));
-    else
-      m_energy = ccsd_energy(x.m2get(t1), x.m4get(t2), m_ham.m2get(f_ov), m_ham.m4get(i_oovv));
-  }
 
-  double get_energy() const {return m_energy;}  
+  virtual void energy(container_t x) {};
+
+  double get_energy() const {
+    return m_energy;
+  }  
 
   friend
   std::ostream& operator<<(std::ostream& s, const problem_gen& problem);
@@ -35,9 +31,9 @@ public:
   void print(std::ostream& s) const {}
 };
 
-std::ostream& operator<<(std::ostream& s, const problem_gen& problem) {
-  problem.print(s);
-  return s;
-}
+// std::ostream& operator<<(std::ostream& s, const problem_gen& problem) {
+//   problem.print(s);
+//   return s;
+// }
 
 #endif //GMB_PROBLEM_GEN_H_

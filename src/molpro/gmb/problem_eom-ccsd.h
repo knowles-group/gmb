@@ -116,14 +116,6 @@ public:
     }
   }
 
-  void print(std::ostream& s) const {
-    s << "EOM-CCSD";
-  }
-
 };
 
-std::ostream& operator<<(std::ostream& s, const problem_eom_ccsd& problem) {
-  s<<"Problem: EOM-CCSD ";
-  return s;
-}
 #endif //GMB_PROBLEM_EOM_CCSD_H_

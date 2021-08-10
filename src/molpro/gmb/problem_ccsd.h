@@ -8,7 +8,6 @@
 #include "expressions/eom-ccsd/precond_ov.h"
 #include "expressions/diag_oovv.h"
 #include "expressions/diag_ov.h"
-#include "expressions/update.h"
 
 
 class problem_ccsd : public problem_gen {
@@ -22,7 +21,7 @@ public:
                     const std::vector<value_t> &shift) const override {
     for (int k = 0; k < g.size(); k++) {
       auto &a = g[k].get();     
-      auto d_ov = diag_ov(m_ham.m2get(f_oo), m_ham.m2get(f_ov), m_ham.m2get(f_vv));
+      auto d_ov = diag_ov(m_ham.m2get(f_oo_e), m_ham.m2get(f_ov), m_ham.m2get(f_vv_e));
       auto d_oovv = diag_oovv(d_ov, m_ham.m4get(i_oovv));
       auto t1_new = precond_ov(a.m2get(t1), d_ov, 0.0);
       auto t2_new = precond_oovv(a.m4get(t2),d_oovv, 0.0);
@@ -64,6 +63,10 @@ public:
   }
 
   void action(const CVecRef<container_t> &parameters, const VecRef<container_t> &actions) const override {}
+
+  void energy(container_t x) {
+    m_energy = ccsd_energy(x.m2get(t1), x.m4get(t2), m_ham.m2get(f_ov), m_ham.m4get(i_oovv));
+  }
 
   void print(std::ostream& s) const {
     s << "CCSD";

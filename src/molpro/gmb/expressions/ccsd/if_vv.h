@@ -24,7 +24,6 @@ container<2,double> ccsd_if_vv(
     if_vv(b|e) = f_vv(b|e)
                - contract(m, t1(m|b), if_ov(m|e))
                - 0.5 * contract(f|m|n, t2(m|n|b|f), i_oovv(m|n|e|f))
-            //    - contract(f|m|n, t1(m|b)*t1(n|f), i_oovv(m|n|e|f))
                + contract(f|m, t1(m|f), i_ovvv(m|b|f|e));
     return if_vv;
 

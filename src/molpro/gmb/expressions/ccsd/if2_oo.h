@@ -7,7 +7,7 @@
 /**
  * @brief F_oo intermediate 
  * 
- * Needed to calculate CCSD T2s
+ * Needed to calculate CCSD T2
  */
 container<2,double> ccsd_if2_oo(
     container<2, double> &t1,     ///< CCSD T1
