@@ -13,11 +13,14 @@ protected:
   mutable hamiltonian<> m_ham;     ///> Hamiltonian
   mutable amplitudes<> m_tampl;    ///> T amplitudes
   size_t m_nroots;    ///> energy
+  mutable std::vector<std::unique_ptr<container<2>>> m_vr1;
 public:
   using Problem::container_t;
   using Problem::value_t;
   problem_eom(const hamiltonian<> &ham, const amplitudes<> &tampl, const size_t &nroots)
-  : m_ham(ham), m_tampl(tampl), m_nroots(nroots) {}
+  : m_ham(ham), m_tampl(tampl), m_nroots(nroots) {
+    m_vr1.resize(nroots);
+  }
 
   virtual ~problem_eom() {}
 
@@ -26,9 +29,61 @@ public:
   std::vector<double> get_energy() const {return m_energy;}  
   
   virtual void create_guess(std::vector<amplitudes<>>& v_rampl) {};
-  
-  void eigenvectors(const size_t &k, const amplitudes<>& rampl) const {
-    std::cout << "this is k: " << k << std::endl;
+
+  void character() const {
+
+    for (size_t ir1 = 0; ir1 < m_vr1.size(); ir1++) {
+      std::cout << "\nTransition #" << ir1+1 << "\n";
+      std::cout << "orbitals      transition type      amplitude\n";
+      // std::cout << "r[" << ir1 << "]:\n";
+      // m_vr1[ir1]->print();
+
+      libtensor::block_tensor_rd_i<2, double> &bt(*m_vr1[ir1]);
+      const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
+      auto no = dims.get_dim(0);
+      auto nv = dims.get_dim(1);
+
+      libtensor::block_tensor_rd_ctrl<2, double> ctrl(*m_vr1[ir1]);
+
+      libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
+        size_t count{0};
+      for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
+        libtensor::index<2> bidx;
+        ol.get_index(it, bidx);
+
+        libtensor::dense_tensor_rd_i<2, double> &blk = ctrl.req_const_block(bidx);
+        libtensor::dense_tensor_rd_ctrl<2, double> tc(blk);
+        const libtensor::dimensions<2> &tdims = blk.get_dims();
+        const double *ptr = tc.req_const_dataptr();
+        size_t i{1}, a{1};
+        for (size_t itdim = 0; itdim < tdims.get_size(); itdim++) {
+          if (ptr[itdim] >  0.0001) {
+            i = 1+(count/nv);
+            a = 1+itdim;
+            std::cout << "o" << i  << " -> v" << a << "      ";
+            for (size_t in = 0; in < 2; in++) {
+              switch (bidx[in]) {
+              case alpha:
+                std::cout << "alpha ";
+                break;
+              case beta:
+                std::cout << "beta  ";
+                break;
+              default:
+                std::cout << "photon";
+                break;
+              }
+              if (in == 0)
+                std::cout << " -> ";
+            }
+            std::cout << "     " << std::setprecision(5) <<  ptr[itdim] << "\n";
+          }
+          ++count;
+        }
+        tc.ret_const_dataptr(ptr);
+        ctrl.ret_const_block(bidx);
+      }
+    }
   };
 };
 
