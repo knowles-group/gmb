@@ -373,7 +373,7 @@ double get_integral(const std::string &filename) {
     
     // set integral permutational symmetry
     if (v_orb_type[0] == v_orb_type[1]) 
-      gmb::set_sym_pp(integral);
+      gmb::set_sym_pp(integral,*pspace);
 
     gmb::zero(integral);
 
@@ -717,7 +717,10 @@ double get_integral(const std::string &filename) {
     libtensor::permutation<4> p0213; p0213.permute(0, 2).permute(1, 3);
     libtensor::se_perm<4, double> se_0213(p0213, tr);
     sym.insert(se_0213);
-  }
+  }  
+  // spin symmetry
+  if (o1 == o2 && o3 == o4 && o1 != o3)
+    gmb::set_sym_ppqq(integral, *p_sp4);
   gmb::zero(integral);
 
   get_two_electron_part(integral, filename, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
