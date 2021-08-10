@@ -86,7 +86,6 @@ public:
 
   void action(const CVecRef<container_t> &parameters, const VecRef<container_t> &actions) const override {
     for (int k = 0; k < parameters.size(); k++) {
-      std::cout << "k = " << k << std::endl;
       auto &ccp = const_cast<container_t&> (parameters[k].get());     
       auto &a = actions[k].get();  
       // compute intermediates
@@ -99,8 +98,7 @@ public:
       auto r1_new = eom_ccsd_r1(ccp.m2get(r1), ccp.m4get(r2), m_int.m2get("if_oo"), m_int.m2get("if_ov"), m_int.m2get("if_vv"),  
                     m_int.m4get("iw_ovov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw2_ovvv"));
       a.set(r1, r1_new);
-      std::cout << "r1_new:" << std::endl;
-      r1_new.print();
+      m_vr1[k+(m_nroots-parameters.size())] = (std::make_unique<container<2>> (r1_new));
       }
       // compute r2
       {
@@ -109,10 +107,8 @@ public:
                     m_ham.m4get(i_oovv), m_int.m4get("iw_oooo"), m_int.m4get("iw_ooov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw_ovov"), m_int.m4get("iw_ovvv"), m_int.m4get("iw2_ovvv"), m_int.m4get("iw_vvvv"));  
       
       a.set(r2, r2_new);
-      std::cout << "r2_new:" << std::endl;
-      r2_new.print();
       }
-      eigenvectors(m_nroots-parameters.size()+k, a);
+      // eigenvectors(m_nroots-parameters.size()+k, a);
     }
   }
 
