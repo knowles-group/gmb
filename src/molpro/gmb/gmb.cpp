@@ -143,6 +143,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
                   << std::setw(14) << ccsd_energy+i << "    "
                   << std::setw(14) << (ccsd_energy+i)*inverse_electron_volt << " \n";
       }
+      problem_es->character();
     }
   #endif
   }
@@ -152,8 +153,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   std::chrono::duration<double> elapsed_seconds = end - start;
   std::time_t end_time = std::chrono::system_clock::to_time_t(end);
   molpro::cout << "\nFinished computation at " << std::ctime(&end_time)
-               << "Elapsed time: " << elapsed_seconds.count() << "s"
-               << std::endl;
+               << "Elapsed time: " << elapsed_seconds.count() << "s\n\n";
   for (int i = 0; i < expected_results.size(); ++i)
     if (not found_expected_results[i])
       throw std::runtime_error("Did not match expected result " +
