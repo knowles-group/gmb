@@ -5,6 +5,7 @@
 #include "problem_eom.h"
 #include "expressions/eom-ccsd/eom-ccsd.h"
 #include "expressions/update.h"
+#include <molpro/iostream.h>
 
 extern molpro::Profiler prof;
 // extern std::unique_ptr<molpro::Profiler> pprof;
