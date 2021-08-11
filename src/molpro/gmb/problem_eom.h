@@ -4,8 +4,7 @@
 #include <vector>
 #include "amplitudes.h"
 #include "hamiltonian.h"
-// #include "expressions/ccsd/ccsd.h"
-
+#include <molpro/iostream.h>
 
 class problem_eom : public molpro::linalg::itsolv::Problem<amplitudes<>> {
 protected:
@@ -33,10 +32,10 @@ public:
   void character() const {
 
     for (size_t ir1 = 0; ir1 < m_vr1.size(); ir1++) {
-      std::cout << "\nExcited state #" << ir1+1 
+      molpro::cout << "\nExcited state #" << ir1+1 
                 << "\nExcitation energy: " << std::setprecision(5) << std::fixed << m_energy[ir1] << " Ha"
                 << "\norbitals      transition type      amplitude\n";
-      // std::cout << "r[" << ir1 << "]:\n";
+      // molpro::cout << "r[" << ir1 << "]:\n";
       // m_vr1[ir1]->print();
 
       libtensor::block_tensor_rd_i<2, double> &bt(*m_vr1[ir1]);
@@ -61,20 +60,20 @@ public:
           if (std::abs(ptr[itdim]) >  0.0001) {
             i = 1+(count/nv);
             a = 1+itdim;
-            std::cout << "o" << i  << " -> v" << a << "      ";
+            molpro::cout << "o" << i  << " -> v" << a << "      ";
             for (size_t in = 0; in < 2; in++) {
               switch (bidx[in]) {
-              case alpha: std::cout << "alpha ";
+              case alpha: molpro::cout << "alpha ";
                 break;
-              case beta: std::cout << "beta  ";
+              case beta: molpro::cout << "beta  ";
                 break;
-              default: std::cout << "photon";
+              default: molpro::cout << "photon";
                 break;
               }
               if (in == 0)
-                std::cout << " -> ";
+                molpro::cout << " -> ";
             }
-            std::cout << "     " << std::setprecision(5) << std::fixed <<  ptr[itdim] << "\n";
+            molpro::cout << "     " << std::setprecision(5) << std::fixed <<  ptr[itdim] << "\n";
           }
           ++count;
         }
