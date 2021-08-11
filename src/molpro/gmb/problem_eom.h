@@ -57,7 +57,7 @@ public:
         const double *ptr = tc.req_const_dataptr();
         size_t i{1}, a{1};
         for (size_t itdim = 0; itdim < tdims.get_size(); itdim++) {
-          if (std::abs(ptr[itdim]) >  0.0001) {
+          if (std::abs(ptr[itdim]) >  0.001) {
             i = 1+(count/nv);
             a = 1+itdim;
             molpro::cout << "o" << i  << " -> v" << a << "      ";
