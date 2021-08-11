@@ -33,8 +33,9 @@ public:
   void character() const {
 
     for (size_t ir1 = 0; ir1 < m_vr1.size(); ir1++) {
-      std::cout << "\nTransition #" << ir1+1 << "\n";
-      std::cout << "orbitals      transition type      amplitude\n";
+      std::cout << "\nExcited state #" << ir1+1 
+                << "\nExcitation energy: " << std::setprecision(5) << std::fixed << m_energy[ir1] << " Ha"
+                << "\norbitals      transition type      amplitude\n";
       // std::cout << "r[" << ir1 << "]:\n";
       // m_vr1[ir1]->print();
 
@@ -57,26 +58,23 @@ public:
         const double *ptr = tc.req_const_dataptr();
         size_t i{1}, a{1};
         for (size_t itdim = 0; itdim < tdims.get_size(); itdim++) {
-          if (ptr[itdim] >  0.0001) {
+          if (std::abs(ptr[itdim]) >  0.0001) {
             i = 1+(count/nv);
             a = 1+itdim;
             std::cout << "o" << i  << " -> v" << a << "      ";
             for (size_t in = 0; in < 2; in++) {
               switch (bidx[in]) {
-              case alpha:
-                std::cout << "alpha ";
+              case alpha: std::cout << "alpha ";
                 break;
-              case beta:
-                std::cout << "beta  ";
+              case beta: std::cout << "beta  ";
                 break;
-              default:
-                std::cout << "photon";
+              default: std::cout << "photon";
                 break;
               }
               if (in == 0)
                 std::cout << " -> ";
             }
-            std::cout << "     " << std::setprecision(5) <<  ptr[itdim] << "\n";
+            std::cout << "     " << std::setprecision(5) << std::fixed <<  ptr[itdim] << "\n";
           }
           ++count;
         }
