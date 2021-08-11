@@ -68,7 +68,7 @@ namespace gmb {
     y(p|q|r|s) += a*x(p|q|r|s);
   };
 
-  void set_sym_pp(libtensor::btensor<2,double> &tensor, const libtensor::bispace<2> &space) {
+  void set_sym_pp(libtensor::btensor<2,double> &tensor) {
     libtensor::block_tensor_wr_ctrl<2, double> ctrl(tensor);
     libtensor::symmetry<2, double> &sym = ctrl.req_symmetry();
     // permutational symmetry
@@ -76,36 +76,6 @@ namespace gmb {
     libtensor::scalar_transf<double> tr(1.0);
     libtensor::se_perm<2, double> se(p01, tr);
     sym.insert(se);
-    // spin symmetry 
-    mask<2> msk; msk[0] = msk[1] = true;
-    index<2> i00, i01, i10, i11;
-    i10[0] = i01[1] = 1;
-    i11[0] = i11[1] = 1;
-    se_part<2, double> sp(space.get_bis(), msk, 2);
-    sp.add_map(i00, i11, tr);
-    sp.mark_forbidden(i01);
-    sp.mark_forbidden(i10);
-    sym.insert(sp); 
-  };
-
-  void set_sym_pq(libtensor::btensor<2,double> &tensor, const libtensor::bispace<2> &space) {
-    libtensor::block_tensor_wr_ctrl<2, double> ctrl(tensor);
-    libtensor::symmetry<2, double> &sym = ctrl.req_symmetry();
-    // // permutational symmetry
-    // libtensor::permutation<2> p01; p01.permute(0, 1);
-    // libtensor::se_perm<2, double> se(p01, tr);
-    // sym.insert(se);
-    // spin symmetry 
-    // mask<2> msk; msk[0] = msk[1] = false;
-    // index<2> i00, i01, i10, i11;
-    // i10[0] = i01[1] = 1;
-    // i11[0] = i11[1] = 1;
-    // se_part<2, double> sp(space.get_bis(), msk, 2);
-    // libtensor::scalar_transf<double> tr(1.0);
-    // sp.add_map(i00, i11, tr);
-    // sp.mark_forbidden(i01);
-    // sp.mark_forbidden(i10);
-    // sym.insert(sp); 
   };
 
   void set_sym_pppp(libtensor::btensor<4,double> &tensor) {
@@ -138,48 +108,19 @@ namespace gmb {
     sym.insert(se_01);
   }
 
-  void set_sym_ppqq(libtensor::btensor<4,double> &tensor, const libtensor::bispace<4> &space) {
+  void set_sym_ppqq(libtensor::btensor<4,double> &tensor) {
     // Request a control object
     libtensor::block_tensor_wr_ctrl<4, double> ctrl(tensor);
     libtensor::symmetry<4, double> &sym = ctrl.req_symmetry();
 
-    // // permutational symmetry
-    // libtensor::permutation<4> p01; p01.permute(0, 1);
-    // libtensor::permutation<4> p23; p23.permute(2, 3);
-    // libtensor::scalar_transf<double> tr(1.0);
-    // libtensor::se_perm<4, double> se_01(p01, tr);
-    // libtensor::se_perm<4, double> se_23(p23, tr);
-    // sym.insert(se_01);
-    // sym.insert(se_23);
-
-    // spin symmetry
-    mask<4> m1111;
-    m1111[0] = true; m1111[1] = true; m1111[2] = true; m1111[3] = true;
-
-    libtensor::index<4> i0000, i1111, i0001, i1110, i0010, i1101, i0011, 
-    i1100,i0100, i1011, i0101, i1010, i0110, i1001, i0111, i1000;
-    i1111[0] = 1; i1111[1] = 1; i1111[2] = 1; i1111[3] = 1;
-    i1110[0] = 1; i1110[1] = 1; i1110[2] = 1; i0001[3] = 1;
-    i1101[0] = 1; i1101[1] = 1; i0010[2] = 1; i1101[3] = 1;
-    i1100[0] = 1; i1100[1] = 1; i0011[2] = 1; i0011[3] = 1;
-    i1011[0] = 1; i0100[1] = 1; i1011[2] = 1; i1011[3] = 1;
-    i1010[0] = 1; i0101[1] = 1; i1010[2] = 1; i0101[3] = 1;
-    i1001[0] = 1; i0110[1] = 1; i0110[2] = 1; i1001[3] = 1;
-    i1000[0] = 1; i0111[1] = 1; i0111[2] = 1; i0111[3] = 1;
-    se_part<4, double> sp(space.get_bis(), m1111, 2);
-    sp.add_map(i0000, i0011);
-    sp.add_map(i0001, i0010);
-    sp.add_map(i0010, i1101);
-    sp.add_map(i0011, i1100);
-    sp.add_map(i0100, i0111);
-    sp.add_map(i0101, i0110);
-    sp.add_map(i0110, i1001);
-    sp.add_map(i0111, i1000);
-    sp.add_map(i1000, i1011);
-    sp.add_map(i1001, i1010);
-    sp.add_map(i1100, i1111);
-    sp.add_map(i1101, i1110);
-    sym.insert(sp);
+    // permutational symmetry
+    libtensor::permutation<4> p01; p01.permute(0, 1);
+    libtensor::permutation<4> p23; p23.permute(2, 3);
+    libtensor::scalar_transf<double> tr(1.0);
+    libtensor::se_perm<4, double> se_01(p01, tr);
+    libtensor::se_perm<4, double> se_23(p23, tr);
+    sym.insert(se_01);
+    sym.insert(se_23);
   }
 
   void set_sym_ppqp(libtensor::btensor<4,double> &tensor) {

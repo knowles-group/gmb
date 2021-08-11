@@ -94,8 +94,10 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   std::unique_ptr<problem_gen> problem;
   std::string method_gs, method_es;
 
+  std::vector<double> all_energies;
   // initialise hamiltonian
   init(filename, method, ham, v_ppol);
+#if 1 // CCSD
 
   auto vnn = get_integral(filename);
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
@@ -107,10 +109,8 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   }
   #endif
   molpro::cout << "\nHF energy: " << std::setprecision(12) << hf_energy << "\n\n";
-  std::vector<double> all_energies;
 
 
-#if 1 // CCSD
   if (!(method.find("hf") != std::string::npos)) {
     run_gs(ham, method, problem, ptampl);
     // print results
@@ -132,6 +132,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
           if (std::abs(ev-expected_results[i])<1e-10) found_expected_results[i]=true;
 
       auto energies = problem_es->get_energy();
+      problem_es->character();
       // print results
       molpro::cout << "\n       Excitation energy                     Total energy  \n";
       molpro::cout << "       (Ha)        (eV)                    (Ha)        (eV)  \n";
@@ -143,7 +144,6 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
                   << std::setw(14) << ccsd_energy+i << "    "
                   << std::setw(14) << (ccsd_energy+i)*inverse_electron_volt << " \n";
       }
-      problem_es->character();
     }
   #endif
   }

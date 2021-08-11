@@ -46,11 +46,10 @@ namespace gmb {
                       libtensor::expr_lhs<4,T> &y);
 
     // set symmetry - probably should be only two functions
-    void set_sym_pp(libtensor::btensor<2,double> &tensor, const libtensor::bispace<2> &space);
-    void set_sym_pq(libtensor::btensor<2,double> &tensor, const libtensor::bispace<2> &space);
+    void set_sym_pp(libtensor::btensor<2,double> &tensor);
     void set_sym_pppp(libtensor::btensor<4,double> &tensor);
     void set_sym_pppq(libtensor::btensor<4,double> &tensor);
-    void set_sym_ppqq(libtensor::btensor<4,double> &tensor, const libtensor::bispace<4> &space);
+    void set_sym_ppqq(libtensor::btensor<4,double> &tensor);
     void set_sym_ppqp(libtensor::btensor<4,double> &tensor);
     void set_sym_pqqq(libtensor::btensor<4,double> &tensor);
     void set_sym_pqqp(libtensor::btensor<4,double> &tensor);
