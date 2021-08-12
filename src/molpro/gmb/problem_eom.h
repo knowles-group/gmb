@@ -12,7 +12,7 @@ protected:
   mutable hamiltonian<> m_ham;                ///> Hamiltonian
   mutable amplitudes<> m_tampl;               ///> T amplitudes
   size_t m_nroots;                            ///> energy
-  mutable std::vector<amplitudes<>> m_vrampl; ///> T amplitudes
+  mutable std::vector<amplitudes<>> m_vrampl; ///> R amplitudes
 public:
   using Problem::container_t;
   using Problem::value_t;
