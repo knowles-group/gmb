@@ -9,3 +9,7 @@
 #include "iw_vvvv.h"
 #include "t1.h"
 #include "t2.h"
+#include "../eom-ccsd/precond_oovv.h"
+#include "../eom-ccsd/precond_ov.h"
+#include "../diag_oovv.h"
+#include "../diag_ov.h"

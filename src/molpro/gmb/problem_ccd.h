@@ -11,7 +11,7 @@
 class problem_ccd : public problem_gen {
 public:
   problem_ccd(const hamiltonian<> &ham)
-  : problem_gen(ham) {}
+  : problem_gen{ham} {}
   
   virtual ~problem_ccd() {}
 
@@ -23,7 +23,6 @@ public:
       a.set(t2, t2_new);
     }
   }
-
 
   value_t residual(const container_t &v, container_t &a) const override {
     value_t value = 0;

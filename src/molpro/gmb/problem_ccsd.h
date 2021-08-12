@@ -1,19 +1,14 @@
 #ifndef GMB_PROBLEM_CCSD_H_
 #define GMB_PROBLEM_CCSD_H_
 #include <molpro/linalg/itsolv/IterativeSolver.h>
-#include <vector>
 #include "problem_gen.h"
 #include "expressions/ccsd/ccsd.h"
-#include "expressions/eom-ccsd/precond_oovv.h"
-#include "expressions/eom-ccsd/precond_ov.h"
-#include "expressions/diag_oovv.h"
-#include "expressions/diag_ov.h"
 
 
 class problem_ccsd : public problem_gen {
 public:
   problem_ccsd(const hamiltonian<> &ham)
-  : problem_gen(ham) {}
+  : problem_gen{ham} {}
 
   virtual ~problem_ccsd() {}
 
