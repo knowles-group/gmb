@@ -8,11 +8,11 @@
 
 class problem_eom : public molpro::linalg::itsolv::Problem<amplitudes<>> {
 protected:
-  std::vector<double> m_energy;    ///> energy
-  mutable hamiltonian<> m_ham;     ///> Hamiltonian
-  mutable amplitudes<> m_tampl;    ///> T amplitudes
-  size_t m_nroots;    ///> energy
-  mutable std::vector<amplitudes<>> m_vrampl;
+  std::vector<double> m_energy;               ///> energy
+  mutable hamiltonian<> m_ham;                ///> Hamiltonian
+  mutable amplitudes<> m_tampl;               ///> T amplitudes
+  size_t m_nroots;                            ///> energy
+  mutable std::vector<amplitudes<>> m_vrampl; ///> T amplitudes
 public:
   using Problem::container_t;
   using Problem::value_t;
@@ -24,11 +24,12 @@ public:
   virtual ~problem_eom() {}
 
   void set_energy(std::vector<double> eigval) {m_energy = eigval;}
-
   std::vector<double> get_energy() const {return m_energy;}  
-  
-  virtual void create_guess(std::vector<amplitudes<>>& v_rampl) {}
 
+  /**
+   * @brief Give description of transitions in terms of orbitals.
+   * 
+   */
   virtual void character() const {}
 
   };
