@@ -112,7 +112,6 @@ public:
         }
         tc.ret_const_dataptr(ptr);
         ctrl.ret_const_block(bidx);
-        // if (!triplets) break; // only alpha-alpha excitations
       }
     }
     return m;

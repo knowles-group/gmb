@@ -23,6 +23,10 @@ public:
     init();
   }
 
+  /**
+   * @brief Initialise EOM calculation by computing EOM intermediates.
+   * 
+   */
   void init() {
 
     auto tau = ccsd_tau(m_tampl.m2get(t1), m_tampl.m4get(t2));
@@ -98,7 +102,7 @@ public:
       auto r1_new = eom_ccsd_r1(ccp.m2get(r1), ccp.m4get(r2), m_int.m2get("if_oo"), m_int.m2get("if_ov"), m_int.m2get("if_vv"),  
                     m_int.m4get("iw_ovov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw2_ovvv"));
       a.set(r1, r1_new);
-      m_vr1[k+(m_nroots-parameters.size())] = (std::make_unique<container<2>> (r1_new));
+      m_vrampl[k+(m_nroots-parameters.size())].set(r1, r1_new);
       }
       // compute r2
       {
@@ -108,9 +112,105 @@ public:
       
       a.set(r2, r2_new);
       }
-      // eigenvectors(m_nroots-parameters.size()+k, a);
     }
   }
+
+    void character() const {
+      #if 1
+    constexpr size_t N =2;
+    constexpr double inverse_electron_volt{27.211386245988};
+    for (size_t ir1 = 0; ir1 < m_vrampl.size(); ir1++) {
+      // molpro::cout << "r[" << ir1 << "]:\n";
+      // m_vr1[ir1]->print();
+      molpro::cout << "\nExcited state #" << ir1+1 
+                << "\nExcitation energy = " << std::setprecision(5) << std::fixed 
+                << m_energy[ir1] << " Ha = "
+                << m_energy[ir1]*inverse_electron_volt << " eV"
+                << "\nocc -> vir     amplitude\n";
+
+      libtensor::block_tensor_rd_i<2, double> &bt(m_vrampl[ir1].m2get(r1));
+
+      // total dimensions
+      const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
+      auto no = dims.get_dim(0);
+      auto nv = dims.get_dim(1);
+
+      auto bis = bt.get_bis();
+
+      size_t maxtyp = 0;
+      for(size_t i = 0; i < N; i++) {
+          auto typ = bis.get_type(i);
+          if(typ > maxtyp) maxtyp = typ;
+      }
+      std::vector<size_t> v_no;
+      std::vector<size_t> v_nv;
+
+    // occupied
+    const libtensor::split_points &spl_o = bis.get_splits(0);
+    for (size_t i = 0; i < spl_o.get_num_points(); i++){
+      if (i == 0)
+        v_no.push_back(spl_o[i]);
+      else 
+        v_no.push_back(spl_o[i]-spl_o[i-1]);
+    }
+    v_no.emplace_back(no-std::accumulate(v_no.cbegin(),v_no.cend(),0));
+
+    // virtual
+    const libtensor::split_points &spl_v = bis.get_splits(1);
+    for (size_t i = 0; i < spl_v.get_num_points(); i++) {
+      if (i == 0)
+        v_nv.push_back(spl_v[i]);
+      else 
+        v_nv.push_back(spl_v[i]-spl_v[i-1]);
+    }
+    v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));    
+
+    std::vector<std::vector<size_t>> n_ne{v_no,v_nv};
+      libtensor::block_tensor_rd_ctrl<2, double> ctrl(m_vrampl[ir1].m2get(r1));
+
+      libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
+        size_t count{0};
+      for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
+        libtensor::index<2> bidx;
+        ol.get_index(it, bidx);
+        const libtensor::dimensions<2> &bd = bt.get_bis().get_block_dims(bidx);
+        libtensor::dense_tensor_rd_i<2, double> &blk = ctrl.req_const_block(bidx);
+        libtensor::dense_tensor_rd_ctrl<2, double> tc(blk);
+        const libtensor::dimensions<2> &tdims = blk.get_dims();
+        const double *ptr = tc.req_const_dataptr();
+        for (size_t offset = 0; offset < tdims.get_size(); offset++) {
+          if (std::abs(ptr[offset]) >  0.001) {
+            size_t i = 1+(offset/v_nv[bidx[1]]);
+            molpro::cout << "o" << i;
+            switch (bidx[0]) {
+            case alpha: molpro::cout << "a";
+              break;
+            case beta: molpro::cout << "b";
+              break;
+            default: molpro::cout << "p";
+              break;
+            }
+            size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
+            molpro::cout << " -> v" << a;
+            switch (bidx[1]) {
+            case alpha: molpro::cout << "a";
+              break;
+            case beta: molpro::cout << "b";
+              break;
+            default: molpro::cout << "p";
+              break;
+            }
+            molpro::cout << "     " << std::setprecision(5) << std::fixed <<  ptr[offset] << "\n";
+          }
+          ++count;
+        }
+        tc.ret_const_dataptr(ptr);
+        ctrl.ret_const_block(bidx);
+      }
+    }
+    #endif
+  };
+
 
 };
 
