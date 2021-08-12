@@ -1,12 +1,7 @@
 #ifndef GMB_PROBLEM_CCD_H_
 #define GMB_PROBLEM_CCD_H_
-#include <molpro/linalg/itsolv/IterativeSolver.h>
-#include <vector>
 #include "problem_gen.h"
-#include "expressions/action_ccd.h"
-#include "expressions/update.h"
-#include "expressions/id_xxxx.h"
-
+#include "expressions/ccd.h"
 
 class problem_ccd : public problem_gen {
 public:

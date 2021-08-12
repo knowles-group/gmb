@@ -1,12 +1,9 @@
 #ifndef GMB_SUPERCONTAINER_H
 #define GMB_SUPERCONTAINER_H
 
+#include <molpro/iostream.h>
 #include "container.h"
 #include "get_integral.h"
-#include <map>
-#include <memory>
-#include <molpro/iostream.h>
-#include <string>
 
 template<typename T=double>
 class supercontainer {

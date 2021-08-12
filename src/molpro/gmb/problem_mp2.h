@@ -1,11 +1,7 @@
 #ifndef GMB_PROBLEM_MP2_H_
 #define GMB_PROBLEM_MP2_H_
 #include "problem_gen.h"
-#include "expressions/action_ccd.h"
-#include "expressions/action_mp2.h"
-#include "expressions/update.h"
-#include "expressions/id_xxxx.h"
-
+#include "expressions/mp2.h"
 
 class problem_mp2 : public problem_gen {
 public:

@@ -1,17 +1,16 @@
 #ifndef GMB_PROBLEM_EOM_H_
 #define GMB_PROBLEM_EOM_H_
 #include <molpro/linalg/itsolv/IterativeSolver.h>
-#include <vector>
+#include <molpro/iostream.h>
 #include "amplitudes.h"
 #include "hamiltonian.h"
-#include <molpro/iostream.h>
 
 class problem_eom : public molpro::linalg::itsolv::Problem<amplitudes<>> {
 
 protected:
-  std::vector<value_t> m_energy;               ///> energy
-  mutable hamiltonian<> m_ham;                 ///> Hamiltonian
-  mutable amplitudes<> m_tampl;                ///> T amplitudes
+  std::vector<value_t> m_energy; ///> energy
+  mutable hamiltonian<> m_ham;   ///> Hamiltonian
+  mutable amplitudes<> m_tampl;  ///> T amplitudes
 
 public:
   using Problem::container_t;

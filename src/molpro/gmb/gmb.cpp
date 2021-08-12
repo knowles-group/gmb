@@ -1,21 +1,19 @@
+#include <molpro/Options.h>
+#include <molpro/iostream.h>
+#include <molpro/linalg/itsolv/IterativeSolver.h>
+#include <molpro/linalg/itsolv/SolverFactory.h>
+
+#include <chrono>
+#include <ctime>
+#include <memory>
+#include <regex>
+
 #include "gmb.h"
 #include "amplitudes.h"
 #include "expressions/energy_hf.h"
 #include "hamiltonian.h"
 #include "init.h"
 #include "run_method.h"
-#include "hamiltonian.h"
-#include "amplitudes.h"
-#include "expressions/energy_hf.h"
-#include "utils.h"
-#include <chrono>
-#include <ctime>
-#include <memory>
-#include <molpro/Options.h>
-#include <molpro/iostream.h>
-#include <molpro/linalg/itsolv/IterativeSolver.h>
-#include <molpro/linalg/itsolv/SolverFactory.h>
-#include <regex>
 
 using namespace gmb;
 
@@ -89,15 +87,11 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     }
   }
 
-  hamiltonian<> ham;
-  std::unique_ptr<amplitudes<>> ptampl{std::make_unique<amplitudes<>>()};
-  std::unique_ptr<problem_gen> problem;
-  std::string method_gs, method_es;
-
   std::vector<double> all_energies;
+
   // initialise hamiltonian
+  hamiltonian<> ham;
   init(filename, method, ham, v_ppol);
-#if 1 // CCSD
 
   auto vnn = get_integral(filename);
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
@@ -111,8 +105,14 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   molpro::cout << "\nHF energy: " << std::setprecision(12) << hf_energy << "\n\n";
 
 
+#if 1 // GS
   if (!(method.find("hf") != std::string::npos)) {
+
+    std::unique_ptr<problem_gen> problem;
+    std::unique_ptr<amplitudes<>> ptampl{std::make_unique<amplitudes<>>()};
+    
     run_gs(ham, method, problem, ptampl);
+    
     // print results
     molpro::cout << *problem << " correlation energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
     double ccsd_energy = problem->get_energy() + hf_energy;
@@ -122,19 +122,20 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     for (int i=0; i<expected_results.size(); ++i)
       if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
 
-#if 1 // Excited State
+#if 1 // ES
     if (method.find("eom") != std::string::npos) {
 
       std::unique_ptr<problem_eom> problem_es;
       run_es(ham, method, problem_es, ptampl, nroots);
+
       for (const auto& ev : problem_es->get_energy())
         for (int i=0; i<expected_results.size(); ++i)
           if (std::abs(ev-expected_results[i])<1e-10) found_expected_results[i]=true;
-
       auto energies = problem_es->get_energy();
+
       // print results
-      molpro::cout << "\n       Excitation energy                     Total energy  \n";
-      molpro::cout << "       (Ha)        (eV)                    (Ha)        (eV)  \n";
+      molpro::cout << "\n          Excitation energy                   Total energy  \n";
+      molpro::cout << "        (Ha)            (eV)              (Ha)            (eV)  \n";
       constexpr double inverse_electron_volt{27.211386245988};
       for (auto &i : energies) {
         all_energies.push_back(ccsd_energy+i);
@@ -159,8 +160,6 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
           std::to_string(expected_results[i]));
   return all_energies;
 }
-
-
 
 #include <molpro/linalg/itsolv/SolverFactory-implementation.h>
 template class molpro::linalg::itsolv::SolverFactory<amplitudes<>, amplitudes<>>;

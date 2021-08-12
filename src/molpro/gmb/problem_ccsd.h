@@ -1,6 +1,5 @@
 #ifndef GMB_PROBLEM_CCSD_H_
 #define GMB_PROBLEM_CCSD_H_
-#include <molpro/linalg/itsolv/IterativeSolver.h>
 #include "problem_gen.h"
 #include "expressions/ccsd/ccsd.h"
 

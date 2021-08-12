@@ -1,7 +1,5 @@
 #ifndef GMB_PROBLEM_EOM_CCSD_H_
 #define GMB_PROBLEM_EOM_CCSD_H_
-#include <molpro/linalg/itsolv/IterativeSolver.h>
-#include <vector>
 #include "problem_eom.h"
 #include "expressions/eom-ccsd/eom-ccsd.h"
 #include "expressions/update.h"
