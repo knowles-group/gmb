@@ -12,17 +12,13 @@ protected:
   std::vector<value_t> m_energy;               ///> energy
   mutable hamiltonian<> m_ham;                 ///> Hamiltonian
   mutable amplitudes<> m_tampl;                ///> T amplitudes
-  size_t m_nroots;                             ///> energy
-  mutable std::vector<container_t> m_vrampl;   ///> R amplitudes
 
 public:
   using Problem::container_t;
   using Problem::value_t;
 
-  problem_eom(const hamiltonian<> &ham, const amplitudes<> &tampl, const size_t &nroots)
-  : m_ham(ham), m_tampl(tampl), m_nroots(nroots) {
-    m_vrampl.resize(nroots);
-  }
+  problem_eom(const hamiltonian<> &ham, const amplitudes<> &tampl)
+  : m_ham{ham}, m_tampl{tampl} {}
 
   virtual ~problem_eom() {}
 
@@ -33,7 +29,7 @@ public:
    * @brief Give description of transitions in terms of orbitals
    * 
    */
-  virtual void character() const {}
+  virtual void character(std::vector<container_t> &v_rampl) const {}
 
   };
 

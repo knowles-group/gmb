@@ -18,8 +18,8 @@ class problem_eom_ccsd : public problem_eom {
 private:
   mutable supercontainer<> m_int;       ///> intermediates
 public:
-  problem_eom_ccsd(const hamiltonian<> &ham, const amplitudes<> &ampl, const size_t &nroots)
-  : problem_eom(ham, ampl, nroots) {
+  problem_eom_ccsd(const hamiltonian<> &ham, const amplitudes<> &ampl)
+  : problem_eom{ham, ampl} {
     init();
   }
 
@@ -102,7 +102,6 @@ public:
       auto r1_new = eom_ccsd_r1(ccp.m2get(r1), ccp.m4get(r2), m_int.m2get("if_oo"), m_int.m2get("if_ov"), m_int.m2get("if_vv"),  
                     m_int.m4get("iw_ovov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw2_ovvv"));
       a.set(r1, r1_new);
-      m_vrampl[k+(m_nroots-parameters.size())].set(r1, r1_new);
       }
       // compute r2
       {
@@ -115,11 +114,10 @@ public:
     }
   }
 
-    void character() const {
-      #if 1
+    void character(std::vector<container_t> &v_rampl) const {
     constexpr size_t N =2;
     constexpr double inverse_electron_volt{27.211386245988};
-    for (size_t ir1 = 0; ir1 < m_vrampl.size(); ir1++) {
+    for (size_t ir1 = 0; ir1 < v_rampl.size(); ir1++) {
       // molpro::cout << "r[" << ir1 << "]:\n";
       // m_vr1[ir1]->print();
       molpro::cout << "\nExcited state #" << ir1+1 
@@ -128,7 +126,7 @@ public:
                 << m_energy[ir1]*inverse_electron_volt << " eV"
                 << "\nocc -> vir     amplitude\n";
 
-      libtensor::block_tensor_rd_i<2, value_t> &bt(m_vrampl[ir1].m2get(r1));
+      libtensor::block_tensor_rd_i<2, value_t> &bt(v_rampl[ir1].m2get(r1));
 
       // total dimensions
       const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
@@ -166,7 +164,7 @@ public:
     v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));    
 
     std::vector<std::vector<size_t>> n_ne{v_no,v_nv};
-      libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(m_vrampl[ir1].m2get(r1));
+      libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir1].m2get(r1));
 
       libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
       for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
@@ -180,24 +178,19 @@ public:
         for (size_t offset = 0; offset < tdims.get_size(); offset++) {
           if (std::abs(ptr[offset]) >  0.001) {
             size_t i = 1+(offset/v_nv[bidx[1]]);
-            molpro::cout << "o" << i;
-            switch (bidx[0]) {
-            case alpha: molpro::cout << "a";
-              break;
-            case beta: molpro::cout << "b";
-              break;
-            default: molpro::cout << "p";
-              break;
-            }
             size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
-            molpro::cout << " -> v" << a;
-            switch (bidx[1]) {
-            case alpha: molpro::cout << "a";
-              break;
-            case beta: molpro::cout << "b";
-              break;
-            default: molpro::cout << "p";
-              break;
+            molpro::cout << "o" << i;
+            for (size_t in = 0; in < N; in++) {
+              switch (bidx[in]) {
+              case alpha: molpro::cout << "a";
+                break;
+              case beta: molpro::cout << "b";
+                break;
+              default: molpro::cout << "p" << bidx[in]-beta;
+                break;
+              }
+              if (in == 0)
+                molpro::cout << " -> v" << a;
             }
             molpro::cout << "     " << std::setprecision(5) << std::fixed <<  ptr[offset] << "\n";
           }
@@ -206,7 +199,6 @@ public:
         ctrl.ret_const_block(bidx);
       }
     }
-    #endif
   };
 
 

@@ -47,7 +47,7 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
   molpro::cout << "\nRunning EOM-CCSD" << std::endl;
   
   // set EOM-CCSD amplitudes
-  problem = std::make_unique<problem_eom_ccsd>(ham, *ptampl, nroots);
+  problem = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
 
   std::unique_ptr<amplitudes<>> prampl{std::make_unique<amplitudes<>>()};
   prampl->set(r1, container(ptampl->m2get(t1).get_space()));
@@ -66,6 +66,12 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
   // solve
   solver->solve(v_rampl, residuals_es, *problem, true);
   problem->set_energy(solver->eigenvalues());
+  std::vector<int> v_nroots(nroots);
+  for (size_t i = 0; i < nroots; i++)
+    v_nroots[i] = i;
+  solver->solution(v_nroots, v_rampl, residuals_es);
+  problem->character(v_rampl);
+
 }
 
 

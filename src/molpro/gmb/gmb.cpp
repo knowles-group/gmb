@@ -132,7 +132,6 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
           if (std::abs(ev-expected_results[i])<1e-10) found_expected_results[i]=true;
 
       auto energies = problem_es->get_energy();
-      problem_es->character();
       // print results
       molpro::cout << "\n       Excitation energy                     Total energy  \n";
       molpro::cout << "       (Ha)        (eV)                    (Ha)        (eV)  \n";
