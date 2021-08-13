@@ -32,6 +32,7 @@ namespace gmb {
     libtensor::letter p;
     t2(p) = t1(p);
   };
+
   template <typename T>
   void copy(libtensor::any_tensor<2,T> &t1,
              libtensor::expr_lhs<2,T> &t2) {
@@ -45,6 +46,20 @@ namespace gmb {
     libtensor::letter p,q,r,s;
     t2(p|q|r|s) = t1(p|q|r|s);
   };
+
+    template <size_t N, typename T>
+        bool comp(const libtensor::btensor<N,T> &tref, 
+                  const libtensor::btensor<N,T> &t) {
+          libtensor::bto_compare<N,T> cmp(const_cast<libtensor::btensor<N,T>&>(tref), const_cast<libtensor::btensor<N,T>&>(t), 1e-12);
+          if(!cmp.compare()) {
+              std::ostringstream str;
+              cmp.tostr(str);
+              std::cout << str.str() << std::endl;
+          }
+          return cmp.compare();
+    };
+
+
   template <typename T>
   void compute_axpy(T a,
                     libtensor::any_tensor<1,T> &x,
@@ -67,6 +82,8 @@ namespace gmb {
     libtensor::letter p,q,r,s;
     y(p|q|r|s) += a*x(p|q|r|s);
   };
+
+
 
   void set_sym_pp(libtensor::btensor<2,double> &tensor) {
     libtensor::block_tensor_wr_ctrl<2, double> ctrl(tensor);
@@ -244,6 +261,12 @@ template void copy(libtensor::any_tensor<2,double>&,
                    libtensor::expr_lhs<2,double>&); 
 template void copy(libtensor::any_tensor<4,double>&,
                    libtensor::expr_lhs<4,double>&); 
+
+template bool comp<2, double> (const libtensor::btensor<2,double> &tref, 
+                               const libtensor::btensor<2,double> &t);
+template bool comp<4, double> (const libtensor::btensor<4,double> &tref, 
+                               const libtensor::btensor<4,double> &t);
+
 template double dot_prod(libtensor::any_tensor<1,double>&,
                          libtensor::any_tensor<1,double>&); 
 template double dot_prod(libtensor::any_tensor<2,double>&,
