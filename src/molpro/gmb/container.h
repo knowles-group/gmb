@@ -2,10 +2,10 @@
 #define GMB_CONTAINER_H
 
 
-#include <libtensor/libtensor.h>
-#include "libtensor_utils.h"
-#include <libtensor/block_tensor/bto_set.h>
 #include <molpro/iostream.h>
+#include <libtensor/libtensor.h>
+#include <libtensor/block_tensor/bto_set.h>
+#include "libtensor_utils.h"
 
 // using namespace libtensor; 
 /**
@@ -41,6 +41,12 @@ public:
   }
 
     using value_type = T;
+
+  friend bool operator==(const container<N,T>& lhs, const container<N,T>& rhs) {
+    // return gmb::comp(const_cast<container&>(lhs), const_cast<container&>(rhs));
+    return gmb::comp(lhs, rhs);
+  }
+
 
   /**
    * @brief Get the space object
