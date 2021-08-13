@@ -30,6 +30,8 @@ public:
    */
   virtual void character(std::vector<container_t> &v_rampl) const {}
 
+  virtual void check_eigenvalue(const container_t &rampl) const {}
+
   };
 
 #endif // GMB_PROBLEM_EOM_H_

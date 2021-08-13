@@ -36,8 +36,8 @@ void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<probl
 
   // solver options
   solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
-  // solver->set_max_iter(110);
   // solver->set_convergence_threshold(1.0e-14);
+
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);
   problem->energy(*ptampl);
@@ -59,9 +59,9 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
   auto residuals_es = v_rampl;
   
   // set options
-  solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
+  solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Detailed);
   solver->set_n_roots(nroots);
-  solver->set_convergence_threshold(1.0e-5);
+  solver->set_convergence_threshold(1.0e-7);
 
   // solve
   solver->solve(v_rampl, residuals_es, *problem, true);
@@ -72,8 +72,15 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
   solver->solution(v_nroots, v_rampl, residuals_es);
   problem->character(v_rampl);
 
-}
+  // check for zero elements
+  auto energies = problem->get_energy();
 
+  for (size_t i = 0; i < energies.size(); i++) {
+    if (energies[i] < 10e-5) {
+      std::cout << "Warning: Found 0 eigenvalue!" << std::endl;
+      problem->check_eigenvalue(v_rampl[i]);
+  }
+}
 
 #include <molpro/linalg/itsolv/SolverFactory-implementation.h>
 template class molpro::linalg::itsolv::SolverFactory<amplitudes<>, amplitudes<>>;
