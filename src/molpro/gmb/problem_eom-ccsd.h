@@ -210,8 +210,6 @@ public:
         
       for (size_t i = 0; i < v_alpha.size(); i++) {
         if ( std::abs(v_alpha[i] - v_beta[i]) > 1e-5) {
-          std::cout << "std::abs(v_alpha[i] - v_beta[i]) " << std::abs(v_alpha[i] - v_beta[i]) << std::endl;
-          std::cout << "v_alpha[i] = " << v_alpha[i] << " != v_beta[i] = " << v_beta[i] << std::endl;
           std::cout << "Warning: There's something wrong with these amplitudes.\n";
           break;
         }
