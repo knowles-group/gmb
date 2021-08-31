@@ -79,6 +79,7 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
     if (energies[i] < 10e-5) {
       std::cout << "Warning: Found 0 eigenvalue!" << std::endl;
       problem->check_eigenvalue(v_rampl[i]);
+    }
   }
 }
 
