@@ -90,8 +90,13 @@ public:
   void action(const CVecRef<container_t> &parameters, const VecRef<container_t> &actions) const override {
   
     for (int k = 0; k < parameters.size(); k++) {
+
       auto &ccp = const_cast<container_t&> (parameters[k].get());     
       auto &a = actions[k].get();  
+
+      // std::cout << "r1 guess: " << std::endl;
+      // ccp.m2get(r1).print();
+
       // compute intermediates
       auto ir1_vv = eom_ccsd_ir1_vv(m_ham.m2get(f_vv),ccp.m2get(r1),m_int.m4get("iw2_ovvv"));          
       auto ir1_oo = eom_ccsd_ir1_oo(m_ham.m2get(f_oo),ccp.m2get(r1),m_int.m4get("iw2_ooov"));          
@@ -165,9 +170,10 @@ public:
     v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));    
 
     std::vector<std::vector<size_t>> n_ne{v_no,v_nv};
-      libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir1].m2get(r1));
+    libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir1].m2get(r1));
 
-      libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
+    libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
+    std::vector<double> v_alpha, v_beta;
       for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
         libtensor::index<N> bidx;
         ol.get_index(it, bidx);
@@ -184,8 +190,10 @@ public:
             for (size_t in = 0; in < N; in++) {
               switch (bidx[in]) {
               case alpha: molpro::cout << "a";
+                v_alpha.push_back(ptr[offset]);
                 break;
               case beta: molpro::cout << "b";
+                v_beta.push_back(ptr[offset]);
                 break;
               default: molpro::cout << "p" << bidx[in]-beta;
                 break;
@@ -198,6 +206,15 @@ public:
         }
         tc.ret_const_dataptr(ptr);
         ctrl.ret_const_block(bidx);
+      }
+        
+      for (size_t i = 0; i < v_alpha.size(); i++) {
+        if ( std::abs(v_alpha[i] - v_beta[i]) > 1e-5) {
+          std::cout << "std::abs(v_alpha[i] - v_beta[i]) " << std::abs(v_alpha[i] - v_beta[i]) << std::endl;
+          std::cout << "v_alpha[i] = " << v_alpha[i] << " != v_beta[i] = " << v_beta[i] << std::endl;
+          std::cout << "Warning: There's something wrong with these amplitudes.\n";
+          break;
+        }
       }
     }
   }
