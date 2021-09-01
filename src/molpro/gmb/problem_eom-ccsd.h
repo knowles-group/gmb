@@ -122,9 +122,14 @@ public:
   }
 
   void character(std::vector<container_t> &v_rampl) const {
+
     constexpr double inverse_electron_volt{27.211386245988};
 
     for (size_t ir = 0; ir < v_rampl.size(); ir++) {
+      // normalise
+      double norm = sqrt(v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1)) + 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)));
+      v_rampl[ir].m2get(r1).scal(1/norm);
+      v_rampl[ir].m4get(r2).scal(1/norm);
 
       std::ostringstream ss;
 
@@ -137,18 +142,11 @@ public:
  
       // get dimensions (#occupied & #virtual)
       libtensor::block_tensor_rd_i<2, value_t> &bt(v_rampl[ir].m2get(r1));
-
       const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
       auto no = dims.get_dim(0);
       auto nv = dims.get_dim(1);
-
       auto bis = bt.get_bis();
 
-      size_t maxtyp = 0;
-      for(size_t i = 0; i < 2; i++) {
-          auto typ = bis.get_type(i);
-          if(typ > maxtyp) maxtyp = typ;
-      }
       std::vector<size_t> v_no;
       std::vector<size_t> v_nv;
 
@@ -213,16 +211,13 @@ public:
         ctrl.ret_const_block(bidx);
       }
         
-      
+      molpro::cout << ss.str() << "\n";
       for (size_t i = 0; i < v_alpha.size(); i++) {
         if ( std::abs(v_alpha[i] - v_beta[i]) > 1e-5) {
-          std::cout << "Warning: There's something wrong with these amplitudes.\n";
+          std::cout << "Warning: There seems to be something wrong with these amplitudes.\n";
           break;
         }
       }
-
-
-      molpro::cout << ss.str();
 
       }
 
