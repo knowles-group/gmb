@@ -134,7 +134,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
       auto energies = problem_es->get_energy();
 
       // print results
-      molpro::cout << "\n          Excitation energy                   Total energy  \n";
+      molpro::cout << "\n\n          Excitation energy                   Total energy  \n";
       molpro::cout << "        (Ha)            (eV)              (Ha)            (eV)  \n";
       constexpr double inverse_electron_volt{27.211386245988};
       for (auto &i : energies) {

@@ -43,7 +43,6 @@ public:
     using value_type = T;
 
   friend bool operator==(const container<N,T>& lhs, const container<N,T>& rhs) {
-    // return gmb::comp(const_cast<container&>(lhs), const_cast<container&>(rhs));
     return gmb::comp(lhs, rhs);
   }
 

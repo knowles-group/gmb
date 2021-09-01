@@ -59,7 +59,7 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
   auto residuals_es = v_rampl;
   
   // set options
-  solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Detailed);
+  solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
   solver->set_n_roots(nroots);
   solver->set_convergence_threshold(1.0e-5);
 

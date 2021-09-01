@@ -1,3 +1,4 @@
+
 #include "utils.h"
 #include <fstream>
 
@@ -44,6 +45,17 @@ namespace gmb {
   size_t get_offset(size_t i, size_t j, size_t nj) {
     size_t offset = i*nj + j;
     return offset;
+  }
+
+  std::string tospin(size_t spin) {
+    switch (spin) {
+    case 0: return "a";
+      break;
+    case 1: return "b";
+      break;
+    default: return "p"+spin-2;
+      break;
+    }
   }
 
   bool is_in_range(size_t i, size_t j,  size_t k, size_t l,
