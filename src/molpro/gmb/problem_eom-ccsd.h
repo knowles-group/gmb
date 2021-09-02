@@ -167,10 +167,6 @@ public:
       }
 
       {
-        // std::cout << "Found an intruder state" << std::endl;
-        #if 1
-        // std::cout << "r1 before:" << std::endl;
-        // ccp.m2get(r1).print();
         libtensor::block_tensor_wr_ctrl<N, value_t> ctrl(ccp.m2get(r1));
         libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
         for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
@@ -187,11 +183,7 @@ public:
           }
           tc.ret_dataptr(ptr);
           ctrl.ret_block(bidx);
-      }
-        // std::cout << "r1 after:" << std::endl;
-        // ccp.m2get(r1).print();
-        #endif
-
+        }
       }
 
       }
@@ -277,62 +269,47 @@ public:
 
       // read r1  
       if ( r12 > r22 ) {
-      constexpr size_t N = 2;
-      libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir].m2get(r1));
+        constexpr size_t N = 2;
+        libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir].m2get(r1));
 
-      libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
-      for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
-        libtensor::index<N> bidx;
-        ol.get_index(it, bidx);
-        libtensor::dense_tensor_rd_i<N, value_t> &blk = ctrl.req_const_block(bidx);
-        libtensor::dense_tensor_rd_ctrl<N, value_t> tc(blk);
-        const libtensor::dimensions<N> &tdims = blk.get_dims();
-        const value_t *ptr = tc.req_const_dataptr();
-        for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-          if (std::abs(ptr[offset]) >  0.1) {
-            size_t i = 1+(offset/v_nv[bidx[1]]);
-            size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
-            ss << "\n" <<std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
-            ss << "o" << i;
-            for (size_t in = 0; in < N; in++) {
-              ss << gmb::tospin(bidx[in]);
-              switch (bidx[in]) {
-              case alpha: v_alpha.push_back(ptr[offset]);
-                break;
-              case beta: v_beta.push_back(ptr[offset]);
-                break;
-              default: ss  << bidx[in]-beta;
-                break;
+        libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
+        for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
+          libtensor::index<N> bidx;
+          ol.get_index(it, bidx);
+          libtensor::dense_tensor_rd_i<N, value_t> &blk = ctrl.req_const_block(bidx);
+          libtensor::dense_tensor_rd_ctrl<N, value_t> tc(blk);
+          const libtensor::dimensions<N> &tdims = blk.get_dims();
+          const value_t *ptr = tc.req_const_dataptr();
+          for (size_t offset = 0; offset < tdims.get_size(); offset++) {
+            if (std::abs(ptr[offset]) >  0.1) {
+              size_t i = 1+(offset/v_nv[bidx[1]]);
+              size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
+              ss << "\n" <<std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
+              ss << "o" << i;
+              for (size_t in = 0; in < N; in++) {
+                ss << gmb::tospin(bidx[in]);
+                switch (bidx[in]) {
+                case alpha: v_alpha.push_back(ptr[offset]);
+                  break;
+                case beta: v_beta.push_back(ptr[offset]);
+                  break;
+                default: ss  << bidx[in]-beta;
+                  break;
+                }
+                if (in == 0)
+                  ss << " -> v" << a;
               }
-              if (in == 0)
-                ss << " -> v" << a;
             }
           }
+          tc.ret_const_dataptr(ptr);
+          ctrl.ret_const_block(bidx);
         }
-        tc.ret_const_dataptr(ptr);
-        ctrl.ret_const_block(bidx);
-      }
-        
-      // for (size_t i = 0; i < v_alpha.size(); i++) {
-      //   if ( std::abs(v_alpha[i] - v_beta[i]) > 1e-5) {
-      //     std::cout << "Warning: There seems to be something wrong with these amplitudes.\n";
-      //     break;
-      //   }
-      // }
-
       } else {
 
-      // read r2
-      // if (v_alpha.empty()) {
-      // if (0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)) > v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1))) {
-        
-
-      // v_rampl[ir].m4get(r2).print();
+      // r2
       constexpr size_t N = 4;
       libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir].m4get(r2));
       libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
-      // std::vector<double> v_alpha, v_beta;
-      size_t count{0};  
       for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
         libtensor::index<N> bidx;
         ol.get_index(it, bidx);
