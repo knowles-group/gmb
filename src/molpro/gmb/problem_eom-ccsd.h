@@ -95,8 +95,111 @@ public:
       auto &ccp = const_cast<container_t&> (parameters[k].get());     
       auto &a = actions[k].get();  
 
-      // std::cout << "r1 guess: " << std::endl;
-      // ccp.m2get(r1).print();
+      // add dinglet projector
+      // get dimensions (#occupied & #virtual)
+      libtensor::block_tensor_rd_i<2, value_t> &bt(ccp.m2get(r1));
+      const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
+      auto no = dims.get_dim(0);
+      auto nv = dims.get_dim(1);
+      auto bis = bt.get_bis();
+
+      std::vector<size_t> v_no;
+      std::vector<size_t> v_nv;
+
+      // occupied
+      const libtensor::split_points &spl_o = bis.get_splits(0);
+      for (size_t i = 0; i < spl_o.get_num_points(); i++){
+        if (i == 0)
+          v_no.push_back(spl_o[i]);
+        else 
+          v_no.emplace_back(spl_o[i]-spl_o[i-1]);
+      }
+      v_no.emplace_back(no-std::accumulate(v_no.cbegin(),v_no.cend(),0));
+
+      // virtual
+      const libtensor::split_points &spl_v = bis.get_splits(1);
+      for (size_t i = 0; i < spl_v.get_num_points(); i++) {
+        if (i == 0)
+          v_nv.push_back(spl_v[i]);
+        else 
+          v_nv.emplace_back(spl_v[i]-spl_v[i-1]);
+      }
+      v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));  
+      std::vector<std::vector<size_t>> n_ne{v_no,v_nv};
+
+      std::vector<double> v_alpha, v_beta;
+
+      // read r1  
+      {
+      constexpr size_t N = 2;
+      libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(ccp.m2get(r1));
+
+      libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
+      for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
+        libtensor::index<N> bidx;
+        ol.get_index(it, bidx);
+        libtensor::dense_tensor_rd_i<N, value_t> &blk = ctrl.req_const_block(bidx);
+        libtensor::dense_tensor_rd_ctrl<N, value_t> tc(blk);
+        const libtensor::dimensions<N> &tdims = blk.get_dims();
+        const value_t *ptr = tc.req_const_dataptr();
+        for (size_t offset = 0; offset < tdims.get_size(); offset++) {
+          if (std::abs(ptr[offset]) >  0.001) {
+            size_t i = 1+(offset/v_nv[bidx[1]]);
+            size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
+            for (size_t in = 0; in < N; in++) {
+              switch (bidx[in]) {
+              case alpha: v_alpha.push_back(ptr[offset]);
+                break;
+              case beta: v_beta.push_back(ptr[offset]);
+                break;
+              }
+            }
+          }
+        }
+        tc.ret_const_dataptr(ptr);
+        ctrl.ret_const_block(bidx);
+      }
+        
+      bool intruder{false};
+      for (size_t i = 0; i < v_alpha.size(); i++) {
+        if ( std::abs(v_alpha[i] - v_beta[i]) > 1e-5) {
+          intruder = true;
+          // v_alpha[i] = (v_alpha[i] + v_beta[i]) / 2;
+        }
+      }
+
+      if (intruder) {
+        std::cout << "Found an intruder" << std::endl;
+        std::cout << "r1 before:" << std::endl;
+        ccp.m2get(r1).print();
+        libtensor::block_tensor_wr_ctrl<N, value_t> ctrl(ccp.m2get(r1));
+        libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
+        for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
+          size_t icount{0};
+          libtensor::index<N> bidx;
+          ol.get_index(it, bidx);
+          if (bidx[0] != bidx[1] || bidx[0] != beta)
+            continue;
+          libtensor::dense_tensor_wr_i<N, value_t> &blk = ctrl.req_block(bidx);
+          libtensor::dense_tensor_wr_ctrl<N, value_t> tc(blk);
+          const libtensor::dimensions<N> &tdims = blk.get_dims();
+          value_t *ptr = tc.req_dataptr();
+          for (size_t offset = 0; offset < tdims.get_size(); offset++) {
+            // if (std::abs(ptr[offset]) >  0.001) {
+              ptr[offset] *= -1;
+              // ++icount;
+            // }
+          }
+          tc.ret_dataptr(ptr);
+          ctrl.ret_block(bidx);
+      }
+        std::cout << "r1 after:" << std::endl;
+        ccp.m2get(r1).print();
+
+      }
+
+      }
+
 
       // compute intermediates
       auto ir1_vv = eom_ccsd_ir1_vv(m_ham.m2get(f_vv),ccp.m2get(r1),m_int.m4get("iw2_ovvv"));          
@@ -127,7 +230,9 @@ public:
 
     for (size_t ir = 0; ir < v_rampl.size(); ir++) {
       // normalise
-      double norm = sqrt(v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1)) + 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)));
+      double r12 = v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1));
+      double r22 = 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2));
+      double norm = sqrt(r12 + r22);
       v_rampl[ir].m2get(r1).scal(1/norm);
       v_rampl[ir].m4get(r2).scal(1/norm);
 
@@ -138,6 +243,7 @@ public:
          << "\n\nExcitation energy = " << std::setprecision(5) << std::fixed 
          << m_energy[ir] << " Ha = "
          << m_energy[ir]*inverse_electron_volt << " eV"
+         << "\n\n|r1|² = " << r12 << "    |r2|² = " << r22
          << "\n\nAmplitude    Transition\n";
  
       // get dimensions (#occupied & #virtual)
