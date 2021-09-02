@@ -329,7 +329,8 @@ public:
 
       // read r2
       // if (v_alpha.empty()) {
-      if () {
+      if (0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)) > v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1))) {
+        
 
       // v_rampl[ir].m4get(r2).print();
       constexpr size_t N = 4;
