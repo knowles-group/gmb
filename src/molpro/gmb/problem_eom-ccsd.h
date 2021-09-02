@@ -95,7 +95,8 @@ public:
       auto &ccp = const_cast<container_t&> (parameters[k].get());     
       auto &a = actions[k].get();  
 
-      // add dinglet projector
+      // add singlet projector
+      
       // get dimensions (#occupied & #virtual)
       libtensor::block_tensor_rd_i<2, value_t> &bt(ccp.m2get(r1));
       const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
@@ -138,22 +139,20 @@ public:
       for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
         libtensor::index<N> bidx;
         ol.get_index(it, bidx);
+        if (bidx[0] != bidx[1] || bidx[0] > beta)
+            continue;
         libtensor::dense_tensor_rd_i<N, value_t> &blk = ctrl.req_const_block(bidx);
         libtensor::dense_tensor_rd_ctrl<N, value_t> tc(blk);
         const libtensor::dimensions<N> &tdims = blk.get_dims();
         const value_t *ptr = tc.req_const_dataptr();
         for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-          if (std::abs(ptr[offset]) >  0.01) {
-            size_t i = 1+(offset/v_nv[bidx[1]]);
-            size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
-            for (size_t in = 0; in < N; in++) {
-              switch (bidx[in]) {
-              case alpha: v_alpha.push_back(ptr[offset]);
-                break;
-              case beta: v_beta.push_back(ptr[offset]);
-                break;
-              }
-            }
+          size_t i = 1+(offset/v_nv[bidx[1]]);
+          size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
+          switch (bidx[0]) {
+          case alpha: v_alpha.push_back(ptr[offset]);
+            break;
+          case beta: v_beta.push_back(ptr[offset]);
+            break;
           }
         }
         tc.ret_const_dataptr(ptr);
@@ -161,41 +160,36 @@ public:
       }
         
       bool intruder{false};
+      auto v_new = v_alpha;
+
       for (size_t i = 0; i < v_alpha.size(); i++) {
-        if ( std::abs(v_alpha[i] - v_beta[i]) > 1e-5) {
-          intruder = true;
-          // v_alpha[i] = (v_alpha[i] + v_beta[i]) / 2;
-        }
+        v_new[i] = (v_alpha[i] + v_beta[i]) / 2;
       }
 
-      if (intruder) {
-        std::cout << "Found an intruder state" << std::endl;
-        #if 0
-        std::cout << "r1 before:" << std::endl;
-        ccp.m2get(r1).print();
+      {
+        // std::cout << "Found an intruder state" << std::endl;
+        #if 1
+        // std::cout << "r1 before:" << std::endl;
+        // ccp.m2get(r1).print();
         libtensor::block_tensor_wr_ctrl<N, value_t> ctrl(ccp.m2get(r1));
         libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
         for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
-          size_t icount{0};
           libtensor::index<N> bidx;
           ol.get_index(it, bidx);
-          if (bidx[0] != bidx[1] || bidx[0] != beta)
+          if (bidx[0] != bidx[1] || bidx[0] > beta)
             continue;
           libtensor::dense_tensor_wr_i<N, value_t> &blk = ctrl.req_block(bidx);
           libtensor::dense_tensor_wr_ctrl<N, value_t> tc(blk);
           const libtensor::dimensions<N> &tdims = blk.get_dims();
           value_t *ptr = tc.req_dataptr();
           for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-            // if (std::abs(ptr[offset]) >  0.001) {
-              ptr[offset] *= -1;
-              // ++icount;
-            // }
+              ptr[offset] = v_new[offset];
           }
           tc.ret_dataptr(ptr);
           ctrl.ret_block(bidx);
       }
-        std::cout << "r1 after:" << std::endl;
-        ccp.m2get(r1).print();
+        // std::cout << "r1 after:" << std::endl;
+        // ccp.m2get(r1).print();
         #endif
 
       }
@@ -235,6 +229,8 @@ public:
       double norm = sqrt(v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1)) + 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)));
       v_rampl[ir].m2get(r1).scal(1/norm);
       v_rampl[ir].m4get(r2).scal(1/norm);
+      double r12 = v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1)) ;
+      double r22 = 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2));
 
       std::ostringstream ss;
 
@@ -243,7 +239,7 @@ public:
          << "\n\nExcitation energy = " << std::setprecision(5) << std::fixed 
          << m_energy[ir] << " Ha = "
          << m_energy[ir]*inverse_electron_volt << " eV"
-         << "\n\n||r1||² = " << v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1)) << "    ||r2||² = " << 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2))
+         << "\n\n||r1||² = " << r12 << "    ||r2||² = " << r22
          << "\n\nAmplitude    Transition\n";
  
       // get dimensions (#occupied & #virtual)
@@ -280,7 +276,7 @@ public:
       std::vector<double> v_alpha, v_beta;
 
       // read r1  
-      if (0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)) > v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1))) {
+      if ( r12 > r22 ) {
       constexpr size_t N = 2;
       libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir].m2get(r1));
 
@@ -293,7 +289,7 @@ public:
         const libtensor::dimensions<N> &tdims = blk.get_dims();
         const value_t *ptr = tc.req_const_dataptr();
         for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-          if (std::abs(ptr[offset]) >  0.01) {
+          if (std::abs(ptr[offset]) >  0.1) {
             size_t i = 1+(offset/v_nv[bidx[1]]);
             size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
             ss << "\n" <<std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
@@ -317,19 +313,18 @@ public:
         ctrl.ret_const_block(bidx);
       }
         
-      molpro::cout << ss.str() << "\n";
-      for (size_t i = 0; i < v_alpha.size(); i++) {
-        if ( std::abs(v_alpha[i] - v_beta[i]) > 1e-5) {
-          std::cout << "Warning: There seems to be something wrong with these amplitudes.\n";
-          break;
-        }
-      }
+      // for (size_t i = 0; i < v_alpha.size(); i++) {
+      //   if ( std::abs(v_alpha[i] - v_beta[i]) > 1e-5) {
+      //     std::cout << "Warning: There seems to be something wrong with these amplitudes.\n";
+      //     break;
+      //   }
+      // }
 
-      }
+      } else {
 
       // read r2
       // if (v_alpha.empty()) {
-      if (0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)) > v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1))) {
+      // if (0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)) > v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1))) {
         
 
       // v_rampl[ir].m4get(r2).print();
@@ -348,21 +343,22 @@ public:
         const libtensor::dimensions<N> &tdims = blk.get_dims();
         const value_t *ptr = tc.req_const_dataptr();
         for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-          if (std::abs(ptr[offset]) >  0.01) {
+          if (std::abs(ptr[offset]) >  0.1) {
             size_t i = offset / (v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]);
             size_t j = (offset - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / (v_nv[bidx[2]]*v_nv[bidx[3]]);
             size_t a = (offset - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / v_nv[bidx[3]];
             size_t b = offset - a*v_nv[bidx[3]] - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]];
 
-            molpro::cout << "\n" << std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
-            molpro::cout << "o" << 1+i << gmb::tospin(bidx[0]) << " -> v" << 1+a << gmb::tospin(bidx[2]);
-            molpro::cout << "    o" << 1+j << gmb::tospin(bidx[1]) << " -> v" << 1+b << gmb::tospin(bidx[3]);
+            ss << "\n" << std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
+            ss << "o" << 1+i << gmb::tospin(bidx[0]) << " -> v" << 1+a << gmb::tospin(bidx[2]);
+            ss << "    o" << 1+j << gmb::tospin(bidx[1]) << " -> v" << 1+b << gmb::tospin(bidx[3]);
           }
         }
         tc.ret_const_dataptr(ptr);
         ctrl.ret_const_block(bidx);
       }
     }
+    molpro::cout << ss.str() << "\n";
     }
 
 
