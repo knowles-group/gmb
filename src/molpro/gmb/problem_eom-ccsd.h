@@ -143,7 +143,7 @@ public:
         const libtensor::dimensions<N> &tdims = blk.get_dims();
         const value_t *ptr = tc.req_const_dataptr();
         for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-          if (std::abs(ptr[offset]) >  0.001) {
+          if (std::abs(ptr[offset]) >  0.01) {
             size_t i = 1+(offset/v_nv[bidx[1]]);
             size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
             for (size_t in = 0; in < N; in++) {
@@ -169,7 +169,8 @@ public:
       }
 
       if (intruder) {
-        std::cout << "Found an intruder" << std::endl;
+        std::cout << "Found an intruder state" << std::endl;
+        #if 0
         std::cout << "r1 before:" << std::endl;
         ccp.m2get(r1).print();
         libtensor::block_tensor_wr_ctrl<N, value_t> ctrl(ccp.m2get(r1));
@@ -195,6 +196,7 @@ public:
       }
         std::cout << "r1 after:" << std::endl;
         ccp.m2get(r1).print();
+        #endif
 
       }
 
@@ -230,9 +232,7 @@ public:
 
     for (size_t ir = 0; ir < v_rampl.size(); ir++) {
       // normalise
-      double r12 = v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1));
-      double r22 = 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2));
-      double norm = sqrt(r12 + r22);
+      double norm = sqrt(v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1)) + 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)));
       v_rampl[ir].m2get(r1).scal(1/norm);
       v_rampl[ir].m4get(r2).scal(1/norm);
 
@@ -243,7 +243,7 @@ public:
          << "\n\nExcitation energy = " << std::setprecision(5) << std::fixed 
          << m_energy[ir] << " Ha = "
          << m_energy[ir]*inverse_electron_volt << " eV"
-         << "\n\n|r1|² = " << r12 << "    |r2|² = " << r22
+         << "\n\n||r1||² = " << v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1)) << "    ||r2||² = " << 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2))
          << "\n\nAmplitude    Transition\n";
  
       // get dimensions (#occupied & #virtual)
@@ -280,7 +280,7 @@ public:
       std::vector<double> v_alpha, v_beta;
 
       // read r1  
-      {
+      if (0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)) > v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1))) {
       constexpr size_t N = 2;
       libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir].m2get(r1));
 
@@ -293,7 +293,7 @@ public:
         const libtensor::dimensions<N> &tdims = blk.get_dims();
         const value_t *ptr = tc.req_const_dataptr();
         for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-          if (std::abs(ptr[offset]) >  0.001) {
+          if (std::abs(ptr[offset]) >  0.01) {
             size_t i = 1+(offset/v_nv[bidx[1]]);
             size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
             ss << "\n" <<std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
@@ -328,7 +328,8 @@ public:
       }
 
       // read r2
-      if (v_alpha.empty()) {
+      // if (v_alpha.empty()) {
+      if () {
 
       // v_rampl[ir].m4get(r2).print();
       constexpr size_t N = 4;
@@ -346,7 +347,7 @@ public:
         const libtensor::dimensions<N> &tdims = blk.get_dims();
         const value_t *ptr = tc.req_const_dataptr();
         for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-          if (std::abs(ptr[offset]) >  0.001) {
+          if (std::abs(ptr[offset]) >  0.01) {
             size_t i = offset / (v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]);
             size_t j = (offset - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / (v_nv[bidx[2]]*v_nv[bidx[3]]);
             size_t a = (offset - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / v_nv[bidx[3]];

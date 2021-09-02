@@ -43,7 +43,7 @@ void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<probl
   problem->energy(*ptampl);
 }
 
-void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots) {
+void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots, const double& es_conv) {
   molpro::cout << "\nRunning EOM-CCSD" << std::endl;
   
   // set EOM-CCSD amplitudes
@@ -61,7 +61,7 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
   // set options
   solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
   solver->set_n_roots(nroots);
-  solver->set_convergence_threshold(1.0e-5);
+  solver->set_convergence_threshold(es_conv);
 
   // solve
   solver->solve(v_rampl, residuals_es, *problem, true);
@@ -79,6 +79,8 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
     if (energies[i] < 10e-5) 
     {
       std::cout << "\nWarning: Found 0 eigenvalue!" << std::endl;
+
+      #if 0
       problem->check_eigenvalue(v_rampl[i]);
       
       // set EOM-CCSD amplitudes
@@ -102,7 +104,7 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
       // solve
       solver->solve(v_rampl, residuals_es, *problem, false);
       problem->set_energy(solver->eigenvalues());
-
+      #endif
     }
   }
 }
