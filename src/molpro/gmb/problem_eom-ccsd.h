@@ -341,14 +341,6 @@ public:
 
   }
 
-  void check_eigenvalue(const container_t &rampl) const {
- #if 0
-    std::cout << "checking eigenvalue" << std::endl;
-
-  #endif
-  }
-
-
 };
 
 #endif //GMB_PROBLEM_EOM_CCSD_H_
