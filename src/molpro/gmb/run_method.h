@@ -16,6 +16,6 @@ void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<probl
  * @brief Run Excited-State (ES) calculation
  * 
  */
-void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots);
+void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots, const double& es_conv);
 
 #endif // RUN_METHOD_H

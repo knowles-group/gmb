@@ -36,14 +36,14 @@ void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<probl
 
   // solver options
   solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
-  // solver->set_max_iter(110);
   // solver->set_convergence_threshold(1.0e-14);
+
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);
   problem->energy(*ptampl);
 }
 
-void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots) {
+void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots, const double& es_conv) {
   molpro::cout << "\nRunning EOM-CCSD" << std::endl;
   
   // set EOM-CCSD amplitudes
@@ -61,7 +61,7 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
   // set options
   solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
   solver->set_n_roots(nroots);
-  solver->set_convergence_threshold(1.0e-5);
+  solver->set_convergence_threshold(es_conv);
 
   // solve
   solver->solve(v_rampl, residuals_es, *problem, true);
@@ -72,8 +72,9 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
   solver->solution(v_nroots, v_rampl, residuals_es);
   problem->character(v_rampl);
 
-}
+  auto energies = problem->get_energy();
 
+}
 
 #include <molpro/linalg/itsolv/SolverFactory-implementation.h>
 template class molpro::linalg::itsolv::SolverFactory<amplitudes<>, amplitudes<>>;
