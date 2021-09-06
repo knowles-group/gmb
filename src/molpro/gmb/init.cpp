@@ -44,7 +44,6 @@ namespace gmb {
       ham.set(i_vvvv, int_vvvv);
 
       if (method.find("ccsd") != std::string::npos) {
-        #if 1
         auto h1_ov = get_integral(filename,filename,v_ppol,o,v);
         auto int_ooov = get_i(filename, v_ppol, o, o, o, v);
         auto int_ovvv = get_i(filename, v_ppol, o, v, v, v);
