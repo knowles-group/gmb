@@ -1,8 +1,10 @@
 #ifndef GMB_PROBLEM_EOM_CCSD_H_
 #define GMB_PROBLEM_EOM_CCSD_H_
 #include "problem_eom.h"
+#include "utils.h"
 #include "expressions/eom-ccsd/eom-ccsd.h"
 #include "expressions/update.h"
+#include "expressions/ccsd/energy.h"
 
 extern molpro::Profiler prof;
 // extern std::unique_ptr<molpro::Profiler> pprof;
@@ -87,118 +89,262 @@ public:
   }
 
   void action(const CVecRef<container_t> &parameters, const VecRef<container_t> &actions) const override {
+  
     for (int k = 0; k < parameters.size(); k++) {
+
       auto &ccp = const_cast<container_t&> (parameters[k].get());     
       auto &a = actions[k].get();  
+
+      // add singlet projector
+      singlet_projector(ccp);
+      
+
       // compute intermediates
       auto ir1_vv = eom_ccsd_ir1_vv(m_ham.m2get(f_vv),ccp.m2get(r1),m_int.m4get("iw2_ovvv"));          
       auto ir1_oo = eom_ccsd_ir1_oo(m_ham.m2get(f_oo),ccp.m2get(r1),m_int.m4get("iw2_ooov"));          
       auto ir2_oo = eom_ccsd_ir2_oo(m_ham.m2get(f_oo),ccp.m4get(r2),m_ham.m4get(i_oovv));          
       auto ir2_vv = eom_ccsd_ir2_vv(m_ham.m2get(f_vv),ccp.m4get(r2),m_ham.m4get(i_oovv));          
+
       // compute r1
       {
-      auto r1_new = eom_ccsd_r1(ccp.m2get(r1), ccp.m4get(r2), m_int.m2get("if_oo"), m_int.m2get("if_ov"), m_int.m2get("if_vv"),  
-                    m_int.m4get("iw_ovov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw2_ovvv"));
-      a.set(r1, r1_new);
+        auto r1_new = eom_ccsd_r1(ccp.m2get(r1), ccp.m4get(r2), m_int.m2get("if_oo"), m_int.m2get("if_ov"), m_int.m2get("if_vv"),  
+                      m_int.m4get("iw_ovov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw2_ovvv"));
+        a.set(r1, r1_new);
       }
       // compute r2
       {
-      auto r2_new = eom_ccsd_r2(ccp.m2get(r1), ccp.m4get(r2), m_tampl.m4get(t2), m_int.m2get("if_oo"), m_int.m2get("if_vv"),  
-                    ir1_oo, ir2_oo, ir1_vv, ir2_vv, 
-                    m_ham.m4get(i_oovv), m_int.m4get("iw_oooo"), m_int.m4get("iw_ooov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw_ovov"), m_int.m4get("iw_ovvv"), m_int.m4get("iw2_ovvv"), m_int.m4get("iw_vvvv"));  
-      
-      a.set(r2, r2_new);
+        auto r2_new = eom_ccsd_r2(ccp.m2get(r1), ccp.m4get(r2), m_tampl.m4get(t2), m_int.m2get("if_oo"), m_int.m2get("if_vv"),  
+                      ir1_oo, ir2_oo, ir1_vv, ir2_vv, 
+                      m_ham.m4get(i_oovv), m_int.m4get("iw_oooo"), m_int.m4get("iw_ooov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw_ovov"), m_int.m4get("iw_ovvv"), m_int.m4get("iw2_ovvv"), m_int.m4get("iw_vvvv"));  
+
+        a.set(r2, r2_new);
       }
     }
   }
 
-    void character(std::vector<container_t> &v_rampl) const {
-    constexpr size_t N =2;
-    constexpr double inverse_electron_volt{27.211386245988};
-    for (size_t ir1 = 0; ir1 < v_rampl.size(); ir1++) {
-      // molpro::cout << "r[" << ir1 << "]:\n";
-      // m_vr1[ir1]->print();
-      molpro::cout << "\nExcited state #" << ir1+1 
-                << "\nExcitation energy = " << std::setprecision(5) << std::fixed 
-                << m_energy[ir1] << " Ha = "
-                << m_energy[ir1]*inverse_electron_volt << " eV"
-                << "\nocc -> vir     amplitude\n";
+  void singlet_projector(container_t &r_ampl) const {
 
-      libtensor::block_tensor_rd_i<2, value_t> &bt(v_rampl[ir1].m2get(r1));
-
-      // total dimensions
+    #if 1
+    // get dimensions (#occupied & #virtual)
+      libtensor::block_tensor_rd_i<2, value_t> &bt(r_ampl.m2get(r1));
       const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
       auto no = dims.get_dim(0);
       auto nv = dims.get_dim(1);
-
       auto bis = bt.get_bis();
 
-      size_t maxtyp = 0;
-      for(size_t i = 0; i < N; i++) {
-          auto typ = bis.get_type(i);
-          if(typ > maxtyp) maxtyp = typ;
-      }
       std::vector<size_t> v_no;
       std::vector<size_t> v_nv;
 
-    // occupied
-    const libtensor::split_points &spl_o = bis.get_splits(0);
-    for (size_t i = 0; i < spl_o.get_num_points(); i++){
-      if (i == 0)
-        v_no.push_back(spl_o[i]);
-      else 
-        v_no.emplace_back(spl_o[i]-spl_o[i-1]);
-    }
-    v_no.emplace_back(no-std::accumulate(v_no.cbegin(),v_no.cend(),0));
+      // occupied
+      const libtensor::split_points &spl_o = bis.get_splits(0);
+      for (size_t i = 0; i < spl_o.get_num_points(); i++){
+        if (i == 0)
+          v_no.push_back(spl_o[i]);
+        else 
+          v_no.emplace_back(spl_o[i]-spl_o[i-1]);
+      }
+      v_no.emplace_back(no-std::accumulate(v_no.cbegin(),v_no.cend(),0));
 
-    // virtual
-    const libtensor::split_points &spl_v = bis.get_splits(1);
-    for (size_t i = 0; i < spl_v.get_num_points(); i++) {
-      if (i == 0)
-        v_nv.push_back(spl_v[i]);
-      else 
-        v_nv.emplace_back(spl_v[i]-spl_v[i-1]);
-    }
-    v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));    
+      // virtual
+      const libtensor::split_points &spl_v = bis.get_splits(1);
+      for (size_t i = 0; i < spl_v.get_num_points(); i++) {
+        if (i == 0)
+          v_nv.push_back(spl_v[i]);
+        else 
+          v_nv.emplace_back(spl_v[i]-spl_v[i-1]);
+      }
+      v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));  
+      std::vector<std::vector<size_t>> n_ne{v_no,v_nv};
 
-    std::vector<std::vector<size_t>> n_ne{v_no,v_nv};
-      libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir1].m2get(r1));
+      std::vector<double> v_alpha, v_beta;
+
+      // read r1  
+      {
+      constexpr size_t N = 2;
+      libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(r_ampl.m2get(r1));
 
       libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
       for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
         libtensor::index<N> bidx;
         ol.get_index(it, bidx);
-        const libtensor::dimensions<N> &bd = bt.get_bis().get_block_dims(bidx);
+        if (bidx[0] != bidx[1] || bidx[0] > beta)
+            continue;
         libtensor::dense_tensor_rd_i<N, value_t> &blk = ctrl.req_const_block(bidx);
         libtensor::dense_tensor_rd_ctrl<N, value_t> tc(blk);
         const libtensor::dimensions<N> &tdims = blk.get_dims();
         const value_t *ptr = tc.req_const_dataptr();
         for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-          if (std::abs(ptr[offset]) >  0.001) {
-            size_t i = 1+(offset/v_nv[bidx[1]]);
-            size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
-            molpro::cout << "o" << i;
-            for (size_t in = 0; in < N; in++) {
-              switch (bidx[in]) {
-              case alpha: molpro::cout << "a";
-                break;
-              case beta: molpro::cout << "b";
-                break;
-              default: molpro::cout << "p" << bidx[in]-beta;
-                break;
+          size_t i = 1+(offset/v_nv[bidx[1]]);
+          size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
+          switch (bidx[0]) {
+          case alpha: v_alpha.push_back(ptr[offset]);
+            break;
+          case beta: v_beta.push_back(ptr[offset]);
+            break;
+          }
+        }
+        tc.ret_const_dataptr(ptr);
+        ctrl.ret_const_block(bidx);
+      }
+        
+      auto v_new = v_alpha;
+
+      for (size_t i = 0; i < v_alpha.size(); i++) {
+        v_new[i] = (v_alpha[i] + v_beta[i]) / 2;
+      }
+
+      {
+        libtensor::block_tensor_wr_ctrl<N, value_t> ctrl(r_ampl.m2get(r1));
+        libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
+        for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
+          libtensor::index<N> bidx;
+          ol.get_index(it, bidx);
+          if (bidx[0] != bidx[1] || bidx[0] > beta)
+            continue;
+          libtensor::dense_tensor_wr_i<N, value_t> &blk = ctrl.req_block(bidx);
+          libtensor::dense_tensor_wr_ctrl<N, value_t> tc(blk);
+          const libtensor::dimensions<N> &tdims = blk.get_dims();
+          value_t *ptr = tc.req_dataptr();
+          for (size_t offset = 0; offset < tdims.get_size(); offset++) {
+              ptr[offset] = v_new[offset];
+          }
+          tc.ret_dataptr(ptr);
+          ctrl.ret_block(bidx);
+        }
+      }
+
+      }
+  #endif
+  }
+
+  void character(std::vector<container_t> &v_rampl) const {
+
+    constexpr double inverse_electron_volt{27.211386245988};
+
+    for (size_t ir = 0; ir < v_rampl.size(); ir++) {
+      // normalise
+      double norm = sqrt(v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1)) + 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)));
+      v_rampl[ir].m2get(r1).scal(1/norm);
+      v_rampl[ir].m4get(r2).scal(1/norm);
+      double r12 = v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1)) ;
+      double r22 = 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2));
+
+      std::ostringstream ss;
+
+      // print excited state number and energy
+      ss << "\n\nExcited state #" << ir+1 
+         << "\n\nExcitation energy = " << std::setprecision(5) << std::fixed 
+         << m_energy[ir] << " Ha = "
+         << m_energy[ir]*inverse_electron_volt << " eV"
+         << "\n\n||r1||² = " << r12 << "    ||r2||² = " << r22
+         << "\n\nAmplitude    Transition\n";
+ 
+      // get dimensions (#occupied & #virtual)
+      libtensor::block_tensor_rd_i<2, value_t> &bt(v_rampl[ir].m2get(r1));
+      const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
+      auto no = dims.get_dim(0);
+      auto nv = dims.get_dim(1);
+      auto bis = bt.get_bis();
+
+      std::vector<size_t> v_no;
+      std::vector<size_t> v_nv;
+
+      // occupied
+      const libtensor::split_points &spl_o = bis.get_splits(0);
+      for (size_t i = 0; i < spl_o.get_num_points(); i++){
+        if (i == 0)
+          v_no.push_back(spl_o[i]);
+        else 
+          v_no.emplace_back(spl_o[i]-spl_o[i-1]);
+      }
+      v_no.emplace_back(no-std::accumulate(v_no.cbegin(),v_no.cend(),0));
+
+      // virtual
+      const libtensor::split_points &spl_v = bis.get_splits(1);
+      for (size_t i = 0; i < spl_v.get_num_points(); i++) {
+        if (i == 0)
+          v_nv.push_back(spl_v[i]);
+        else 
+          v_nv.emplace_back(spl_v[i]-spl_v[i-1]);
+      }
+      v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));  
+      std::vector<std::vector<size_t>> n_ne{v_no,v_nv};
+
+      std::vector<double> v_alpha, v_beta;
+
+      // read r1  
+      if ( r12 > r22 ) {
+        constexpr size_t N = 2;
+        libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir].m2get(r1));
+
+        libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
+        for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
+          libtensor::index<N> bidx;
+          ol.get_index(it, bidx);
+          libtensor::dense_tensor_rd_i<N, value_t> &blk = ctrl.req_const_block(bidx);
+          libtensor::dense_tensor_rd_ctrl<N, value_t> tc(blk);
+          const libtensor::dimensions<N> &tdims = blk.get_dims();
+          const value_t *ptr = tc.req_const_dataptr();
+          for (size_t offset = 0; offset < tdims.get_size(); offset++) {
+            if (std::abs(ptr[offset]) >  0.1) {
+              size_t i = 1+(offset/v_nv[bidx[1]]);
+              size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
+              ss << "\n" <<std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
+              ss << "O" << i;
+              for (size_t in = 0; in < N; in++) {
+                ss << gmb::tospin(bidx[in]);
+                switch (bidx[in]) {
+                case alpha: v_alpha.push_back(ptr[offset]);
+                  break;
+                case beta: v_beta.push_back(ptr[offset]);
+                  break;
+                default: ss  << bidx[in]-beta;
+                  break;
+                }
+                if (in == 0)
+                  ss << " -> V" << a;
               }
-              if (in == 0)
-                molpro::cout << " -> v" << a;
             }
-            molpro::cout << "     " << std::setprecision(5) << std::fixed <<  ptr[offset] << "\n";
+          }
+          tc.ret_const_dataptr(ptr);
+          ctrl.ret_const_block(bidx);
+        }
+      } else {
+
+      // read r2
+      constexpr size_t N = 4;
+      libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir].m4get(r2));
+      libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
+      for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
+        libtensor::index<N> bidx;
+        ol.get_index(it, bidx);
+        if (ctrl.req_is_zero_block(bidx)) 
+          continue;
+        libtensor::dense_tensor_rd_i<N, value_t> &blk = ctrl.req_const_block(bidx);
+        libtensor::dense_tensor_rd_ctrl<N, value_t> tc(blk);
+        const libtensor::dimensions<N> &tdims = blk.get_dims();
+        const value_t *ptr = tc.req_const_dataptr();
+        for (size_t offset = 0; offset < tdims.get_size(); offset++) {
+          if (std::abs(ptr[offset]) >  0.1) {
+            size_t i = offset / (v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]);
+            size_t j = (offset - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / (v_nv[bidx[2]]*v_nv[bidx[3]]);
+            size_t a = (offset - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / v_nv[bidx[3]];
+            size_t b = offset - a*v_nv[bidx[3]] - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]];
+
+            ss << "\n" << std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
+            ss << "o" << 1+i << gmb::tospin(bidx[0]) << " -> v" << 1+a << gmb::tospin(bidx[2]);
+            ss << "    o" << 1+j << gmb::tospin(bidx[1]) << " -> v" << 1+b << gmb::tospin(bidx[3]);
           }
         }
         tc.ret_const_dataptr(ptr);
         ctrl.ret_const_block(bidx);
       }
     }
-  };
+    molpro::cout << ss.str() << "\n";
+    }
 
+
+  }
 
 };
 

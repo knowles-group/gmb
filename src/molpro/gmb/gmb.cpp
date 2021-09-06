@@ -38,6 +38,8 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   // parse arguments
   auto method = options.parameter("method", "eom-ccsd");
   auto nroots = options.parameter("states", 3);
+  // auto es_conv = options.parameter("es_conv", 1e-5);
+  double es_conv{1e-5};
   auto ncav = options.parameter("polariton_modes", 0);
 
   std::vector<std::shared_ptr<polariton>> v_ppol(ncav);
@@ -126,7 +128,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     if (method.find("eom") != std::string::npos) {
 
       std::unique_ptr<problem_eom> problem_es;
-      run_es(ham, method, problem_es, ptampl, nroots);
+      run_es(ham, method, problem_es, ptampl, nroots, es_conv);
 
       for (const auto& ev : problem_es->get_energy())
         for (int i=0; i<expected_results.size(); ++i)
@@ -134,7 +136,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
       auto energies = problem_es->get_energy();
 
       // print results
-      molpro::cout << "\n          Excitation energy                   Total energy  \n";
+      molpro::cout << "\n\n          Excitation energy                   Total energy  \n";
       molpro::cout << "        (Ha)            (eV)              (Ha)            (eV)  \n";
       constexpr double inverse_electron_volt{27.211386245988};
       for (auto &i : energies) {

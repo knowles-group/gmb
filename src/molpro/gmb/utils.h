@@ -13,6 +13,8 @@ namespace gmb {
   
   size_t get_offset(size_t i, size_t j, size_t k, size_t l, size_t nj, size_t nk, size_t nl);
   size_t get_offset(size_t i, size_t j, size_t nj);
+
+  std::string tospin(size_t spin);
     
 } // namespace gmb
 #endif //GMB_UTILS_H
