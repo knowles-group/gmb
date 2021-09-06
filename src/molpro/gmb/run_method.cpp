@@ -72,41 +72,8 @@ void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr
   solver->solution(v_nroots, v_rampl, residuals_es);
   problem->character(v_rampl);
 
-  // check for zero elements
   auto energies = problem->get_energy();
 
-  for (size_t i = 0; i < energies.size(); i++) {
-    if (energies[i] < 10e-5) 
-    {
-      std::cout << "\nWarning: Found 0 eigenvalue!" << std::endl;
-
-      #if 0
-      problem->check_eigenvalue(v_rampl[i]);
-      
-      // set EOM-CCSD amplitudes
-      // problem = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
-
-      // std::unique_ptr<amplitudes<>> prampl{std::make_unique<amplitudes<>>()};
-      prampl->set(r1, container(v_rampl[i].m2get(r1)));
-      prampl->set(r2, container(v_rampl[i].m4get(r2)));
-      std::vector<amplitudes<>> v_rampl(1, *prampl);
-
-      // set solver 
-      auto solver = molpro::linalg::itsolv::create_LinearEigensystem<amplitudes<>>("Davidson");
-      auto residuals_es = v_rampl;
-
-      // set options
-      solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Detailed);
-      solver->set_n_roots(1);
-      // solver->set_max_iter(1);
-      solver->set_convergence_threshold(1.0e-10);
-
-      // solve
-      solver->solve(v_rampl, residuals_es, *problem, false);
-      problem->set_energy(solver->eigenvalues());
-      #endif
-    }
-  }
 }
 
 #include <molpro/linalg/itsolv/SolverFactory-implementation.h>
