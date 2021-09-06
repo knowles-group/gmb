@@ -8,6 +8,9 @@
 #include "supercontainer.h"
 
 #include <memory>
+#include <numeric>
+
+#include <molpro/iostream.h>
 
 namespace gmb {
 
@@ -19,7 +22,7 @@ namespace gmb {
    * @param hamiltonian 
    */
   void init(const std::string &filename, const std::string &method, hamiltonian<> &hamiltonian, const std::vector<std::shared_ptr<polariton>> &ppol);
-  
+  void readf(container<2> &f_xx, std::ostringstream &ss, const char &x); 
 
 } // namespace gmb
 
