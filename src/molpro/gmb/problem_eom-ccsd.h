@@ -124,42 +124,37 @@ public:
 
   void singlet_projector(container_t &r_ampl) const {
 
-    #if 1
     // get dimensions (#occupied & #virtual)
-      libtensor::block_tensor_rd_i<2, value_t> &bt(r_ampl.m2get(r1));
-      const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
-      auto no = dims.get_dim(0);
-      auto nv = dims.get_dim(1);
-      auto bis = bt.get_bis();
-
-      std::vector<size_t> v_no;
-      std::vector<size_t> v_nv;
-
-      // occupied
-      const libtensor::split_points &spl_o = bis.get_splits(0);
-      for (size_t i = 0; i < spl_o.get_num_points(); i++){
-        if (i == 0)
-          v_no.push_back(spl_o[i]);
-        else 
-          v_no.emplace_back(spl_o[i]-spl_o[i-1]);
-      }
-      v_no.emplace_back(no-std::accumulate(v_no.cbegin(),v_no.cend(),0));
-
-      // virtual
-      const libtensor::split_points &spl_v = bis.get_splits(1);
-      for (size_t i = 0; i < spl_v.get_num_points(); i++) {
-        if (i == 0)
-          v_nv.push_back(spl_v[i]);
-        else 
-          v_nv.emplace_back(spl_v[i]-spl_v[i-1]);
-      }
-      v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));  
-      std::vector<std::vector<size_t>> n_ne{v_no,v_nv};
-
-      std::vector<double> v_alpha, v_beta;
-
-      // read r1  
-      {
+    libtensor::block_tensor_rd_i<2, value_t> &bt(r_ampl.m2get(r1));
+    const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
+    auto no = dims.get_dim(0);
+    auto nv = dims.get_dim(1);
+    auto bis = bt.get_bis();
+    std::vector<size_t> v_no;
+    std::vector<size_t> v_nv;
+    // occupied
+    const libtensor::split_points &spl_o = bis.get_splits(0);
+    for (size_t i = 0; i < spl_o.get_num_points(); i++){
+      if (i == 0)
+        v_no.push_back(spl_o[i]);
+      else 
+        v_no.emplace_back(spl_o[i]-spl_o[i-1]);
+    }
+    v_no.emplace_back(no-std::accumulate(v_no.cbegin(),v_no.cend(),0));
+    // virtual
+    const libtensor::split_points &spl_v = bis.get_splits(1);
+    for (size_t i = 0; i < spl_v.get_num_points(); i++) {
+      if (i == 0)
+        v_nv.push_back(spl_v[i]);
+      else 
+        v_nv.emplace_back(spl_v[i]-spl_v[i-1]);
+    }
+    v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));  
+    std::vector<std::vector<size_t>> n_ne{v_no,v_nv};
+    std::vector<double> v_alpha, v_beta;
+    
+    // read r1  
+    {
       constexpr size_t N = 2;
       libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(r_ampl.m2get(r1));
 
@@ -193,6 +188,7 @@ public:
         v_new[i] = (v_alpha[i] + v_beta[i]) / 2;
       }
 
+      // clean r1 
       {
         libtensor::block_tensor_wr_ctrl<N, value_t> ctrl(r_ampl.m2get(r1));
         libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
@@ -212,9 +208,7 @@ public:
           ctrl.ret_block(bidx);
         }
       }
-
-      }
-  #endif
+    }
   }
 
   void character(std::vector<container_t> &v_rampl) const {
@@ -342,8 +336,6 @@ public:
     }
     molpro::cout << ss.str() << "\n";
     }
-
-
   }
 
 };
