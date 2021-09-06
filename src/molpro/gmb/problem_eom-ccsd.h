@@ -96,9 +96,37 @@ public:
       auto &a = actions[k].get();  
 
       // add singlet projector
+      singlet_projector(ccp);
       
-      // get dimensions (#occupied & #virtual)
-      libtensor::block_tensor_rd_i<2, value_t> &bt(ccp.m2get(r1));
+
+      // compute intermediates
+      auto ir1_vv = eom_ccsd_ir1_vv(m_ham.m2get(f_vv),ccp.m2get(r1),m_int.m4get("iw2_ovvv"));          
+      auto ir1_oo = eom_ccsd_ir1_oo(m_ham.m2get(f_oo),ccp.m2get(r1),m_int.m4get("iw2_ooov"));          
+      auto ir2_oo = eom_ccsd_ir2_oo(m_ham.m2get(f_oo),ccp.m4get(r2),m_ham.m4get(i_oovv));          
+      auto ir2_vv = eom_ccsd_ir2_vv(m_ham.m2get(f_vv),ccp.m4get(r2),m_ham.m4get(i_oovv));          
+
+      // compute r1
+      {
+        auto r1_new = eom_ccsd_r1(ccp.m2get(r1), ccp.m4get(r2), m_int.m2get("if_oo"), m_int.m2get("if_ov"), m_int.m2get("if_vv"),  
+                      m_int.m4get("iw_ovov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw2_ovvv"));
+        a.set(r1, r1_new);
+      }
+      // compute r2
+      {
+        auto r2_new = eom_ccsd_r2(ccp.m2get(r1), ccp.m4get(r2), m_tampl.m4get(t2), m_int.m2get("if_oo"), m_int.m2get("if_vv"),  
+                      ir1_oo, ir2_oo, ir1_vv, ir2_vv, 
+                      m_ham.m4get(i_oovv), m_int.m4get("iw_oooo"), m_int.m4get("iw_ooov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw_ovov"), m_int.m4get("iw_ovvv"), m_int.m4get("iw2_ovvv"), m_int.m4get("iw_vvvv"));  
+
+        a.set(r2, r2_new);
+      }
+    }
+  }
+
+  void singlet_projector(container_t &r_ampl) const {
+
+    #if 1
+    // get dimensions (#occupied & #virtual)
+      libtensor::block_tensor_rd_i<2, value_t> &bt(r_ampl.m2get(r1));
       const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
       auto no = dims.get_dim(0);
       auto nv = dims.get_dim(1);
@@ -133,7 +161,7 @@ public:
       // read r1  
       {
       constexpr size_t N = 2;
-      libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(ccp.m2get(r1));
+      libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(r_ampl.m2get(r1));
 
       libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
       for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
@@ -159,7 +187,6 @@ public:
         ctrl.ret_const_block(bidx);
       }
         
-      bool intruder{false};
       auto v_new = v_alpha;
 
       for (size_t i = 0; i < v_alpha.size(); i++) {
@@ -167,7 +194,7 @@ public:
       }
 
       {
-        libtensor::block_tensor_wr_ctrl<N, value_t> ctrl(ccp.m2get(r1));
+        libtensor::block_tensor_wr_ctrl<N, value_t> ctrl(r_ampl.m2get(r1));
         libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
         for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
           libtensor::index<N> bidx;
@@ -187,29 +214,7 @@ public:
       }
 
       }
-
-
-      // compute intermediates
-      auto ir1_vv = eom_ccsd_ir1_vv(m_ham.m2get(f_vv),ccp.m2get(r1),m_int.m4get("iw2_ovvv"));          
-      auto ir1_oo = eom_ccsd_ir1_oo(m_ham.m2get(f_oo),ccp.m2get(r1),m_int.m4get("iw2_ooov"));          
-      auto ir2_oo = eom_ccsd_ir2_oo(m_ham.m2get(f_oo),ccp.m4get(r2),m_ham.m4get(i_oovv));          
-      auto ir2_vv = eom_ccsd_ir2_vv(m_ham.m2get(f_vv),ccp.m4get(r2),m_ham.m4get(i_oovv));          
-
-      // compute r1
-      {
-        auto r1_new = eom_ccsd_r1(ccp.m2get(r1), ccp.m4get(r2), m_int.m2get("if_oo"), m_int.m2get("if_ov"), m_int.m2get("if_vv"),  
-                      m_int.m4get("iw_ovov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw2_ovvv"));
-        a.set(r1, r1_new);
-      }
-      // compute r2
-      {
-        auto r2_new = eom_ccsd_r2(ccp.m2get(r1), ccp.m4get(r2), m_tampl.m4get(t2), m_int.m2get("if_oo"), m_int.m2get("if_vv"),  
-                      ir1_oo, ir2_oo, ir1_vv, ir2_vv, 
-                      m_ham.m4get(i_oovv), m_int.m4get("iw_oooo"), m_int.m4get("iw_ooov"), m_int.m4get("iw2_ooov"), m_int.m4get("iw_ovov"), m_int.m4get("iw_ovvv"), m_int.m4get("iw2_ovvv"), m_int.m4get("iw_vvvv"));  
-
-        a.set(r2, r2_new);
-      }
-    }
+  #endif
   }
 
   void character(std::vector<container_t> &v_rampl) const {
@@ -285,7 +290,7 @@ public:
               size_t i = 1+(offset/v_nv[bidx[1]]);
               size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
               ss << "\n" <<std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
-              ss << "o" << i;
+              ss << "O" << i;
               for (size_t in = 0; in < N; in++) {
                 ss << gmb::tospin(bidx[in]);
                 switch (bidx[in]) {
@@ -297,7 +302,7 @@ public:
                   break;
                 }
                 if (in == 0)
-                  ss << " -> v" << a;
+                  ss << " -> V" << a;
               }
             }
           }
@@ -306,7 +311,7 @@ public:
         }
       } else {
 
-      // r2
+      // read r2
       constexpr size_t N = 4;
       libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir].m4get(r2));
       libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
