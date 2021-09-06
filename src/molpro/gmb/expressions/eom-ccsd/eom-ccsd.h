@@ -13,6 +13,7 @@
 #include "ir2_oo.h"
 #include "ir1_vv.h"
 #include "ir2_vv.h"
+#include "r0.h"
 #include "r1.h"
 #include "r2.h"
 #include "../diag_ov.h"

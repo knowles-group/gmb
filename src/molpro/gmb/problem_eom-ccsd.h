@@ -232,7 +232,8 @@ public:
          << "\n\nExcitation energy = " << std::setprecision(5) << std::fixed 
          << m_energy[ir] << " Ha = "
          << m_energy[ir]*inverse_electron_volt << " eV"
-         << "\n\n||r1||² = " << r12 << "    ||r2||² = " << r22
+         << "\n\nr0 = "<< eom_ccsd_r0(m_energy[ir], v_rampl[ir].m2get(r1), v_rampl[ir].m4get(r2), m_int.m2get("if_ov"), m_ham.m4get(i_oovv)) 
+         << "    ||r1||² = " << r12 << "    ||r2||² = " << r22
          << "\n\nAmplitude    Transition\n";
  
       // get dimensions (#occupied & #virtual)
