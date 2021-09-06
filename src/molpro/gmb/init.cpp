@@ -17,7 +17,6 @@ namespace gmb {
     // One-particle integrals
     auto h1_oo = get_integral(filename,filename,v_ppol,o,o);
     auto h1_vv = get_integral(filename,filename,v_ppol,v,v);
-#if 1   
 
     // get fock matrix
     auto d_oo = diag_xx(h1_oo);
@@ -55,60 +54,56 @@ namespace gmb {
         ham.set(i_ovvv, int_ovvv);
   
         ham.set(f_ov, fock_xx(d_oo, h1_ov, int_ooov));
-#endif
       }
     }
-  #endif
-  
   }
 
   void readf(container<2> &f_xx, std::ostringstream &ss, const char &x) {
+
       // get dimensions 
       libtensor::block_tensor_rd_i<2, double> &bt(f_xx);
       const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
-      auto no = dims.get_dim(0);
+      auto norb = dims.get_dim(0);
       auto bis = bt.get_bis();
 
-      std::vector<size_t> v_no;
-      std::vector<double> v_occ;
+      std::vector<size_t> v_norb;
+      std::vector<double> v_orb;
 
-      const libtensor::split_points &spl_o = bis.get_splits(0);
-      for (size_t i = 0; i < spl_o.get_num_points(); i++){
+      const libtensor::split_points &spl = bis.get_splits(0);
+      for (size_t i = 0; i < spl.get_num_points(); i++){
         if (i == 0)
-          v_no.push_back(spl_o[i]);
+          v_norb.push_back(spl[i]);
         else 
-          v_no.emplace_back(spl_o[i]-spl_o[i-1]);
+          v_norb.emplace_back(spl[i]-spl[i-1]);
       }
-      v_no.emplace_back(no-std::accumulate(v_no.cbegin(),v_no.cend(),0));
-      v_occ.reserve(no);
+      v_norb.emplace_back(norb-std::accumulate(v_norb.cbegin(),v_norb.cend(),0));
+      v_orb.reserve(norb);
 
-        constexpr size_t N = 2;
-        libtensor::block_tensor_rd_ctrl<N, double> ctrl(f_xx);
-
-        libtensor::orbit_list<N, double> ol(ctrl.req_const_symmetry());
-        for (libtensor::orbit_list<N, double>::iterator it = ol.begin(); it != ol.end(); it++) {
-          libtensor::index<N> bidx;
-          ol.get_index(it, bidx);
-        if (bidx[0] != bidx[1]) 
-          continue;
-          libtensor::dense_tensor_rd_i<N, double> &blk = ctrl.req_const_block(bidx);
-          libtensor::dense_tensor_rd_ctrl<N, double> tc(blk);
-          const libtensor::dimensions<N> &tdims = blk.get_dims();
-          const double *ptr = tc.req_const_dataptr();
-          for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-              size_t i = 1+(offset/v_no[bidx[1]]);
-              size_t j = 1+offset-(offset/v_no[bidx[1]])*v_no[bidx[1]];
-              if (i == j) {
-                ss << std::setw(3) << x << i << gmb::tospin(bidx[0]) << "        "
-                   << std::setprecision(3) << std::setw(6) <<  ptr[offset] << "\n";
-              }
-            }
-          tc.ret_const_dataptr(ptr);
-          ctrl.ret_const_block(bidx);
+      // get values
+      constexpr size_t N = 2;
+      libtensor::block_tensor_rd_ctrl<N, double> ctrl(f_xx);
+      libtensor::orbit_list<N, double> ol(ctrl.req_const_symmetry());
+      for (libtensor::orbit_list<N, double>::iterator it = ol.begin(); it != ol.end(); it++) {
+        libtensor::index<N> bidx;
+        ol.get_index(it, bidx);
+      if (bidx[0] != bidx[1]) 
+        continue;
+      libtensor::dense_tensor_rd_i<N, double> &blk = ctrl.req_const_block(bidx);
+      libtensor::dense_tensor_rd_ctrl<N, double> tc(blk);
+      const libtensor::dimensions<N> &tdims = blk.get_dims();
+      const double *ptr = tc.req_const_dataptr();
+      for (size_t offset = 0; offset < tdims.get_size(); offset++) {
+          size_t i = 1+(offset/v_norb[bidx[1]]);
+          size_t j = 1+offset-(offset/v_norb[bidx[1]])*v_norb[bidx[1]];
+          if (i == j) {
+            ss << std::setw(3) << x << i << gmb::tospin(bidx[0]) << "        "
+               << std::setprecision(3) << std::setw(6) <<  ptr[offset] << "\n";
+          }
         }
-
+      tc.ret_const_dataptr(ptr);
+      ctrl.ret_const_block(bidx);
+    }
     ss << "\n";
-
   }
 
 

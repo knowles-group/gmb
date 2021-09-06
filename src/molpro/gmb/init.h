@@ -22,6 +22,14 @@ namespace gmb {
    * @param hamiltonian 
    */
   void init(const std::string &filename, const std::string &method, hamiltonian<> &hamiltonian, const std::vector<std::shared_ptr<polariton>> &ppol);
+
+  /**
+   * @brief Read fock matrix for orbital energies
+   * 
+   * @param f_xx block of fock matrix to read 
+   * @param ss where to print
+   * @param x O or V for Occupied/Virtual
+   */
   void readf(container<2> &f_xx, std::ostringstream &ss, const char &x); 
 
 } // namespace gmb
