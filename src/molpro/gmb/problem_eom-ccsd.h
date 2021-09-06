@@ -6,9 +6,6 @@
 #include "expressions/update.h"
 #include "expressions/ccsd/energy.h"
 
-extern molpro::Profiler prof;
-// extern std::unique_ptr<molpro::Profiler> pprof;
-
 /**
  * @brief EOM-CCSD
  * 
@@ -122,6 +119,11 @@ public:
     }
   }
 
+  /**
+   * @brief Project out intruder triplet states
+   * 
+   * @param r_ampl r amplitudes
+   */
   void singlet_projector(container_t &r_ampl) const {
 
     // get dimensions (#occupied & #virtual)
@@ -326,8 +328,8 @@ public:
             size_t b = offset - a*v_nv[bidx[3]] - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]];
 
             ss << "\n" << std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
-            ss << "o" << 1+i << gmb::tospin(bidx[0]) << " -> v" << 1+a << gmb::tospin(bidx[2]);
-            ss << "    o" << 1+j << gmb::tospin(bidx[1]) << " -> v" << 1+b << gmb::tospin(bidx[3]);
+            ss << "O" << 1+i << gmb::tospin(bidx[0]) << " -> V" << 1+a << gmb::tospin(bidx[2]);
+            ss << "    O" << 1+j << gmb::tospin(bidx[1]) << " -> V" << 1+b << gmb::tospin(bidx[3]);
           }
         }
         tc.ret_const_dataptr(ptr);
