@@ -120,9 +120,11 @@ public:
           
           libtensor::index<4> bidx;
           ol.get_index(it, bidx);
-          if ((bidx[0] != bidx[2] || bidx[1] != bidx[3]) && (bidx[0] != bidx[3] || bidx[1] != bidx[2]))
-            continue;
 
+
+          if ((bidx[0] != bidx[2] || bidx[1] != bidx[3]) && (bidx[0] != bidx[3] || bidx[1] != bidx[2])
+          || ( (bidx[0] > beta) || (bidx[1] > beta) || (bidx[2] > beta) || (bidx[3] > beta)) )
+              continue;
           if (ss) {
             if ( (bidx[0] != beta) || (bidx[1] != beta) || (bidx[2] != beta) || (bidx[3] != beta)) {
               continue;
@@ -248,8 +250,9 @@ public:
       for (libtensor::orbit_list<4, double>::iterator it = ol.begin(); it != ol.end(); it++) {
         libtensor::index<4> bidx;
         ol.get_index(it, bidx);
-        if ((bidx[0] != bidx[2] || bidx[1] != bidx[3]) && (bidx[0] != bidx[3] || bidx[1] != bidx[2]))
-          continue;
+        if ((bidx[0] != bidx[2] || bidx[1] != bidx[3]) && (bidx[0] != bidx[3] || bidx[1] != bidx[2])
+          || ( (bidx[0] > beta) || (bidx[1] > beta) || (bidx[2] > beta) || (bidx[3] > beta)) )
+              continue;
         libtensor::dense_tensor_rd_i<4, double> &blk = ctrl.req_const_block(bidx);
         libtensor::dense_tensor_rd_ctrl<4, double> tc(blk);
         const libtensor::dimensions<4> &tdims = blk.get_dims();
