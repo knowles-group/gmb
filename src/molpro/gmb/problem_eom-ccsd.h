@@ -126,33 +126,8 @@ public:
    */
   void singlet_projector(container_t &r_ampl) const {
 
-    // get dimensions (#occupied & #virtual)
-    libtensor::block_tensor_rd_i<2, value_t> &bt(r_ampl.m2get(r1));
-    const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
-    auto no = dims.get_dim(0);
-    auto nv = dims.get_dim(1);
-    auto bis = bt.get_bis();
-    std::vector<size_t> v_no;
-    std::vector<size_t> v_nv;
-    // occupied
-    const libtensor::split_points &spl_o = bis.get_splits(0);
-    for (size_t i = 0; i < spl_o.get_num_points(); i++){
-      if (i == 0)
-        v_no.push_back(spl_o[i]);
-      else 
-        v_no.emplace_back(spl_o[i]-spl_o[i-1]);
-    }
-    v_no.emplace_back(no-std::accumulate(v_no.cbegin(),v_no.cend(),0));
-    // virtual
-    const libtensor::split_points &spl_v = bis.get_splits(1);
-    for (size_t i = 0; i < spl_v.get_num_points(); i++) {
-      if (i == 0)
-        v_nv.push_back(spl_v[i]);
-      else 
-        v_nv.emplace_back(spl_v[i]-spl_v[i-1]);
-    }
-    v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));  
-    std::vector<std::vector<size_t>> n_ne{v_no,v_nv};
+    std::vector<size_t> v_no, v_nv;
+    gmb::get_tensor_dimensions(r_ampl.m2get(r1), v_no, v_nv);
     std::vector<double> v_alpha, v_beta;
     
     // read r1  
@@ -236,37 +211,8 @@ public:
          << "    ||r1||² = " << r12 << "    ||r2||² = " << r22
          << "\n\nAmplitude    Transition\n";
  
-      // get dimensions (#occupied & #virtual)
-      libtensor::block_tensor_rd_i<2, value_t> &bt(v_rampl[ir].m2get(r1));
-      const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
-      auto no = dims.get_dim(0);
-      auto nv = dims.get_dim(1);
-      auto bis = bt.get_bis();
-
-      std::vector<size_t> v_no;
-      std::vector<size_t> v_nv;
-
-      // occupied
-      const libtensor::split_points &spl_o = bis.get_splits(0);
-      for (size_t i = 0; i < spl_o.get_num_points(); i++){
-        if (i == 0)
-          v_no.push_back(spl_o[i]);
-        else 
-          v_no.emplace_back(spl_o[i]-spl_o[i-1]);
-      }
-      v_no.emplace_back(no-std::accumulate(v_no.cbegin(),v_no.cend(),0));
-
-      // virtual
-      const libtensor::split_points &spl_v = bis.get_splits(1);
-      for (size_t i = 0; i < spl_v.get_num_points(); i++) {
-        if (i == 0)
-          v_nv.push_back(spl_v[i]);
-        else 
-          v_nv.emplace_back(spl_v[i]-spl_v[i-1]);
-      }
-      v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));  
-      std::vector<std::vector<size_t>> n_ne{v_no,v_nv};
-
+      std::vector<size_t> v_no, v_nv;
+      gmb::get_tensor_dimensions(v_rampl[ir].m2get(r1), v_no, v_nv);
       std::vector<double> v_alpha, v_beta;
 
       // read r1  
@@ -290,14 +236,8 @@ public:
               ss << "O" << i;
               for (size_t in = 0; in < N; in++) {
                 ss << gmb::tospin(bidx[in]);
-                switch (bidx[in]) {
-                case alpha: v_alpha.push_back(ptr[offset]);
-                  break;
-                case beta: v_beta.push_back(ptr[offset]);
-                  break;
-                default: ss  << bidx[in]-beta;
-                  break;
-                }
+                if (bidx[in] > beta)
+                  ss << bidx[in]-beta;
                 if (in == 0)
                   ss << " -> V" << a;
               }

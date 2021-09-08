@@ -39,9 +39,8 @@ public:
  */
   amplitudes& operator=(const std::map<size_t,value_type>& source) {
 
-    size_t count{0}, nsing{0};
+    size_t count{0};
     bool doubles{false};
-    size_t no{0}, nv{0};
     std::vector<size_t> v_no, v_nv;
     
     for (auto &&im2 : this->m_m2) {
@@ -71,35 +70,7 @@ public:
         if (count < imin.first)
           {
             doubles = true;
-            nsing = count;
-            
-            // get dimensions (#occupied & #virtual)
-            libtensor::block_tensor_rd_i<2, double> &bt(*im2.second);
-            const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
-            no = dims.get_dim(0);
-            nv = dims.get_dim(1);
-            auto bis = bt.get_bis();
-
-            // occupied
-            const libtensor::split_points &spl_o = bis.get_splits(0);
-            for (size_t i = 0; i < spl_o.get_num_points(); i++){
-              if (i == 0)
-                v_no.push_back(spl_o[i]);
-              else 
-                v_no.emplace_back(spl_o[i]-spl_o[i-1]);
-            }
-            v_no.emplace_back(no-std::accumulate(v_no.cbegin(),v_no.cend(),0));
-
-            // virtual
-            const libtensor::split_points &spl_v = bis.get_splits(1);
-            for (size_t i = 0; i < spl_v.get_num_points(); i++) {
-              if (i == 0)
-                v_nv.push_back(spl_v[i]);
-              else 
-                v_nv.emplace_back(spl_v[i]-spl_v[i-1]);
-            }
-            v_nv.emplace_back(nv-std::accumulate(v_nv.cbegin(),v_nv.cend(),0));  
-          
+            gmb::get_tensor_dimensions(*im2.second, v_no, v_nv);
         }
       }
     }
@@ -120,7 +91,6 @@ public:
           
           libtensor::index<4> bidx;
           ol.get_index(it, bidx);
-
 
           if ((bidx[0] != bidx[2] || bidx[1] != bidx[3]) && (bidx[0] != bidx[3] || bidx[1] != bidx[2])
           || ( (bidx[0] > beta) || (bidx[1] > beta) || (bidx[2] > beta) || (bidx[3] > beta)) )
@@ -243,7 +213,8 @@ public:
 
     // doubles
     if (m.rbegin()->first >= 1e6)
-      molpro::cout << "Warning: Guess vector will be generated with double excitations; some excited states might not be reasonable.\n";
+      molpro::cout << "\nWarning: Guess vector will be generated with double excitations; some excited states might not be reasonable.\n"
+                   << "         If this is the case, try reducing the number of requested EOM states.\n\n";
     for (auto &&im4 : this->m_m4) {
       libtensor::block_tensor_rd_ctrl<4, double> ctrl(*im4.second);
       libtensor::orbit_list<4, double> ol(ctrl.req_const_symmetry());

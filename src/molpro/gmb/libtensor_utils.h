@@ -3,6 +3,7 @@
 
 #include <libtensor/libtensor.h>
 #include <libtensor/block_tensor/bto_compare.h>
+#include <numeric>
 
 // support libtensor functions 
 namespace gmb {
@@ -65,6 +66,8 @@ namespace gmb {
     // initialize to zero
     void zero(libtensor::btensor<2,double> &tensor);
     void zero(libtensor::btensor<4,double> &tensor);
-    
+
+    void get_tensor_dimensions(libtensor::btensor<2,double> &tensor, std::vector<size_t> &v_no, std::vector<size_t> &v_nv);
+  
 } // namespace gmb
 #endif //GMB_LIBTENSOR_UTILS_H
