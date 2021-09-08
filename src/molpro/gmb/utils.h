@@ -6,8 +6,6 @@
 // support libtensor functions 
 namespace gmb {
 
-  template <typename T>
-  void get_polval(std::stringstream &ss, T &value);
 
   void check_file(const std::string &file, const std::string &str);
   

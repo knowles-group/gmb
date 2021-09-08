@@ -4,18 +4,6 @@
 
 namespace gmb {
 
-  template <typename T>
-  void get_polval(std::stringstream &ss, T &value) {
-    if (!ss.good()) {
-      std::cerr << "The keyword polariton needs 3 arguments as: polariton=[nmax,gamma,omega]\n";
-      exit(1);
-    }
-    std::string substr;
-    getline(ss, substr, ',');
-    std::stringstream ssval{substr};
-    ssval >> value;
-  }
-
   /**
    * @brief Check if a file exists.
    * 
@@ -58,19 +46,6 @@ namespace gmb {
     }
   }
 
-  bool is_in_range(size_t i, size_t j,  size_t k, size_t l,
-          size_t ni_min, size_t nj_min,  size_t nk_min, size_t nl_min,
-          size_t ni_max, size_t nj_max,  size_t nk_max, size_t nl_max) {
-    bool in_range{false};
-    if ( ((ni_min <= i && i < ni_max) && (nj_min <= j && j < nj_max))
-      && ((nk_min <= k && k < nk_max) && (nl_min <= l && l < nl_max))) {
-        in_range = true;
-    }
-    return in_range;
-  }
-
-template void get_polval(std::stringstream &ss, unsigned int &value); 
-template void get_polval(std::stringstream &ss, double &value); 
 
 } // namespace gmb
 
