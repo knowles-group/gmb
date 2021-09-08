@@ -128,27 +128,21 @@ public:
                   first = false;
                   if (bidx[0] == alpha && bidx[1] == alpha && bidx[2] == alpha && bidx[3] == alpha)
                     ss = true;
-                  if (a > b) {
+                  if (a > b) 
                     ptr[gmb::get_offset(i, j, b, a, v_no[bidx[1]], v_nv[bidx[2]], v_nv[bidx[3]])] = - fact;
-                  } else if (i > j){
+                  else if (i > j)
                     ptr[gmb::get_offset(j, i, a, b, v_no[bidx[1]], v_nv[bidx[2]], v_nv[bidx[3]])] = - fact;
-                  }
                 }
                 ++count;
-              } 
-              else {
-                if (i == ii && j == jj && a == aa && b == bb) {
+              } else {
+                if (i == ii && j == jj && a == aa && b == bb)
                   ptr[offset] = fact;
-                }
-                else if (i == jj && j == ii && a == aa && b == bb){
+                else if (i == jj && j == ii && a == aa && b == bb)
                   ptr[offset] = - fact;
-                }
-                else if (i == ii && j == jj && a == bb && b == aa){
+                else if (i == ii && j == jj && a == bb && b == aa)
                   ptr[offset] = - fact;
-                }
-                else if (i == jj && j == ii && a == bb && b == aa){
+                else if (i == jj && j == ii && a == bb && b == aa)
                   ptr[offset] =  fact;
-                }
               }
             }
           tc.ret_dataptr(ptr);

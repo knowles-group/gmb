@@ -213,7 +213,6 @@ public:
  
       std::vector<size_t> v_no, v_nv;
       gmb::get_tensor_dimensions(v_rampl[ir].m2get(r1), v_no, v_nv);
-      std::vector<double> v_alpha, v_beta;
 
       // read r1  
       if ( r12 > r22 ) {
