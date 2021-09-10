@@ -176,8 +176,8 @@ double get_integral(const std::string &filename) {
   syms_t full(8);
   for (auto &&os : orbsym) full[os-1] += 1;
 
-  unsigned int nalpha = std::accumulate(fermi.begin(),fermi.end(),0);
-  unsigned int nbeta =std::accumulate(closed.begin(),closed.end(),0);
+  unsigned int nalpha = std::accumulate(fermi.cbegin(),fermi.cend(),0);
+  unsigned int nbeta =std::accumulate(closed.cbegin(),closed.cend(),0);
   std::vector<size_t> no = {nalpha, nbeta}, nv = {nb - nalpha, nb - nbeta};
 
   std::vector<std::pair<syms_t, syms_t>> 

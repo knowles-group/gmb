@@ -114,37 +114,37 @@ public:
           const libtensor::dimensions<4> &tdims = blk.get_dims();
           double *ptr = tc.req_dataptr();
           for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-              size_t i = offset / (v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]);
-              size_t j = (offset - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / (v_nv[bidx[2]]*v_nv[bidx[3]]);
-              size_t a = (offset - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / v_nv[bidx[3]];
-              size_t b = offset - a*v_nv[bidx[3]] - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]];
-              if (first) {
-                if (count == imin.first) {
-                  ptr[offset] = imin.second;
-                  ii = i;
-                  jj = j;
-                  aa = a;
-                  bb = b;
-                  first = false;
-                  if (bidx[0] == alpha && bidx[1] == alpha && bidx[2] == alpha && bidx[3] == alpha)
-                    ss = true;
-                  if (a > b) 
-                    ptr[gmb::get_offset(i, j, b, a, v_no[bidx[1]], v_nv[bidx[2]], v_nv[bidx[3]])] = - fact;
-                  else if (i > j)
-                    ptr[gmb::get_offset(j, i, a, b, v_no[bidx[1]], v_nv[bidx[2]], v_nv[bidx[3]])] = - fact;
-                }
-                ++count;
-              } else {
-                if (i == ii && j == jj && a == aa && b == bb)
-                  ptr[offset] = fact;
-                else if (i == jj && j == ii && a == aa && b == bb)
-                  ptr[offset] = - fact;
-                else if (i == ii && j == jj && a == bb && b == aa)
-                  ptr[offset] = - fact;
-                else if (i == jj && j == ii && a == bb && b == aa)
-                  ptr[offset] =  fact;
+            size_t i = offset / (v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]);
+            size_t j = (offset - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / (v_nv[bidx[2]]*v_nv[bidx[3]]);
+            size_t a = (offset - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / v_nv[bidx[3]];
+            size_t b = offset - a*v_nv[bidx[3]] - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]];
+            if (first) {
+              if (count == imin.first) {
+                ptr[offset] = imin.second;
+                ii = i;
+                jj = j;
+                aa = a;
+                bb = b;
+                first = false;
+                if (bidx[0] == alpha && bidx[1] == alpha && bidx[2] == alpha && bidx[3] == alpha)
+                  ss = true;
+                if (a > b) 
+                  ptr[gmb::get_offset(i, j, b, a, v_no[bidx[1]], v_nv[bidx[2]], v_nv[bidx[3]])] = - fact;
+                else if (i > j)
+                  ptr[gmb::get_offset(j, i, a, b, v_no[bidx[1]], v_nv[bidx[2]], v_nv[bidx[3]])] = - fact;
               }
+              ++count;
+            } else {
+              if (i == ii && j == jj && a == aa && b == bb)
+                ptr[offset] = fact;
+              else if (i == jj && j == ii && a == aa && b == bb)
+                ptr[offset] = - fact;
+              else if (i == ii && j == jj && a == bb && b == aa)
+                ptr[offset] = - fact;
+              else if (i == jj && j == ii && a == bb && b == aa)
+                ptr[offset] =  fact;
             }
+          }
           tc.ret_dataptr(ptr);
           ctrl.ret_block(bidx);
         }

@@ -92,9 +92,7 @@ public:
       auto &ccp = const_cast<container_t&> (parameters[k].get());     
       auto &a = actions[k].get();  
 
-      // add singlet projector
       singlet_projector(ccp);
-      
 
       // compute intermediates
       auto ir1_vv = eom_ccsd_ir1_vv(m_ham.m2get(f_vv),ccp.m2get(r1),m_int.m4get("iw2_ovvv"));          
