@@ -3,7 +3,7 @@
 
 
 #include "molpro/FCIdump.h"
-#include "libtensor/libtensor.h"
+#include <libtensor/libtensor.h>
 #include "libtensor_utils.h"
 #include "container.h"
 #include <vector>
