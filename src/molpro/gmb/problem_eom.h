@@ -19,7 +19,7 @@ public:
   problem_eom(const hamiltonian<> &ham, const amplitudes<> &tampl)
   : m_ham{ham}, m_tampl{tampl} {}
 
-  virtual ~problem_eom() {}
+  virtual ~problem_eom() = default;
 
   void set_energy(std::vector<value_t> eigval) {m_energy = eigval;}
   std::vector<value_t> get_energy() const {return m_energy;}  

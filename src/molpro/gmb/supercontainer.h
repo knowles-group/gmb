@@ -14,6 +14,7 @@ public:
   using value_type = T;
 
   supercontainer() = default;
+  virtual ~supercontainer() = default;
 
   supercontainer(const std::map<size_t,value_type>& source) {
     throw std::logic_error("supercontainer(const std::map<size_t,value_type>& source) unimplemented");
