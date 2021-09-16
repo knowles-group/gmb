@@ -8,8 +8,6 @@ public:
   problem_mp2(const hamiltonian<> &ham)
   : problem_gen{ham} {}
   
-  virtual ~problem_mp2() {}
-
   void precondition(const VecRef<container_t> &g,
                     const std::vector<value_t> &shift) const override {
     for (int k = 0; k < g.size(); k++) {
