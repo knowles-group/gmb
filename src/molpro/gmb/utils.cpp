@@ -41,7 +41,7 @@ namespace gmb {
       break;
     case 1: return "b";
       break;
-    default: return "p"+spin-2;
+    default: return &"p"[spin]-2;
       break;
     }
   }
