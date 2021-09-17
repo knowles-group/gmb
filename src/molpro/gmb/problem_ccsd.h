@@ -56,11 +56,11 @@ public:
 
   void action(const CVecRef<container_t> &parameters, const VecRef<container_t> &actions) const override {}
 
-  void energy(container_t x) {
+  void energy(container_t x) override {
     m_energy = ccsd_energy(x.m2get(t1), x.m4get(t2), m_ham.m2get(f_ov), m_ham.m4get(i_oovv));
   }
 
-  void print(std::ostream& s) const {
+  void print(std::ostream& s) const override {
     s << "CCSD";
   }
 };

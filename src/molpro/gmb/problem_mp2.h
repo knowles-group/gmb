@@ -34,11 +34,11 @@ public:
     }
   }
 
-  void energy(container_t x) {
+  void energy(container_t x) override {
       m_energy = 0.25 * x.m4get(t2).dot(m_ham.m4get(i_oovv));
   }
 
-    void print(std::ostream& s) const {
+    void print(std::ostream& s) const override {
     s << "MP2";
   }
 };

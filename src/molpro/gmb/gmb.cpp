@@ -25,9 +25,17 @@ extern "C" void general_many_body(int64_t &nstate, double *energies) {
     energies[i] = ev[i];
 }
 
+void test_omp() {
+  molpro::cout << "Testing OMP:\n";
+  #pragma omp parallel
+  {
+    molpro::cout << "Hi there!\n";
+  }
+}
+
 std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 
-
+  test_omp();
   std::string filename = options.parameter("dump", std::string{""});
   auto expected_results = options.parameter("results", std::vector<double>{});
   std::vector<bool> found_expected_results(expected_results.size(), false);

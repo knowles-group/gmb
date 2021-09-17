@@ -186,7 +186,7 @@ public:
     }
   }
 
-  void character(std::vector<container_t> &v_rampl) const {
+  void character(std::vector<container_t> &v_rampl) const override {
 
     constexpr double inverse_electron_volt{27.211386245988};
 
