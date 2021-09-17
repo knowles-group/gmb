@@ -157,7 +157,6 @@ double get_integral(const std::string &filename) {
   // read parameters from fcidump file
   molpro::FCIdump dump{filename};
   unsigned int nb = dump.parameter("NORB")[0];
-  unsigned int nel = dump.parameter("NELEC")[0];
   std::vector<unsigned int> nphoton(v_ppol.size(), 1); // occupied is always 1 (vacuum orbital)
 
 
