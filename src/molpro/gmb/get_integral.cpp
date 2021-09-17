@@ -71,12 +71,12 @@ double get_integral(const std::string &filename) {
   h2_o1o3o2o4 = std::make_shared<container<4>> (get_integral(filename, v_ppol, o1, o3, o2, o4)); 
 
   if (o3 == o4) 
-    h2_o1o4o2o3.reset(new container<4>(*h2_o1o3o2o4));
+    h2_o1o4o2o3 = std::make_shared<container<4>>(*h2_o1o3o2o4);
   else 
     h2_o1o4o2o3 = std::make_shared<container<4>> (get_integral(filename, v_ppol, o1, o4, o2, o3)); 
   
   if (o2 == o4 && o2 == o3) 
-    tmp_o1o2o3o4.reset(new container<4>(*h2_o1o4o2o3));
+    tmp_o1o2o3o4 = std::make_shared<container<4>>(*h2_o1o4o2o3);
   else 
     tmp_o1o2o3o4 = std::make_shared<container<4>> (get_integral(filename, v_ppol, o1, o2, o3, o4)); 
 
