@@ -25,17 +25,10 @@ extern "C" void general_many_body(int64_t &nstate, double *energies) {
     energies[i] = ev[i];
 }
 
-void test_omp() {
-  molpro::cout << "Testing OMP:\n";
-  #pragma omp parallel
-  {
-    molpro::cout << "Hi there!\n";
-  }
-}
-
 std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 
-  test_omp();
+  std::vector<double> all_energies;
+  #if 1
   std::string filename = options.parameter("dump", std::string{""});
   auto expected_results = options.parameter("results", std::vector<double>{});
   std::vector<bool> found_expected_results(expected_results.size(), false);
@@ -50,7 +43,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   double es_conv{1e-5};
   auto ncav = options.parameter("polariton_modes", 0);
 
-  std::vector<std::shared_ptr<polariton>> v_ppol(ncav);
+  std::vector<std::unique_ptr<polariton>> v_ppol(ncav);
   if (ncav > 0) {
     std::vector<int> v_option_polariton_nmax(ncav, 1);
     v_option_polariton_nmax =
@@ -62,7 +55,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     v_option_polariton_omega =
         options.parameter("polariton_omega", v_option_polariton_omega);
     for (size_t i = 0; i < ncav; i++) {
-      v_ppol[i] = std::make_shared<polariton>(v_option_polariton_nmax[i],
+      v_ppol[i] = std::make_unique<polariton>(v_option_polariton_nmax[i],
                                               v_option_polariton_gamma[i],
                                               v_option_polariton_omega[i]);
       v_ppol[i]->fname_dm = options.parameter(
@@ -97,7 +90,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     }
   }
 
-  std::vector<double> all_energies;
+  // std::vector<double> all_energies;
 
   // initialise hamiltonian
   hamiltonian<> ham;
@@ -114,7 +107,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   #endif
   molpro::cout << "\nHF energy: " << std::setprecision(12) << hf_energy << "\n\n";
 
-
+  
 #if 1 // GS
   if (!(method.find("hf") != std::string::npos)) {
 
@@ -146,7 +139,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
       // print results
       molpro::cout << "\n\n          Excitation energy                   Total energy  \n";
       molpro::cout << "        (Ha)            (eV)              (Ha)            (eV)  \n";
-      constexpr double inverse_electron_volt{27.211386245988};
+      constexpr double inverse_electron_volt{27.211'386'245'988};
       for (auto &i : energies) {
         all_energies.push_back(ccsd_energy+i);
         molpro::cout << std::setw(14) << std::setprecision(7) << i << "   "
@@ -168,6 +161,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     if (not found_expected_results[i])
       throw std::runtime_error("Did not match expected result " +
           std::to_string(expected_results[i]));
+  #endif 
   return all_energies;
 }
 

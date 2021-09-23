@@ -4,7 +4,7 @@
 
 namespace gmb {
 
-  void init(const std::string &filename, const std::string &method, hamiltonian<> &ham, const std::vector<std::shared_ptr<polariton>> &v_ppol) {
+  void init(const std::string &filename, const std::string &method, hamiltonian<> &ham, const std::vector<std::unique_ptr<polariton>> &v_ppol) {
 
     // Two-particle integrals <pq||rs> 
     auto int_oooo = get_i(filename,v_ppol, o, o, o, o);
