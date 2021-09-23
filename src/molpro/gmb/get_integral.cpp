@@ -20,7 +20,7 @@ double get_integral(const std::string &filename) {
 }
 
   container<2,double> get_integral(const std::string &fname_integrals, const std::string &fname_header, 
-    const std::vector<std::shared_ptr<polariton>> &v_ppol, const orb_type &o1, const orb_type &o2, bool add_ph) 
+    const std::vector<std::unique_ptr<polariton>> &v_ppol, const orb_type &o1, const orb_type &o2, bool add_ph) 
   {
     std::vector<orb_type> v_orb_type = {o1,o2}; // vector containing orbital types
 
@@ -63,22 +63,22 @@ double get_integral(const std::string &filename) {
 
 
   container<4,double> get_i(const std::string &filename, 
-                            const std::vector<std::shared_ptr<polariton>> &v_ppol,
+                            const std::vector<std::unique_ptr<polariton>> &v_ppol,
                             const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4, const bool &add_ph) {
   
-  std::shared_ptr<container<4>> tmp_o1o2o3o4, h2_o1o3o2o4, h2_o1o4o2o3;
+  std::unique_ptr<container<4>> tmp_o1o2o3o4, h2_o1o3o2o4, h2_o1o4o2o3;
   
-  h2_o1o3o2o4 = std::make_shared<container<4>> (get_integral(filename, v_ppol, o1, o3, o2, o4)); 
+  h2_o1o3o2o4 = std::make_unique<container<4>> (get_integral(filename, v_ppol, o1, o3, o2, o4)); 
 
   if (o3 == o4) 
-    h2_o1o4o2o3 = std::make_shared<container<4>>(*h2_o1o3o2o4);
+    h2_o1o4o2o3 = std::make_unique<container<4>>(*h2_o1o3o2o4);
   else 
-    h2_o1o4o2o3 = std::make_shared<container<4>> (get_integral(filename, v_ppol, o1, o4, o2, o3)); 
+    h2_o1o4o2o3 = std::make_unique<container<4>> (get_integral(filename, v_ppol, o1, o4, o2, o3)); 
   
   if (o2 == o4 && o2 == o3) 
-    tmp_o1o2o3o4 = std::make_shared<container<4>>(*h2_o1o4o2o3);
+    tmp_o1o2o3o4 = std::make_unique<container<4>>(*h2_o1o4o2o3);
   else 
-    tmp_o1o2o3o4 = std::make_shared<container<4>> (get_integral(filename, v_ppol, o1, o2, o3, o4)); 
+    tmp_o1o2o3o4 = std::make_unique<container<4>> (get_integral(filename, v_ppol, o1, o2, o3, o4)); 
 
   container<4,double> h2_o1o2o3o4(tmp_o1o2o3o4->get_space());
 
@@ -143,7 +143,7 @@ double get_integral(const std::string &filename) {
 }
 
   void read_dump(const std::string &filename, 
-               const std::vector<std::shared_ptr<polariton>> &v_ppol,
+               const std::vector<std::unique_ptr<polariton>> &v_ppol,
                std::vector<std::vector<bool>>& v_exist,
                std::vector<std::vector<size_t>>& v_norb,
                const std::vector<orb_type>& v_orb_type, 
@@ -322,7 +322,7 @@ double get_integral(const std::string &filename) {
   }
 
   void get_one_photon_part(container<2,double> &integral, 
-               const std::vector<std::shared_ptr<polariton>> &v_ppol,
+               const std::vector<std::unique_ptr<polariton>> &v_ppol,
                const std::vector<std::vector<bool>>& v_exist,
                const std::vector<orb_type>& v_orb_type) 
   {
@@ -543,7 +543,7 @@ double get_integral(const std::string &filename) {
   }
 
   void get_electron_photon_part(container<4,double> &integral, 
-               const std::vector<std::shared_ptr<polariton>> &v_ppol,
+               const std::vector<std::unique_ptr<polariton>> &v_ppol,
                const std::vector<std::vector<bool>> &v_exist,
                const std::vector<std::vector<size_t>>& v_norb,
                const std::vector<orb_type> &v_orb_type, 
@@ -679,7 +679,7 @@ double get_integral(const std::string &filename) {
   }
 
   container<4,double> get_integral(const std::string &filename, 
-    const std::vector<std::shared_ptr<polariton>> &v_ppol,
+    const std::vector<std::unique_ptr<polariton>> &v_ppol,
     const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4) {
                                  
   std::vector<spin> v_spin = {alpha, beta}; // possible spins
