@@ -14,8 +14,11 @@ using syms_t=std::vector<sym_t>; ///< position in orbital space for each symmetr
 
 // orbital types occupied, virtual & basis (
 enum orb_type{o, v, b};
+
 // possible spins (
 enum spin{alpha=0, beta=1, photon=2};
+
+constexpr unsigned int nsym{8};
 
 struct polariton {
   sym_t nmax{0};

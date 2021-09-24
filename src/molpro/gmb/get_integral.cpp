@@ -25,12 +25,12 @@ double get_integral(const std::string &filename) {
     std::vector<orb_type> v_orb_type = {o1,o2}; // vector containing orbital types
 
     std::vector<spin> v_spin = {alpha, beta}; // vector containing possible spins
-    if (v_ppol.size() > 0) 
+    if (!v_ppol.empty() ) 
       for (size_t i = 0; i < v_ppol.size(); i++)
         v_spin.push_back(photon);
     std::vector<std::vector<std::pair<syms_t, syms_t>>> v_psi(v_spin.size(), std::vector<std::pair<syms_t, syms_t>> (v_orb_type.size())); // vector containing bra and ket
     std::vector<std::vector<size_t>> v_norb(v_spin.size(), std::vector<size_t> (v_orb_type.size())); // vector containing number of orbitals in each bra/ket
-    std::vector<std::vector<std::vector<int>>> v_shift(v_spin.size(), std::vector<std::vector<int>> (v_orb_type.size(), std::vector<int> (8,0))); // vector containing symmetry shift 
+    std::vector<std::vector<std::vector<int>>> v_shift(v_spin.size(), std::vector<std::vector<int>> (v_orb_type.size(), std::vector<int> (nsym,0))); // vector containing symmetry shift 
     std::vector<libtensor::bispace<1>> v_sp; // vector containing 1D spaces for each bra/ket
     std::vector<std::vector<bool>> v_exist(v_spin.size(), std::vector<bool> (v_orb_type.size(), true)); // vector containing if block exists or not
     bool uhf{false};
@@ -42,17 +42,18 @@ double get_integral(const std::string &filename) {
     
     if (v_ppol.size() > 0 && add_ph) {
       get_one_photon_part(integral, v_ppol, v_exist, v_orb_type);
-      for (size_t i = 0; i < v_ppol.size(); i++) {
-        double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
-        auto rnuc = get_integral(v_ppol[i]->fname_dm);
+      // for (size_t i = 0; i < v_ppol.size(); i++) {
+      for (auto &&i_ppol : v_ppol) {
+        double fact = i_ppol->omega*i_ppol->gamma*i_ppol->gamma;
+        auto rnuc = get_integral(i_ppol->fname_dm);
         #if 1 // add self-energy
         container<2> sm(integral.get_space()); // second moment of charges
         gmb::zero(sm);
-        get_one_electron_part(sm, v_ppol[i]->fname_sm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
+        get_one_electron_part(sm, i_ppol->fname_sm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
         integral.axpy(-fact, sm);
         container<2> dm(integral.get_space()); // dipole moment 
         gmb::zero(dm);
-        get_one_electron_part(dm, v_ppol[i]->fname_dm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
+        get_one_electron_part(dm, i_ppol->fname_dm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
         integral.axpy(2.0*fact*rnuc, dm);
         #endif
       }
@@ -165,14 +166,14 @@ double get_integral(const std::string &filename) {
   uhf = dump.parameter("IUHF")[0];
   
   syms_t empty = {0, 0, 0, 0, 0, 0, 0, 0};
-  syms_t fermi(8);
-  for (size_t i = 0; i < 8; i++)
-    fermi[i] = (unsigned int)dump.parameter("OCC")[i];
-  syms_t closed(8);
-  for (size_t i = 0; i < 8; i++)
-    closed[i] = (unsigned int)dump.parameter("CLOSED")[i];
+  syms_t fermi(nsym);
+  for (size_t i = 0; i < nsym; i++)
+    fermi[i] = static_cast<unsigned int>(dump.parameter("OCC")[i]);
+  syms_t closed(nsym);
+  for (size_t i = 0; i < nsym; i++)
+    closed[i] = static_cast<unsigned int>(dump.parameter("CLOSED")[i]);
   
-  syms_t full(8);
+  syms_t full(nsym);
   for (auto &&os : orbsym) full[os-1] += 1;
 
   unsigned int nalpha = std::accumulate(fermi.cbegin(),fermi.cend(),0);
@@ -187,14 +188,14 @@ double get_integral(const std::string &filename) {
   
 
   // photon space
-  if (v_ppol.size() > 0) {
+  if (!v_ppol.empty() ) {
     for (size_t i = 0; i < v_ppol.size(); i++) {
       syms_t fermi_ph = {nphoton[i], 0, 0, 0, 0, 0, 0, 0};
       syms_t full_ph = {nphoton[i] + v_ppol[i]->nmax, 0, 0, 0, 0, 0, 0, 0};
       no.push_back(nphoton[i]);
       nv.push_back(v_ppol[i]->nmax);
-      occ.push_back({empty, fermi_ph});
-      vir.push_back({fermi_ph, full_ph});
+      occ.emplace_back(std::pair<syms_t,syms_t>({empty, fermi_ph}));
+      vir.emplace_back(std::pair<syms_t,syms_t>({fermi_ph, full_ph}));
     }
   }
 
@@ -234,20 +235,21 @@ double get_integral(const std::string &filename) {
   for (size_t ispin = 0; ispin < v_spin.size(); ispin++) {
     for (size_t iot = 0; iot < v_orb_type.size(); iot++) {
       size_t count{0};
-      for (sym_t isym = 0; isym < 8; isym++)
+      for (sym_t isym = 0; isym < nsym; isym++) {
         if ((v_psi[ispin][iot].second[isym] - v_psi[ispin][iot].first[isym]) == 0) 
           ++count;
-        if (count == 8) {
-          v_exist[ispin][iot] = false;
-          molpro::cout << "orb number: " << iot
-                    << " ispin: " << ispin
-                    << " does not exist."
-                    << "\n";
+      }
+      if (count == nsym) {
+        v_exist[ispin][iot] = false;
+        molpro::cout << "orb number: " << iot
+                  << " ispin: " << ispin
+                  << " does not exist."
+                  << "\n";
       }
     }
   }
 
-  for (sym_t isym = 0; isym < 8; isym++) {
+  for (sym_t isym = 0; isym < nsym; isym++) {
     for (size_t ino = 0; ino < v_orb_type.size(); ino++) 
       for (size_t ispin = 0; ispin < v_spin.size(); ispin++) {
         if (isym == 0) v_shift[ispin][ino][isym] = - v_psi[ispin][ino].first[isym];
@@ -297,20 +299,20 @@ double get_integral(const std::string &filename) {
       double *ptr = tc.req_dataptr();
       size_t i, j, k, l;
       unsigned int symi, symj, symk, syml;
-      double value;
+      double value{0.0};
       molpro::FCIdump::integralType type;
       
       molpro::FCIdump dump(filename);
       dump.rewind();
       while ((type = dump.nextIntegral(symi, i, symj, j, symk, k, syml, l, value)) != molpro::FCIdump::endOfFile) {
         if (type == itype) {
-          if ((((i) >= v_psi[spin][0].first[symi] & (i) < v_psi[spin][0].second[symi]) 
-            && ((j) >= v_psi[spin][1].first[symj] & (j) < v_psi[spin][1].second[symj]))) {
+          if ((((i) >= v_psi[spin][0].first[symi] && (i) < v_psi[spin][0].second[symi]) 
+            && ((j) >= v_psi[spin][1].first[symj] && (j) < v_psi[spin][1].second[symj]))) {
             ptr[gmb::get_offset(i+v_shift[spin][0][symi], j+v_shift[spin][1][symj], v_norb[spin][1])] 
             = value;
           }
-          if ((((i) >= v_psi[spin][1].first[symi] & (i) < v_psi[spin][1].second[symi])
-            && ((j) >= v_psi[spin][0].first[symj] & (j) < v_psi[spin][0].second[symj]))) {
+          if ((((i) >= v_psi[spin][1].first[symi] && (i) < v_psi[spin][1].second[symi])
+            && ((j) >= v_psi[spin][0].first[symj] && (j) < v_psi[spin][0].second[symj]))) {
             ptr[gmb::get_offset(j+v_shift[spin][0][symj], i+v_shift[spin][1][symi], v_norb[spin][1])] 
               = value;
           }
@@ -470,7 +472,7 @@ double get_integral(const std::string &filename) {
     molpro::FCIdump dump(filename);
     size_t i, j, k, l;
     unsigned int symi, symj, symk, syml;
-    double value;
+    double value{0.0};
     molpro::FCIdump::integralType type;
     dump.rewind();     
     while ((type = dump.nextIntegral(symi, i, symj, j, symk, k, syml, l, value)) != molpro::FCIdump::endOfFile) {
@@ -600,7 +602,7 @@ double get_integral(const std::string &filename) {
       molpro::FCIdump dump{fname_dm}; 
       size_t p, q, r, s;
       unsigned int symp, symq, symr, syms;
-      double value;
+      double value{0.0};
       molpro::FCIdump::integralType type;
       dump.rewind();
       double fact{v_ppol[spin2-2]->gamma*v_ppol[spin2-2]->omega};
@@ -688,7 +690,7 @@ double get_integral(const std::string &filename) {
   std::vector<orb_type> v_orb_type = {o1,o2,o3,o4}; // orbital types
   std::vector<std::vector<std::pair<syms_t, syms_t>>> v_psi(v_spin.size(), std::vector<std::pair<syms_t, syms_t>> (v_orb_type.size())); // bra and ket
   std::vector<std::vector<size_t>> v_norb(v_spin.size(), std::vector<size_t> (v_orb_type.size())); // number of orbitals in each bra/ket
-  std::vector<std::vector<std::vector<int>>> v_shift(v_spin.size(), std::vector<std::vector<int>> (v_orb_type.size(), std::vector<int> (8,0))); // symmetry shift 
+  std::vector<std::vector<std::vector<int>>> v_shift(v_spin.size(), std::vector<std::vector<int>> (v_orb_type.size(), std::vector<int> (nsym,0))); // symmetry shift 
   std::vector<libtensor::bispace<1>> v_sp; // 1D spaces for each bra/ket
   std::vector<std::vector<bool>> v_exist(v_spin.size(), std::vector<bool> (v_orb_type.size(), true)); // if block exists or not
   bool uhf{false};
@@ -753,7 +755,7 @@ double get_integral(const std::string &filename) {
   gmb::zero(integral);
 
   get_two_electron_part(integral, filename, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
-  if (v_ppol.size() > 0)
+  if (!v_ppol.empty() )
     get_electron_photon_part(integral, v_ppol, v_exist, v_norb, v_orb_type, v_psi, v_shift);
   return integral;
 }
