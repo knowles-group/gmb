@@ -42,8 +42,7 @@ double get_integral(const std::string &filename) {
     
     if (v_ppol.size() > 0 && add_ph) {
       get_one_photon_part(integral, v_ppol, v_exist, v_orb_type);
-      // for (size_t i = 0; i < v_ppol.size(); i++) {
-      for (auto &&i_ppol : v_ppol) {
+      for (const auto &i_ppol : v_ppol) {
         double fact = i_ppol->omega*i_ppol->gamma*i_ppol->gamma;
         auto rnuc = get_integral(i_ppol->fname_dm);
         #if 1 // add self-energy
@@ -174,7 +173,7 @@ double get_integral(const std::string &filename) {
     closed[i] = static_cast<unsigned int>(dump.parameter("CLOSED")[i]);
   
   syms_t full(nsym);
-  for (auto &&os : orbsym) full[os-1] += 1;
+  for (const auto &os : orbsym) full[os-1] += 1;
 
   unsigned int nalpha = std::accumulate(fermi.cbegin(),fermi.cend(),0);
   unsigned int nbeta =std::accumulate(closed.cbegin(),closed.cend(),0);

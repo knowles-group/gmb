@@ -43,7 +43,7 @@ public:
     bool doubles{false};
     std::vector<size_t> v_no, v_nv;
     
-    for (auto &&im2 : this->m_m2) {
+    for (auto &im2 : this->m_m2) {
       gmb::zero(*im2.second);
       libtensor::block_tensor_wr_ctrl<2, double> ctrl(*im2.second);
       for (auto &imin : source) {
@@ -81,7 +81,7 @@ public:
       int fact{1};
       size_t ii{0}, jj{0}, aa{0}, bb{0};
 
-    for (auto &&im4 : this->m_m4) {
+    for (auto &im4 : this->m_m4) {
       gmb::zero(*im4.second);
       libtensor::block_tensor_wr_ctrl<4, double> ctrl(*im4.second);
       for (auto &imin : source) {
@@ -179,7 +179,7 @@ public:
     size_t count{0};
 
     // singles
-    for (auto &&im2 : this->m_m2) {
+    for (auto &im2 : this->m_m2) {
       libtensor::block_tensor_rd_ctrl<2, double> ctrl(*im2.second);
       libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
       for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
@@ -209,7 +209,7 @@ public:
     if (m.rbegin()->first >= 1e6)
       molpro::cout << "\nWarning: Guess vector will be generated with double excitations; some excited states might not be reasonable.\n"
                    << "         If this is the case, try reducing the number of requested EOM states.\n\n";
-    for (auto &&im4 : this->m_m4) {
+    for (auto &im4 : this->m_m4) {
       libtensor::block_tensor_rd_ctrl<4, double> ctrl(*im4.second);
       libtensor::orbit_list<4, double> ol(ctrl.req_const_symmetry());
       for (libtensor::orbit_list<4, double>::iterator it = ol.begin(); it != ol.end(); it++) {

@@ -70,36 +70,36 @@ public:
 
 
   void fill(T a) {
-    for (auto &&im2 : m_m2)
+    for (auto &im2 : m_m2)
       im2.second->fill(a);
-    for (auto &&im4 : m_m4)
+    for (auto &im4 : m_m4)
       im4.second->fill(a);
   };
 
   void scal(T a) {
-    for (auto &&im2 : m_m2)
+    for (auto &im2 : m_m2)
       im2.second->scale(a);
-    for (auto &&im4 : m_m4)
+    for (auto &im4 : m_m4)
       im4.second->scale(a);
   };
 
   T dot(const supercontainer &sc) const {
     double product(0.0);
-    for (auto &&im2 : m_m2)
-      for (auto &&isc : sc.get_m2())
+    for (auto &im2 : m_m2)
+      for (const auto &isc : sc.get_m2())
         product += im2.second->dot(*isc.second);
-    for (auto &&im4 : m_m4)
-      for (auto &&isc : sc.get_m4())
+    for (auto &im4 : m_m4)
+      for (const auto &isc : sc.get_m4())
         product += im4.second->dot(*isc.second);
     return product;
   };
 
   void axpy(T a, const supercontainer &sc) {
-    for (auto &&im2 : m_m2)
-      for (auto &&isc : sc.get_m2())
+    for (auto &im2 : m_m2)
+      for (const auto &isc : sc.get_m2())
         im2.second->axpy(a, *isc.second);
-    for (auto &&im4 : m_m4)
-      for (auto &&isc : sc.get_m4())
+    for (auto &im4 : m_m4)
+      for (const auto &isc : sc.get_m4())
         im4.second->axpy(a, *isc.second);
     };
 
