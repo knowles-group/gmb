@@ -1,10 +1,11 @@
 #ifndef GMB_SRC_MOLPRO_GMB_PROBLEM_EOM_CCSD_H_
 #define GMB_SRC_MOLPRO_GMB_PROBLEM_EOM_CCSD_H_
-#include "problem_eom.h"
-#include "utils.h"
+#include "constants.h"
 #include "expressions/eom-ccsd/eom-ccsd.h"
 #include "expressions/update.h"
 #include "expressions/ccsd/energy.h"
+#include "problem_eom.h"
+#include "utils.h"
 
 /**
  * @brief EOM-CCSD
@@ -188,7 +189,6 @@ public:
 
   void character(std::vector<container_t> &v_rampl) const override {
 
-    constexpr double inverse_electron_volt{27.211'386'245'988};
 
     for (size_t ir = 0; ir < v_rampl.size(); ir++) {
       // normalise

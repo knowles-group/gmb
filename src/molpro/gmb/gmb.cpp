@@ -8,9 +8,10 @@
 #include <memory>
 #include <regex>
 
-#include "gmb.h"
 #include "amplitudes.h"
+#include "constants.h"
 #include "expressions/energy_hf.h"
+#include "gmb.h"
 #include "hamiltonian.h"
 #include "init.h"
 #include "run_method.h"
@@ -73,7 +74,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   molpro::cout << " fcidump = " << filename << "\n";
   molpro::cout << " method = " << method << "\n";
   molpro::cout << " roots = " << nroots << "\n";
-  if (v_ppol.size() > 0) {
+  if (!v_ppol.empty() ) {
     check_file(v_ppol[0]->fname_dm, "dipole");
     molpro::cout << " dipole file = " << v_ppol[0]->fname_dm << "\n";
     check_file(v_ppol[0]->fname_sm, "second moment of charges");
@@ -139,7 +140,6 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
       // print results
       molpro::cout << "\n\n          Excitation energy                   Total energy  \n";
       molpro::cout << "        (Ha)            (eV)              (Ha)            (eV)  \n";
-      constexpr double inverse_electron_volt{27.211'386'245'988};
       for (auto &i : energies) {
         all_energies.push_back(ccsd_energy+i);
         molpro::cout << std::setw(14) << std::setprecision(7) << i << "   "
