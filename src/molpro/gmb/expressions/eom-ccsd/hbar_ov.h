@@ -1,5 +1,5 @@
-#ifndef GMB_HBAR_OV_H
-#define GMB_HBAR_OV_H
+#ifndef GMB_SRC_MOLPRO_GMB_HBAR_OV_H
+#define GMB_SRC_MOLPRO_GMB_HBAR_OV_H
 
 #include "../../container.h"
 
@@ -20,4 +20,4 @@ container<2,double> hbar_ov(
     return hb_ov;
 };
 
-#endif //GMB_HBAR_OV_H
+#endif // GMB_SRC_MOLPRO_GMB_HBAR_OV_H

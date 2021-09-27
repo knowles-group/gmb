@@ -1,13 +1,15 @@
-#ifndef GMB_GET_INTEGRAL_H
-#define GMB_GET_INTEGRAL_H
+#ifndef GMB_SRC_MOLPRO_GMB_GET_INTEGRAL_H
+#define GMB_SRC_MOLPRO_GMB_GET_INTEGRAL_H
 
-
-#include "molpro/FCIdump.h"
-#include <libtensor/libtensor.h>
-#include "libtensor_utils.h"
-#include "container.h"
 #include <vector>
 #include <string>
+
+#include <libtensor/libtensor.h>
+
+#include "molpro/FCIdump.h"
+
+#include "container.h"
+#include "libtensor_utils.h"
 
 using sym_t=unsigned int;
 using syms_t=std::vector<sym_t>; ///< position in orbital space for each symmetry
@@ -123,4 +125,4 @@ void read_dump(const std::string &filename,
               
 
 
-#endif //GMB_GET_INTEGRAL_H
+#endif // GMB_SRC_MOLPRO_GMB_GET_INTEGRAL_H

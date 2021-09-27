@@ -1,5 +1,5 @@
-#ifndef GMB_CONTAINER_H
-#define GMB_CONTAINER_H
+#ifndef GMB_SRC_MOLPRO_GMB_CONTAINER_H
+#define GMB_SRC_MOLPRO_GMB_CONTAINER_H
 
 
 #include <molpro/iostream.h>
@@ -98,4 +98,4 @@ public:
 
 };
 
-#endif //GMB_CONTAINER_H
+#endif // GMB_SRC_MOLPRO_GMB_CONTAINER_H

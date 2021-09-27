@@ -1,5 +1,5 @@
-#ifndef GMB_CCSD_EOM_IW_OVOV_H
-#define GMB_CCSD_EOM_IW_OVOV_H
+#ifndef GMB_SRC_MOLPRO_GMB_CCSD_EOM_IW_OVOV_H
+#define GMB_SRC_MOLPRO_GMB_CCSD_EOM_IW_OVOV_H
 
 #include <libtensor/libtensor.h>
 #include "../../container.h"
@@ -33,4 +33,4 @@ container<4,double> eom_ccsd_iw_ovov(
 
 }
 
-#endif //GMB_CCSD_EOM_IW_OVOV_H
+#endif // GMB_SRC_MOLPRO_GMB_CCSD_EOM_IW_OVOV_H

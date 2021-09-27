@@ -1,5 +1,5 @@
-#ifndef GMB_INIT_H
-#define GMB_INIT_H
+#ifndef GMB_SRC_MOLPRO_GMB_INIT_H
+#define GMB_SRC_MOLPRO_GMB_INIT_H
 
 #include "get_integral.h"
 #include "utils.h"
@@ -34,4 +34,4 @@ namespace gmb {
 
 } // namespace gmb
 
-#endif //GMB_INIT_H
+#endif // GMB_SRC_MOLPRO_GMB_INIT_H

@@ -1,5 +1,5 @@
-#ifndef GMB_LIBTENSOR_UTILS_H
-#define GMB_LIBTENSOR_UTILS_H
+#ifndef GMB_SRC_MOLPRO_GMB_LIBTENSOR_UTILS_H
+#define GMB_SRC_MOLPRO_GMB_LIBTENSOR_UTILS_H
 
 #include <libtensor/libtensor.h>
 #include <libtensor/block_tensor/bto_compare.h>
@@ -70,4 +70,4 @@ namespace gmb {
     void get_tensor_dimensions(libtensor::btensor<2,double> &tensor, std::vector<size_t> &v_no, std::vector<size_t> &v_nv);
   
 } // namespace gmb
-#endif //GMB_LIBTENSOR_UTILS_H
+#endif // GMB_SRC_MOLPRO_GMB_LIBTENSOR_UTILS_H

@@ -1,5 +1,5 @@
-#ifndef GMB_PROBLEM_EOM_H_
-#define GMB_PROBLEM_EOM_H_
+#ifndef GMB_SRC_MOLPRO_GMB_PROBLEM_EOM_H_
+#define GMB_SRC_MOLPRO_GMB_PROBLEM_EOM_H_
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <molpro/iostream.h>
 #include "amplitudes.h"

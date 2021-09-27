@@ -1,5 +1,5 @@
-#ifndef GMB_PROBLEM_GEN_H_
-#define GMB_PROBLEM_GEN_H_
+#ifndef GMB_SRC_MOLPRO_GMB_PROBLEM_GEN_H_
+#define GMB_SRC_MOLPRO_GMB_PROBLEM_GEN_H_
 #include <molpro/linalg/itsolv/IterativeSolver.h>
 #include <vector>
 #include "hamiltonian.h"
@@ -36,4 +36,4 @@ public:
 //   return s;
 // }
 
-#endif //GMB_PROBLEM_GEN_H_
+#endif // GMB_SRC_MOLPRO_GMB_PROBLEM_GEN_H_

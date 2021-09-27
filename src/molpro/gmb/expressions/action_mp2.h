@@ -1,5 +1,5 @@
-#ifndef GMB_ACTION_MP2_H
-#define GMB_ACTION_MP2_H
+#ifndef GMB_SRC_MOLPRO_GMB_ACTION_MP2_H
+#define GMB_SRC_MOLPRO_GMB_ACTION_MP2_H
 
 #include <libtensor/libtensor.h>
 
@@ -23,4 +23,4 @@ container<4,double> action_mp2 (
     return t2_new;  
 };
 
-#endif //GMB_ACTION_MP2_H
+#endif // GMB_SRC_MOLPRO_GMB_ACTION_MP2_H

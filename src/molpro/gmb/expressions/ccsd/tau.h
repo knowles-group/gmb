@@ -1,5 +1,5 @@
-#ifndef GMB_CCSD_TAU_H
-#define GMB_CCSD_TAU_H
+#ifndef GMB_SRC_MOLPRO_GMB_CCSD_TAU_H
+#define GMB_SRC_MOLPRO_GMB_CCSD_TAU_H
 
 #include <libtensor/libtensor.h>
 #include "../../container.h"
@@ -25,4 +25,4 @@ container<4,double> ccsd_tau(
 }
 
 
-#endif //GMB_CCSD_TAU_H
+#endif // GMB_SRC_MOLPRO_GMB_CCSD_TAU_H

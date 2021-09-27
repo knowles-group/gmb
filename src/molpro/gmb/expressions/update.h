@@ -1,5 +1,5 @@
-#ifndef GMB_UPDATE_H
-#define GMB_UPDATE_H
+#ifndef GMB_SRC_MOLPRO_GMB_UPDATE_H
+#define GMB_SRC_MOLPRO_GMB_UPDATE_H
 
 #include "../container.h"
 
@@ -45,4 +45,4 @@ container<4, double> update_t2 (
     return t2_new;
 };
 
-#endif //GMB_UPDATE_H
+#endif // GMB_SRC_MOLPRO_GMB_UPDATE_H

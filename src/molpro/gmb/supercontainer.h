@@ -1,5 +1,5 @@
-#ifndef GMB_SUPERCONTAINER_H
-#define GMB_SUPERCONTAINER_H
+#ifndef GMB_SRC_MOLPRO_GMB_SUPERCONTAINER_H
+#define GMB_SRC_MOLPRO_GMB_SUPERCONTAINER_H
 
 #include <molpro/iostream.h>
 #include "container.h"
@@ -22,11 +22,10 @@ public:
 
   supercontainer(const supercontainer &sc) {
     for (const auto &im2 : sc.m_m2) {
-      m_m2.insert(std::make_pair(im2.first, new container<2,T> (*im2.second)));
+      m_m2.insert(std::make_pair(im2.first, std::make_unique<container<2,T>> (*im2.second)));
     }
     for (const auto &im4 : sc.m_m4)
-      m_m4.insert(std::make_pair(im4.first, new container<4,T> (*im4.second)));
-    
+      m_m4.insert(std::make_pair(im4.first, std::make_unique<container<4,T>> (*im4.second)));
   }
 
   supercontainer& operator=(const supercontainer &sc) {
@@ -43,7 +42,7 @@ public:
       m_m2.insert(std::make_pair(key, std::make_unique<container<2,T>> (c2)));
     }
     else {
-      m_m2[key].reset(new container<2,T> (c2));
+      m_m2[key] = std::make_unique<container<2,T>> (c2);
     }
   };
 
@@ -52,7 +51,7 @@ public:
      if (m_m4.find(key) == m_m4.end())
       m_m4.insert(std::make_pair(key, std::make_unique<container<4,T>> (c4)));
     else
-      m_m4[key].reset(new container<4,T> (c4));
+      m_m4[key] = std::make_unique<container<4,T>> (c4);
    };
 
   const std::map<std::string, std::unique_ptr<container<2,T>>>& get_m2() const { return m_m2; };
@@ -113,4 +112,4 @@ public:
 
 };
 
-#endif //GMB_SUPERCONTAINER_H
+#endif // GMB_SRC_MOLPRO_GMB_SUPERCONTAINER_H

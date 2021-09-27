@@ -1,5 +1,5 @@
-#ifndef GMB_PRECOND_OOVV_H
-#define GMB_PRECOND_OOVV_H
+#ifndef GMB_SRC_MOLPRO_GMB_PRECOND_OOVV_H
+#define GMB_SRC_MOLPRO_GMB_PRECOND_OOVV_H
 
 #include "../../container.h"
 
@@ -22,4 +22,4 @@ container<4,double> precond_oovv(
     return pc_oovv;
 };
 
-#endif //GMB_PRECOND_OOVV_H
+#endif // GMB_SRC_MOLPRO_GMB_PRECOND_OOVV_H

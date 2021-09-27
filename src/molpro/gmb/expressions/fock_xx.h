@@ -1,5 +1,5 @@
-#ifndef GMB_FOCK_XX_H
-#define GMB_FOCK_XX_H
+#ifndef GMB_SRC_MOLPRO_GMB_FOCK_XX_H
+#define GMB_SRC_MOLPRO_GMB_FOCK_XX_H
 
 #include "../container.h"
 
@@ -20,4 +20,4 @@ container<2,double> fock_xx (
     return f_xx;
 }
 
-#endif //GMB_FOCK_XX_H
+#endif // GMB_SRC_MOLPRO_GMB_FOCK_XX_H

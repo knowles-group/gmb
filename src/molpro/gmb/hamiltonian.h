@@ -1,5 +1,5 @@
-#ifndef GMB_HAMILTONIAN_H
-#define GMB_HAMILTONIAN_H
+#ifndef GMB_SRC_MOLPRO_GMB_HAMILTONIAN_H
+#define GMB_SRC_MOLPRO_GMB_HAMILTONIAN_H
 
 #include "supercontainer.h"
 
@@ -44,4 +44,4 @@ public:
 
 };
 
-#endif //GMB_HAMILTONIAN_H
+#endif // GMB_SRC_MOLPRO_GMB_HAMILTONIAN_H

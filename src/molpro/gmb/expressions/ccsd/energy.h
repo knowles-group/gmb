@@ -1,5 +1,5 @@
-#ifndef GMB_CCSD_ENERGY_H
-#define GMB_CCSD_ENERGY_H
+#ifndef GMB_SRC_MOLPRO_GMB_CCSD_ENERGY_H
+#define GMB_SRC_MOLPRO_GMB_CCSD_ENERGY_H
 
 #include <libtensor/libtensor.h>
 
@@ -23,4 +23,4 @@ double ccsd_energy (
    return energy;
 }
 
-#endif //GMB_CCSD_ENERGY_H
+#endif // GMB_SRC_MOLPRO_GMB_CCSD_ENERGY_H

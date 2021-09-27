@@ -1,5 +1,5 @@
-#ifndef GMB_CCSD_T2_H
-#define GMB_CCSD_T2_H
+#ifndef GMB_SRC_MOLPRO_GMB_CCSD_T2_H
+#define GMB_SRC_MOLPRO_GMB_CCSD_T2_H
 
 #include <libtensor/libtensor.h>
 #include "../../container.h"
@@ -41,4 +41,4 @@ container<4,double> ccsd_t2 (
     return t2_new;
 }     
 
-#endif //GMB_CCSD_T2_H
+#endif // GMB_SRC_MOLPRO_GMB_CCSD_T2_H

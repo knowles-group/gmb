@@ -1,5 +1,5 @@
-#ifndef GMB_UTILS_H
-#define GMB_UTILS_H
+#ifndef GMB_SRC_MOLPRO_GMB_UTILS_H
+#define GMB_SRC_MOLPRO_GMB_UTILS_H
 
 #include <libtensor/libtensor.h>
 
@@ -15,4 +15,4 @@ namespace gmb {
   std::string tospin(size_t spin);
     
 } // namespace gmb
-#endif //GMB_UTILS_H
+#endif // GMB_SRC_MOLPRO_GMB_UTILS_H

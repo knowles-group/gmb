@@ -1,5 +1,5 @@
-#ifndef GMB_PRECOND_OV_H
-#define GMB_PRECOND_OV_H
+#ifndef GMB_SRC_MOLPRO_GMB_PRECOND_OV_H
+#define GMB_SRC_MOLPRO_GMB_PRECOND_OV_H
 
 #include "../../container.h"
 
@@ -23,4 +23,4 @@ container<2,double> precond_ov(
     return pc_ov;
 };
 
-#endif //GMB_PRECOND_OV_H
+#endif // GMB_SRC_MOLPRO_GMB_PRECOND_OV_H

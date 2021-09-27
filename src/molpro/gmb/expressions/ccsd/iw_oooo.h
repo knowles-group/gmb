@@ -1,5 +1,5 @@
-#ifndef GMB_CCSD_IW_OOOO_H
-#define GMB_CCSD_IW_OOOO_H
+#ifndef GMB_SRC_MOLPRO_GMB_CCSD_IW_OOOO_H
+#define GMB_SRC_MOLPRO_GMB_CCSD_IW_OOOO_H
 
 #include <libtensor/libtensor.h>
 #include "../../container.h"
@@ -30,4 +30,4 @@ container<4,double> ccsd_iw_oooo(
 
 }
 
-#endif //GMB_CCSD_IW_OOOO_H
+#endif // GMB_SRC_MOLPRO_GMB_CCSD_IW_OOOO_H

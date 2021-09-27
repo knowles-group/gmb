@@ -1,5 +1,5 @@
-#ifndef GMB_PROBLEM_MP2_H_
-#define GMB_PROBLEM_MP2_H_
+#ifndef GMB_SRC_MOLPRO_GMB_PROBLEM_MP2_H_
+#define GMB_SRC_MOLPRO_GMB_PROBLEM_MP2_H_
 #include "problem_gen.h"
 #include "expressions/mp2.h"
 
@@ -43,4 +43,4 @@ public:
   }
 };
 
-#endif //GMB_PROBLEM_MP2_H_
+#endif // GMB_SRC_MOLPRO_GMB_PROBLEM_MP2_H_

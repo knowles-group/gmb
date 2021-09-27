@@ -1,5 +1,5 @@
-#ifndef GMB_EOM_CCSD_IR2_VV_H
-#define GMB_EOM_CCSD_IR2_VV_H
+#ifndef GMB_SRC_MOLPRO_GMB_EOM_CCSD_IR2_VV_H
+#define GMB_SRC_MOLPRO_GMB_EOM_CCSD_IR2_VV_H
 
 #include <libtensor/libtensor.h>
 #include "../../container.h"
@@ -24,4 +24,4 @@ container<2,double> eom_ccsd_ir2_vv(
 
 }
 
-#endif //GMB_EOM_CCSD_IR2_VV_H
+#endif // GMB_SRC_MOLPRO_GMB_EOM_CCSD_IR2_VV_H

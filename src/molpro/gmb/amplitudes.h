@@ -1,5 +1,5 @@
-#ifndef GMB_AMPLITUDES_H
-#define GMB_AMPLITUDES_H
+#ifndef GMB_SRC_MOLPRO_GMB_AMPLITUDES_H
+#define GMB_SRC_MOLPRO_GMB_AMPLITUDES_H
 
 #include "supercontainer.h"
 #include "utils.h"
@@ -240,4 +240,4 @@ public:
 
 };
 
-#endif //GMB_AMPLITUDES_H
+#endif // GMB_SRC_MOLPRO_GMB_AMPLITUDES_H

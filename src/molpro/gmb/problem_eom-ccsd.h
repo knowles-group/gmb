@@ -1,5 +1,5 @@
-#ifndef GMB_PROBLEM_EOM_CCSD_H_
-#define GMB_PROBLEM_EOM_CCSD_H_
+#ifndef GMB_SRC_MOLPRO_GMB_PROBLEM_EOM_CCSD_H_
+#define GMB_SRC_MOLPRO_GMB_PROBLEM_EOM_CCSD_H_
 #include "problem_eom.h"
 #include "utils.h"
 #include "expressions/eom-ccsd/eom-ccsd.h"
@@ -280,4 +280,4 @@ public:
 
 };
 
-#endif //GMB_PROBLEM_EOM_CCSD_H_
+#endif // GMB_SRC_MOLPRO_GMB_PROBLEM_EOM_CCSD_H_

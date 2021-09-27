@@ -1,5 +1,5 @@
-#ifndef GMB_PROBLEM_CCD_H_
-#define GMB_PROBLEM_CCD_H_
+#ifndef GMB_SRC_MOLPRO_GMB_PROBLEM_CCD_H_
+#define GMB_SRC_MOLPRO_GMB_PROBLEM_CCD_H_
 #include "problem_gen.h"
 #include "expressions/ccd.h"
 
@@ -45,4 +45,4 @@ public:
   }
 };
 
-#endif //GMB_PROBLEM_CCD_H_
+#endif // GMB_SRC_MOLPRO_GMB_PROBLEM_CCD_H_

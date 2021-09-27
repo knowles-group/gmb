@@ -1,5 +1,5 @@
-#ifndef GMB_EOM_CCSD_IW_VVVV_H
-#define GMB_EOM_CCSD_IW_VVVV_H
+#ifndef GMB_SRC_MOLPRO_GMB_EOM_CCSD_IW_VVVV_H
+#define GMB_SRC_MOLPRO_GMB_EOM_CCSD_IW_VVVV_H
 
 #include <libtensor/libtensor.h>
 #include "../../container.h"
@@ -32,4 +32,4 @@ container<4,double> eom_ccsd_iw_vvvv(
 }
 
 
-#endif //GMB_EOM_CCSD_IW_VVVV_H
+#endif // GMB_SRC_MOLPRO_GMB_EOM_CCSD_IW_VVVV_H

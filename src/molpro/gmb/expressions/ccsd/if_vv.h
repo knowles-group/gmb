@@ -1,5 +1,5 @@
-#ifndef GMB_CCSD_IF_VV_H
-#define GMB_CCSD_IF_VV_H
+#ifndef GMB_SRC_MOLPRO_GMB_CCSD_IF_VV_H
+#define GMB_SRC_MOLPRO_GMB_CCSD_IF_VV_H
 
 #include <libtensor/libtensor.h>
 #include "../../container.h"
@@ -29,4 +29,4 @@ container<2,double> ccsd_if_vv(
 
 }
 
-#endif //GMB_CCSD_IF_VV_H
+#endif // GMB_SRC_MOLPRO_GMB_CCSD_IF_VV_H

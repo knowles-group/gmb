@@ -1,5 +1,5 @@
-#ifndef GMB_ID_XXXX_H
-#define GMB_ID_XXXX_H
+#ifndef GMB_SRC_MOLPRO_GMB_ID_XXXX_H
+#define GMB_SRC_MOLPRO_GMB_ID_XXXX_H
 
 #include "../container.h"
 
@@ -19,4 +19,4 @@ container<4,double> id_xxxx(
     return d_xxxx;
 }
 
-#endif //GMB_ID_XXXX_H
+#endif // GMB_SRC_MOLPRO_GMB_ID_XXXX_H

@@ -1,5 +1,5 @@
-#ifndef GMB_DIAG_OOVV_H
-#define GMB_DIAG_OOVV_H
+#ifndef GMB_SRC_MOLPRO_GMB_DIAG_OOVV_H
+#define GMB_SRC_MOLPRO_GMB_DIAG_OOVV_H
 
 #include "../container.h"
 
@@ -22,4 +22,4 @@ container<4,double> diag_oovv(
     return d_oovv;
 };
 
-#endif //GMB_DIAG_OOVV_H
+#endif // GMB_SRC_MOLPRO_GMB_DIAG_OOVV_H
