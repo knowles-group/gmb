@@ -1,6 +1,6 @@
 #include "init.h"
-#include "expressions/fock_xx.h"
 #include "expressions/diag_xx.h"
+#include "expressions/fock_xx.h"
 
 namespace gmb {
 
@@ -63,7 +63,7 @@ namespace gmb {
       libtensor::block_tensor_rd_i<2, double> &bt(f_xx);
       const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
       auto norb = dims.get_dim(0);
-      auto bis = bt.get_bis();
+      const auto &bis = bt.get_bis();
 
       std::vector<size_t> v_norb;
       std::vector<double> v_orb;
