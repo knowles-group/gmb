@@ -16,7 +16,7 @@ namespace gmb {
     infile.open(file);
     //send error if file not found
     if (!infile) {
-      if (file.size() == 0) 
+      if (file.empty()) 
         std::cerr << "No " << str << " file was provided.\n";
       else 
         std::cerr << "Unable to open " << str << " file: \"" << file << "\"\n";
