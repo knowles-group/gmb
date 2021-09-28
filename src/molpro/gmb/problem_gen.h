@@ -12,7 +12,8 @@ protected:
 public:
   using Problem::container_t;
   using Problem::value_t;
-  problem_gen(const hamiltonian<> &ham)
+  
+  explicit problem_gen(const hamiltonian<> &ham)
   : m_ham{ham} {}
 
   virtual ~problem_gen() = default;
