@@ -10,42 +10,42 @@ namespace gmb {
     libtensor::letter p;
     T product = dot_product(t2(p), t1(p));
     return product;
-  };
+  }
   template <typename T>
   T dot_prod(libtensor::any_tensor<2,T> &t1,
              libtensor::any_tensor<2,T> &t2) {
     libtensor::letter p,q;
     T product = dot_product(t2(p|q), t1(p|q));
     return product;
-  };
+  }
   template <typename T>
   T dot_prod(libtensor::any_tensor<4,T> &t1,
              libtensor::any_tensor<4,T> &t2) {
     libtensor::letter p,q,r,s;
     T product = dot_product(t2(p|q|r|s), t1(p|q|r|s));
     return product;
-  };
+  }
 
   template <typename T>
   void copy(libtensor::any_tensor<1,T> &t1,
              libtensor::expr_lhs<1,T> &t2) {
     libtensor::letter p;
     t2(p) = t1(p);
-  };
+  }
 
   template <typename T>
   void copy(libtensor::any_tensor<2,T> &t1,
              libtensor::expr_lhs<2,T> &t2) {
     libtensor::letter p, q;
     t2(p|q) = t1(p|q);
-  };
+  }
                  
   template <typename T>
   void copy(libtensor::any_tensor<4,T> &t1,
             libtensor::expr_lhs<4,T> &t2) {
     libtensor::letter p,q,r,s;
     t2(p|q|r|s) = t1(p|q|r|s);
-  };
+  }
 
     template <size_t N, typename T>
         bool comp(const libtensor::btensor<N,T> &tref, 
@@ -57,7 +57,7 @@ namespace gmb {
               std::cout << str.str() << std::endl;
           }
           return cmp.compare();
-    };
+    }
 
 
   template <typename T>
@@ -66,14 +66,14 @@ namespace gmb {
                     libtensor::expr_lhs<1,T> &y) {
     libtensor::letter p;
     y(p) += a*x(p);
-  };
+  }
   template <typename T>
   void compute_axpy(T a,
                     libtensor::any_tensor<2,T> &x,
                     libtensor::expr_lhs<2,T> &y) {
     libtensor::letter p,q;
     y(p|q) += a*x(p|q);
-  };
+  }
 
   template <typename T>
   void compute_axpy(T a,
@@ -81,7 +81,7 @@ namespace gmb {
                     libtensor::expr_lhs<4,T> &y) {
     libtensor::letter p,q,r,s;
     y(p|q|r|s) += a*x(p|q|r|s);
-  };
+  }
 
 
 
@@ -93,7 +93,7 @@ namespace gmb {
     libtensor::scalar_transf<double> tr(1.0);
     libtensor::se_perm<2, double> se(p01, tr);
     sym.insert(se);
-  };
+  }
 
   void set_sym_pppp(libtensor::btensor<4,double> &tensor) {
     // Request a control object
