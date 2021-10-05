@@ -44,7 +44,7 @@ public:
     else {
       m_m2[key] = std::make_unique<container<2,T>> (c2);
     }
-  };
+  }
 
   void set(std::string key, const container<4,T> &c4) {
 
@@ -52,20 +52,20 @@ public:
       m_m4.insert(std::make_pair(key, std::make_unique<container<4,T>> (c4)));
     else
       m_m4[key] = std::make_unique<container<4,T>> (c4);
-   };
+   }
 
-  const std::map<std::string, std::unique_ptr<container<2,T>>>& get_m2() const { return m_m2; };
-  const std::map<std::string, std::unique_ptr<container<4,T>>>& get_m4() const { return m_m4; };
+  const std::map<std::string, std::unique_ptr<container<2,T>>>& get_m2() const { return m_m2; }
+  const std::map<std::string, std::unique_ptr<container<4,T>>>& get_m4() const { return m_m4; }
 
   container<2,T>& m2get(std::string key) {
     if (m_m2.find(key) == m_m2.end()) molpro::cout << key <<" not found!\n";
     return *m_m2[key];
-  };
+  }
 
   container<4,T>& m4get(std::string key) {
     if (m_m4.find(key) == m_m4.end()) molpro::cout << key <<" not found!\n";
     return *m_m4[key]; 
-  };
+  }
 
 
   void fill(T a) {
@@ -73,14 +73,14 @@ public:
       im2.second->fill(a);
     for (auto &im4 : m_m4)
       im4.second->fill(a);
-  };
+  }
 
   void scal(T a) {
     for (auto &im2 : m_m2)
       im2.second->scale(a);
     for (auto &im4 : m_m4)
       im4.second->scale(a);
-  };
+  }
 
   T dot(const supercontainer &sc) const {
     double product(0.0);
@@ -91,7 +91,7 @@ public:
       for (const auto &isc : sc.get_m4())
         product += im4.second->dot(*isc.second);
     return product;
-  };
+  }
 
   void axpy(T a, const supercontainer &sc) {
     for (auto &im2 : m_m2)
@@ -100,7 +100,7 @@ public:
     for (auto &im4 : m_m4)
       for (const auto &isc : sc.get_m4())
         im4.second->axpy(a, *isc.second);
-    };
+    }
 
   std::map<size_t, T> select_max_dot(size_t n, const supercontainer& sc) const {
     throw std::logic_error("supercontainer::select_max_dot(size_t n, const supercontainer& sc) unimplemented");
