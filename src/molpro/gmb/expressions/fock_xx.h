@@ -8,7 +8,7 @@
  * 
  */
 
-container<2,double> fock_xx (
+static container<2,double> fock_xx (
     container<2, double> &d_oo,    ///> identity matrix
     container<2, double> &h1_xx,   ///> one-electron hamiltonian
     container<4, double> &i_oxox   ///> anti-symmetrized integral <ip||jq>

@@ -8,7 +8,7 @@
  * 
  */
 
-void anti(
+static void anti(
     container<4, double> &i_o1o2o3o4,
     container<4, double> &i_o1o3o2o4,
     container<4, double> &i_o1o4o2o3

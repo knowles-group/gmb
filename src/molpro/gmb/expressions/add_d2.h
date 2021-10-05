@@ -8,7 +8,7 @@
  * 
  */
 
-void add_d2(
+static void add_d2(
     double fact,
     container<2, double> &d1_xx,
     container<2, double> &d2_xx,

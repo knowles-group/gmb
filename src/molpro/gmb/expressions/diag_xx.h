@@ -17,6 +17,6 @@ container<2,double> diag_xx(
     libtensor::letter p,q;
     d_xx(p|q) =  set(p|q, 1.0, set(0.0, d_xx(p|q)));
     return d_xx;
-};
+}
 
 #endif // GMB_SRC_MOLPRO_GMB_DIAG_XX_H
