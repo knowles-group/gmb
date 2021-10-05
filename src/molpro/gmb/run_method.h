@@ -13,9 +13,9 @@
 void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_gen> &problem, std::unique_ptr<amplitudes<>> &ptampl);
 
 /**
- * @brief Run Excited-State (ES) calculation
+ * @brief Run equation-of-motion (EOM) coupled-cluster (CC) calculation
  * 
  */
-void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots, const double& es_conv);
+void run_eom(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots, const double& es_conv);
 
 #endif // GMB_SRC_MOLPRO_GMB_RUN_METHOD_H

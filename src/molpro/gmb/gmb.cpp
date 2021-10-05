@@ -130,7 +130,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     if (method.find("eom") != std::string::npos) {
 
       std::unique_ptr<problem_eom> problem_es;
-      run_es(ham, method, problem_es, ptampl, nroots, es_conv);
+      run_eom(ham, method, problem_es, ptampl, nroots, es_conv);
 
       for (const auto& ev : problem_es->get_energy())
         for (int i=0; i<expected_results.size(); ++i)
