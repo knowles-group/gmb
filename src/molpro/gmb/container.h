@@ -52,21 +52,21 @@ public:
    * 
    * @return const libtensor::bispace<N>& 
    */
-  const libtensor::bispace<N>& get_space() const { return m_sp; };
+  const libtensor::bispace<N>& get_space() const { return m_sp; }
 
   /**
    * @brief Fill a tensor with a constant value a
    * 
    * @param a constant value to fill the tensor with
    */
-  void fill(T a) { libtensor::bto_set<N,T>(a).perform(*this); };
+  void fill(T a) { libtensor::bto_set<N,T>(a).perform(*this); }
 
   /**
    * @brief Scale the tensor with constant value a
    * 
    * @param a constant to be scale the tensor by
    */
-  void scal(T a) { (*this).scale(a); };
+  void scal(T a) { (*this).scale(a); }
 
   /**
    * @brief Dot tensor with another tensor
@@ -74,7 +74,7 @@ public:
    * @param x tensor to be dotted with
    * @return T dot product between tensors
    */
-  T dot(const container &x) const { return gmb::dot_prod(const_cast<container&> (*this), const_cast<container&> (x)); };
+  T dot(const container &x) const { return gmb::dot_prod(const_cast<container&> (*this), const_cast<container&> (x)); }
 
   /**
    * @brief Assigns new value to the tensor Y = a*X + Y
@@ -82,14 +82,14 @@ public:
    * @param a constant value
    * @param x another tensor
    */
-  void axpy(T a, const container &x) { gmb::compute_axpy(a, const_cast<container&> (x), (*this)); };
-  // void axpy(T a, container x) { gmb::compute_axpy(a, x, (*this)); };
+  void axpy(T a, const container &x) { gmb::compute_axpy(a, const_cast<container&> (x), (*this)); }
+  // void axpy(T a, container x) { gmb::compute_axpy(a, x, (*this)); }
 
   /**
    * @brief print container
    * 
    */
-  void print() { libtensor::bto_print<N, T>(molpro::cout).perform(*this);};
+  void print() { libtensor::bto_print<N, T>(molpro::cout).perform(*this);}
 
 
   std::map<size_t, value_type> select_max_dot(size_t n, const container& y) const {throw std::logic_error("container::select_max_dot unimplemented");}
