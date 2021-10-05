@@ -175,8 +175,8 @@ double get_integral(const std::string &filename) {
   syms_t full(nsym);
   for (const auto &os : orbsym) full[os-1] += 1;
 
-  unsigned int nalpha = std::accumulate(fermi.cbegin(),fermi.cend(),0);
-  unsigned int nbeta =std::accumulate(closed.cbegin(),closed.cend(),0);
+  sym_t nalpha = std::accumulate(fermi.cbegin(),fermi.cend(),0);
+  sym_t nbeta = std::accumulate(closed.cbegin(),closed.cend(),0);
   std::vector<size_t> no = {nalpha, nbeta}, nv = {nb - nalpha, nb - nbeta};
 
   std::vector<std::pair<syms_t, syms_t>> 
@@ -278,7 +278,6 @@ double get_integral(const std::string &filename) {
       }
       spin spin{alpha};
       auto itype = molpro::FCIdump::I1a;
-      bool skip{false};
       if (bidx_cp[0] !=  bidx_cp[1] ) { 
           ctrl.req_zero_block(bidx);
           continue;
@@ -294,7 +293,6 @@ double get_integral(const std::string &filename) {
       
       libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
       libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
-      const libtensor::dimensions<2> &tdims = blk.get_dims();
       double *ptr = tc.req_dataptr();
       size_t i, j, k, l;
       unsigned int symi, symj, symk, syml;
