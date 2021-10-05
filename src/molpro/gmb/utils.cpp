@@ -38,11 +38,8 @@ namespace gmb {
   std::string tospin(size_t spin) {
     switch (spin) {
     case 0: return "a";
-      break;
     case 1: return "b";
-      break;
     default: return &"p"[spin]-2;
-      break;
     }
   }
 
