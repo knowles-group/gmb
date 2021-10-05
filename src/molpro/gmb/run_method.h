@@ -1,5 +1,5 @@
-#ifndef RUN_METHOD_H
-#define RUN_METHOD_H
+#ifndef GMB_SRC_MOLPRO_GMB_RUN_METHOD_H
+#define GMB_SRC_MOLPRO_GMB_RUN_METHOD_H
 
 #include "hamiltonian.h"
 #include "amplitudes.h"
@@ -18,4 +18,4 @@ void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<probl
  */
 void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots, const double& es_conv);
 
-#endif // RUN_METHOD_H
+#endif // GMB_SRC_MOLPRO_GMB_RUN_METHOD_H
