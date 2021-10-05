@@ -43,7 +43,7 @@ void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<probl
   problem->energy(*ptampl);
 }
 
-void run_es(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots, const double& es_conv) {
+void run_eom(const hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_eom> &problem, const std::unique_ptr<amplitudes<>> &ptampl, const size_t &nroots, const double& es_conv) {
   molpro::cout << "\nRunning EOM-CCSD" << std::endl;
   
   // set EOM-CCSD amplitudes
