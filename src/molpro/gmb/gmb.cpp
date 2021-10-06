@@ -96,6 +96,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   // initialise hamiltonian
   hamiltonian<> ham;
   init(filename, method, ham, v_ppol);
+  auto pham = std::make_shared<hamiltonian<>>(ham);
 
   auto vnn = get_integral(filename);
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
@@ -113,7 +114,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   if (!(method.find("hf") != std::string::npos)) {
 
     std::unique_ptr<problem_gen> problem;
-    std::unique_ptr<amplitudes<>> ptampl{std::make_unique<amplitudes<>>()};
+    std::shared_ptr<amplitudes<>> ptampl{std::make_shared<amplitudes<>>()};
     
     run_gs(ham, method, problem, ptampl);
     
@@ -130,7 +131,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     if (method.find("eom") != std::string::npos) {
 
       std::unique_ptr<problem_eom> problem_es;
-      run_eom(ham, method, problem_es, ptampl, nroots, es_conv);
+      run_eom(pham, method, problem_es, ptampl, nroots, es_conv);
 
       for (const auto& ev : problem_es->get_energy())
         for (int i=0; i<expected_results.size(); ++i)
