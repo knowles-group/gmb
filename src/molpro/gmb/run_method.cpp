@@ -82,7 +82,7 @@ void run_eom(const std::shared_ptr<hamiltonian<>> &pham, const std::string &meth
   }
   auto energies = problem->get_energy();
 
-  bool left{true};
+  bool left{false};
   if (left) {
     // set EOM-CCSD left amplitudes
     molpro::cout << "\nSolving left EOM-CCSD\n";
