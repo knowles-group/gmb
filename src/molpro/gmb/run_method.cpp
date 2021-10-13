@@ -104,7 +104,6 @@ std::vector<double> run_eom(const std::shared_ptr<hamiltonian<>> &pham, const st
     problem->set_energy(solver->eigenvalues());
 
     auto energies_left = problem->get_energy();
-    std::cout << std::equal(energies.begin(), energies_left.begin(), 10e-5) << "\n";
     for (size_t i = 0; i < energies_left.size(); i++) {
       if (std::abs(energies_left[i] - energies[i]) > 10e-5) {
         std::cerr << "Warning! There seems to be something wrong with the left eigenvalues!\n";
