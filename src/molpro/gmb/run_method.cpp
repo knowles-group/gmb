@@ -44,7 +44,7 @@ void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<probl
   problem->energy(*ptampl);
 }
 
-void run_eom(const std::shared_ptr<hamiltonian<>> &pham, const std::string &method, 
+std::vector<double> run_eom(const std::shared_ptr<hamiltonian<>> &pham, const std::string &method, 
              std::unique_ptr<problem_eom> &problem, const std::shared_ptr<amplitudes<>> &ptampl, 
              const size_t &nroots, const double& es_conv) {
   molpro::cout << "\nRunning EOM-CCSD" << std::endl;
@@ -101,15 +101,18 @@ void run_eom(const std::shared_ptr<hamiltonian<>> &pham, const std::string &meth
 
     // solve
     solver->solve(v_lampl, residuals, *problem, false);
-    // problem->set_energy(solver->eigenvalues());
-    // std::vector<int> v_nroots(nroots);
-    // for (size_t i = 0; i < nroots; i++)
-    //   v_nroots[i] = i;
-    // solver->solution(v_nroots, v_lampl, residuals);
-    // problem->character(v_lampl);
+    problem->set_energy(solver->eigenvalues());
 
-    // auto energies = problem->get_energy();
+    auto energies_left = problem->get_energy();
+    std::cout << std::equal(energies.begin(), energies_left.begin(), 10e-5) << "\n";
+    for (size_t i = 0; i < energies_left.size(); i++) {
+      if (std::abs(energies_left[i] - energies[i]) > 10e-5) {
+        std::cerr << "Warning! There seems to be something wrong with the left eigenvalues!\n";
+        break;
+      }
+    }
   }
+  return energies;
 }
 
   void eom_intermediates(const std::shared_ptr<hamiltonian<>> &pham, 

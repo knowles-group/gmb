@@ -19,7 +19,7 @@ void run_gs(hamiltonian<> &ham,
  * @brief Run equation-of-motion (EOM) coupled-cluster (CC) calculation
  * 
  */
-void run_eom(const std::shared_ptr<hamiltonian<>> &pham, 
+std::vector<double> run_eom(const std::shared_ptr<hamiltonian<>> &pham, 
              const std::string &method, 
              std::unique_ptr<problem_eom> &problem, 
              const std::shared_ptr<amplitudes<>> &ptampl, 

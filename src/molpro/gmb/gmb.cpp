@@ -131,12 +131,11 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     if (method.find("eom") != std::string::npos) {
 
       std::unique_ptr<problem_eom> problem_es;
-      run_eom(pham, method, problem_es, ptampl, nroots, es_conv);
+      auto energies = run_eom(pham, method, problem_es, ptampl, nroots, es_conv);
 
       for (const auto& ev : problem_es->get_energy())
         for (int i=0; i<expected_results.size(); ++i)
           if (std::abs(ev-expected_results[i])<1e-10) found_expected_results[i]=true;
-      auto energies = problem_es->get_energy();
 
       // print results
       molpro::cout << "\n\n          Excitation energy                   Total energy  \n";

@@ -1,9 +1,7 @@
 #ifndef GMB_SRC_MOLPRO_GMB_PROBLEM_EOM_CCSD_LEFT_H_
 #define GMB_SRC_MOLPRO_GMB_PROBLEM_EOM_CCSD_LEFT_H_
 #include "constants.h"
-#include "expressions/eom-ccsd/eom-ccsd.h"
-#include "expressions/eom-ccsd/l1.h"
-#include "expressions/eom-ccsd/l2.h"
+#include "expressions/eom-ccsd/eom-ccsd-left.h"
 #include "expressions/update.h"
 #include "expressions/ccsd/energy.h"
 #include "problem_eom.h"
@@ -35,17 +33,16 @@ public:
 
       singlet_projector(ccp);
 
-      // compute intermediates
-      // auto ir1_vv = eom_ccsd_ir1_vv(m_ham->m2get(f_vv),ccp.m2get(r1),m_int->m4get("iw2_ovvv"));          
-      // auto ir1_oo = eom_ccsd_ir1_oo(m_ham->m2get(f_oo),ccp.m2get(r1),m_int->m4get("iw2_ooov"));          
-      // auto ir2_oo = eom_ccsd_ir2_oo(m_ham->m2get(f_oo),ccp.m4get(r2),m_ham->m4get(i_oovv));          
-      // auto ir2_vv = eom_ccsd_ir2_vv(m_ham->m2get(f_vv),ccp.m4get(r2),m_ham->m4get(i_oovv));          
+      // compute left intermediates
+      auto il_vv = eom_ccsd_il_vv(m_ham->m2get(f_vv), m_tampl->m4get(t2), ccp.m4get(r2));          
+      auto il_oo = eom_ccsd_il_oo(m_ham->m2get(f_oo), m_tampl->m4get(t2), ccp.m4get(r2));          
 
       // compute l1
       {
         auto l1_new = eom_ccsd_l1(ccp.m2get(r1), 
                                   ccp.m4get(r2), 
                                   m_tampl->m4get(t2), 
+                                  il_oo, il_vv, 
                                   m_int->m2get("if_oo"), 
                                   m_int->m2get("if_ov"), 
                                   m_int->m2get("if_vv"),  
@@ -53,8 +50,7 @@ public:
                                   m_int->m4get("iw_ooov"), 
                                   m_int->m4get("iw2_ooov"), 
                                   m_int->m4get("iw_ovvv"), 
-                                  m_int->m4get("iw2_ovvv"), 
-                                  m_int->m4get("iw_oovv"));
+                                  m_int->m4get("iw2_ovvv"));
         a.set(r1, l1_new);
       }
       // compute l2
@@ -65,7 +61,7 @@ public:
                                   m_int->m2get("if_oo"), 
                                   m_int->m2get("if_ov"), 
                                   m_int->m2get("if_vv"),  
-                                  // ir1_oo, ir2_oo, ir1_vv, ir2_vv, 
+                                  il_oo, il_vv, 
                                   m_ham->m4get(i_oovv), 
                                   m_int->m4get("iw_oooo"), 
                                   m_int->m4get("iw_ooov"), 
@@ -74,7 +70,6 @@ public:
                                   m_int->m4get("iw_ovvv"), 
                                   m_int->m4get("iw2_ovvv"), 
                                   m_int->m4get("iw_vvvv"));  
-
         a.set(r2, l2_new);
       }
     }
