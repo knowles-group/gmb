@@ -37,13 +37,11 @@ container<4,double> eom_ccsd_l2 (
                       + asymm(a, b, 
                           contract(e, l2(i|j|a|e), if_vv(e|b))
                         - contract(m, l1(m|a), iw2_ooov(i|j|m|b))
-                        - 0.5*contract(e, i_oovv(i|j|e|b), 
-                            contract(m|n|f, t2(m|n|e|f), l2(m|n|a|f))))
+                        - contract(e, i_oovv(i|j|e|b), il_vv(a|e)))
                      + asymm(i, j, 
                            - contract(m, l2(i|m|a|b), if_oo(j|m))
                            + contract(e, l1(i|e), iw2_ovvv(j|e|b|a))
-                        - 0.5*contract(m, i_oovv(m|j|a|b), 
-                            contract(n|e|f, t2(m|n|e|f), l2(i|n|e|f)))
+                        - contract(m, i_oovv(m|j|a|b), il_oo(i|m))
                         + asymm(a,b,
                             l1(i|a)*if_ov(j|b)
                          - contract(e|m, l2(i|m|a|e), iw_ovov(m|b|j|e))))
