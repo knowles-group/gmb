@@ -245,36 +245,36 @@ public:
         }
       } else {
 
-      // read r2
-      constexpr size_t N = 4;
-      libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir].m4get(r2));
-      libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
-      for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
-        libtensor::index<N> bidx;
-        ol.get_index(it, bidx);
-        if (ctrl.req_is_zero_block(bidx)) 
-          continue;
-        libtensor::dense_tensor_rd_i<N, value_t> &blk = ctrl.req_const_block(bidx);
-        libtensor::dense_tensor_rd_ctrl<N, value_t> tc(blk);
-        const libtensor::dimensions<N> &tdims = blk.get_dims();
-        const value_t *ptr = tc.req_const_dataptr();
-        for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-          if (std::abs(ptr[offset]) >  0.1) {
-            size_t i = offset / (v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]);
-            size_t j = (offset - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / (v_nv[bidx[2]]*v_nv[bidx[3]]);
-            size_t a = (offset - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / v_nv[bidx[3]];
-            size_t b = offset - a*v_nv[bidx[3]] - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]];
-
-            ss << "\n" << std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
-            ss << "O" << 1+i << gmb::tospin(bidx[0]) << " -> V" << 1+a << gmb::tospin(bidx[2]);
-            ss << "    O" << 1+j << gmb::tospin(bidx[1]) << " -> V" << 1+b << gmb::tospin(bidx[3]);
+        // read r2
+        constexpr size_t N = 4;
+        libtensor::block_tensor_rd_ctrl<N, value_t> ctrl(v_rampl[ir].m4get(r2));
+        libtensor::orbit_list<N, value_t> ol(ctrl.req_const_symmetry());
+        for (libtensor::orbit_list<N, value_t>::iterator it = ol.begin(); it != ol.end(); it++) {
+          libtensor::index<N> bidx;
+          ol.get_index(it, bidx);
+          if (ctrl.req_is_zero_block(bidx)) 
+            continue;
+          libtensor::dense_tensor_rd_i<N, value_t> &blk = ctrl.req_const_block(bidx);
+          libtensor::dense_tensor_rd_ctrl<N, value_t> tc(blk);
+          const libtensor::dimensions<N> &tdims = blk.get_dims();
+          const value_t *ptr = tc.req_const_dataptr();
+          for (size_t offset = 0; offset < tdims.get_size(); offset++) {
+            if (std::abs(ptr[offset]) >  0.1) {
+              size_t i = offset / (v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]);
+              size_t j = (offset - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / (v_nv[bidx[2]]*v_nv[bidx[3]]);
+              size_t a = (offset - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / v_nv[bidx[3]];
+              size_t b = offset - a*v_nv[bidx[3]] - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]];
+  
+              ss << "\n" << std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
+              ss << "O" << 1+i << gmb::tospin(bidx[0]) << " -> V" << 1+a << gmb::tospin(bidx[2]);
+              ss << "    O" << 1+j << gmb::tospin(bidx[1]) << " -> V" << 1+b << gmb::tospin(bidx[3]);
+            }
           }
+          tc.ret_const_dataptr(ptr);
+          ctrl.ret_const_block(bidx);
         }
-        tc.ret_const_dataptr(ptr);
-        ctrl.ret_const_block(bidx);
       }
-    }
-    molpro::cout << ss.str() << "\n";
+      molpro::cout << ss.str() << "std::endl";
     }
   }
 
