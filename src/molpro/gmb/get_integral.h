@@ -23,6 +23,8 @@ enum spin{alpha=0, beta=1, photon=2};
 constexpr unsigned int nsym{8};
 
 struct polariton {
+  bool self_energy{true};
+  bool coupling{true};
   sym_t nmax{0};
   double gamma{0.0};
   double omega{0.0};
@@ -31,8 +33,8 @@ struct polariton {
   std::string fname_sm;
 
   polariton() = default;
-  polariton(sym_t nmax_, double gamma_, double omega_) 
-  : nmax{nmax_}, gamma{gamma_}, omega{omega_} 
+  polariton(sym_t nmax_, double gamma_, double omega_, bool self_energy_, bool coupling_) 
+  : nmax{nmax_}, gamma{gamma_}, omega{omega_}, self_energy{self_energy_}, coupling{coupling_} 
   {
     lambd = gamma*(sqrt(2*omega));
   }

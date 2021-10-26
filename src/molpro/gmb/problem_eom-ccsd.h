@@ -274,7 +274,7 @@ public:
           ctrl.ret_const_block(bidx);
         }
       }
-      molpro::cout << ss.str() << "std::endl";
+      molpro::cout << ss.str() << std::endl;
     }
   }
 

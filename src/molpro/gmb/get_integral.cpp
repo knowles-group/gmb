@@ -46,14 +46,16 @@ double get_integral(const std::string &filename) {
         double fact = i_ppol->omega*i_ppol->gamma*i_ppol->gamma;
         auto rnuc = get_integral(i_ppol->fname_dm);
         #if 1 // add self-energy
-        container<2> sm(integral.get_space()); // second moment of charges
-        gmb::zero(sm);
-        get_one_electron_part(sm, i_ppol->fname_sm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
-        integral.axpy(-fact, sm);
-        container<2> dm(integral.get_space()); // dipole moment 
-        gmb::zero(dm);
-        get_one_electron_part(dm, i_ppol->fname_dm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
-        integral.axpy(2.0*fact*rnuc, dm);
+        if (i_ppol->self_energy) {
+          container<2> sm(integral.get_space()); // second moment of charges
+          gmb::zero(sm);
+          get_one_electron_part(sm, i_ppol->fname_sm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
+          integral.axpy(-fact, sm);
+          container<2> dm(integral.get_space()); // dipole moment 
+          gmb::zero(dm);
+          get_one_electron_part(dm, i_ppol->fname_dm, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
+          integral.axpy(2.0*fact*rnuc, dm);
+        }
         #endif
       }
     }
@@ -108,36 +110,39 @@ double get_integral(const std::string &filename) {
   #if 1 // add self-energy if needed
   if (add_ph) {
     for (size_t i = 0; i < v_ppol.size(); i++) {
-      std::unique_ptr<container<2>> pd_o1o3, pd_o2o4, pd_o2o3, pd_o1o4;
-      double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
 
-      // add dipole integrals to two-electron part
-      pd_o1o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o3, false));
-      if (o1 == o2 && o3 == o4)
-        pd_o2o4 = std::make_unique<container<2>> (*pd_o1o3);
-      else 
-        pd_o2o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o4, false));
+      if (v_ppol[i]->self_energy) {
+        std::unique_ptr<container<2>> pd_o1o3, pd_o2o4, pd_o2o3, pd_o1o4;
+        double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
 
-      if (o1 == o2)
-        pd_o2o3 = std::make_unique<container<2>> (*pd_o1o3);
-      else if(o3 == o4)
-        pd_o2o3 = std::make_unique<container<2>> (*pd_o2o4);
-      else
-        pd_o2o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o3, false));
+        // add dipole integrals to two-electron part
+        pd_o1o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o3, false));
+        if (o1 == o2 && o3 == o4)
+          pd_o2o4 = std::make_unique<container<2>> (*pd_o1o3);
+        else 
+          pd_o2o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o4, false));
 
-      if (o3 == o4)
-        pd_o1o4 = std::make_unique<container<2>> (*pd_o1o3);
-      else if (o1 == o2)
-        pd_o1o4 = std::make_unique<container<2>> (*pd_o2o4);
-      else if (o1 == o2 && o3 == o4)
-        pd_o1o4 = std::make_unique<container<2>> (*pd_o2o3);
-      else
-        pd_o1o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o4, false));
+        if (o1 == o2)
+          pd_o2o3 = std::make_unique<container<2>> (*pd_o1o3);
+        else if(o3 == o4)
+          pd_o2o3 = std::make_unique<container<2>> (*pd_o2o4);
+        else
+          pd_o2o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o3, false));
 
-      add_d2(fact, *pd_o1o3, *pd_o2o4, *pd_o2o3, *pd_o1o4, h2_o1o2o3o4);
+        if (o3 == o4)
+          pd_o1o4 = std::make_unique<container<2>> (*pd_o1o3);
+        else if (o1 == o2)
+          pd_o1o4 = std::make_unique<container<2>> (*pd_o2o4);
+        else if (o1 == o2 && o3 == o4)
+          pd_o1o4 = std::make_unique<container<2>> (*pd_o2o3);
+        else
+          pd_o1o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o4, false));
+
+        add_d2(fact, *pd_o1o3, *pd_o2o4, *pd_o2o3, *pd_o1o4, h2_o1o2o3o4);
+      }
     }
   }
-  #endif
+    #endif
   
   return h2_o1o2o3o4;
 }
@@ -342,8 +347,10 @@ double get_integral(const std::string &filename) {
       auto rnuc = get_integral(v_ppol[bidx[0]-2]->fname_dm);
       if (v_orb_type[0] != v_orb_type[1]) { // ov block - only one element
         #if 1 //coupling
-        for (size_t i = 0; i < 1; i++) 
-           ptr[0] = - fact*rnuc;
+        if (v_ppol[bidx[0]-2]->coupling) {
+          for (size_t i = 0; i < 1; i++) 
+             ptr[0] = - fact*rnuc;
+        }
         #endif
       } else {
         switch (v_orb_type[0]) {
@@ -361,9 +368,11 @@ double get_integral(const std::string &filename) {
               ptr[gmb::get_offset(ip,ip,nmax)] = p*omega;        
               // off-diagonal elements
               #if 1 //coupling
-              if (!(q > nmax)) {
-                ptr[gmb::get_offset(ip,iq,nmax)] = - fact*rnuc*sqrt(q);
-                ptr[gmb::get_offset(iq,ip,nmax)] = - fact*rnuc*sqrt(p+1);
+              if (v_ppol[bidx[0]-2]->coupling) {
+                if (!(q > nmax)) {
+                  ptr[gmb::get_offset(ip,iq,nmax)] = - fact*rnuc*sqrt(q);
+                  ptr[gmb::get_offset(iq,ip,nmax)] = - fact*rnuc*sqrt(p+1);
+                }
               }
               #endif
             }
@@ -587,92 +596,94 @@ double get_integral(const std::string &filename) {
           ctrl.req_zero_block(bidx);
           continue;
         }   
-    #if 1 // zero out coupling
-      libtensor::dense_tensor_wr_i<4, double> &blk = ctrl.req_block(bidx);
-      libtensor::dense_tensor_wr_ctrl<4, double> tc(blk);
-      const libtensor::dimensions<4> &tdims = blk.get_dims();
-      double *ptr = tc.req_dataptr();
+      #if 1 // zero out coupling
+      if (v_ppol[spin2-2]->coupling) {
+        libtensor::dense_tensor_wr_i<4, double> &blk = ctrl.req_block(bidx);
+        libtensor::dense_tensor_wr_ctrl<4, double> tc(blk);
+        const libtensor::dimensions<4> &tdims = blk.get_dims();
+        double *ptr = tc.req_dataptr();
 
-      // read dipole integrals
-      std::string fname_dm{v_ppol[0]->fname_dm};
+        // read dipole integrals
+        std::string fname_dm{v_ppol[0]->fname_dm};
 
-      molpro::FCIdump dump{fname_dm}; 
-      size_t p, q, r, s;
-      unsigned int symp, symq, symr, syms;
-      double value{0.0};
-      molpro::FCIdump::integralType type;
-      dump.rewind();
-      double fact{v_ppol[spin2-2]->gamma*v_ppol[spin2-2]->omega};
-      while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
-        if (type != molpro::FCIdump::I0)
-        for (int r = 0; r < v_ppol[spin2-2]->nmax + 1; r++) {
-          s = r+1;
-          symr = 0;
-          syms = 0;
-          // 1 (pq|rs)
-          if (block1) { // ppee
-          if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
-            && ((v_psi[spin2][2].first[symr] <= r && r < v_psi[spin2][2].second[symr]) && (v_psi[spin2][3].first[syms] <= s && s < v_psi[spin2][3].second[syms]))) {
-              ptr[gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
-                = - fact*sqrt(s)*value;
+        molpro::FCIdump dump{fname_dm}; 
+        size_t p, q, r, s;
+        unsigned int symp, symq, symr, syms;
+        double value{0.0};
+        molpro::FCIdump::integralType type;
+        dump.rewind();
+        double fact{v_ppol[spin2-2]->gamma*v_ppol[spin2-2]->omega};
+        while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
+          if (type != molpro::FCIdump::I0)
+          for (int r = 0; r < v_ppol[spin2-2]->nmax + 1; r++) {
+            s = r+1;
+            symr = 0;
+            syms = 0;
+            // 1 (pq|rs)
+            if (block1) { // ppee
+            if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
+              && ((v_psi[spin2][2].first[symr] <= r && r < v_psi[spin2][2].second[symr]) && (v_psi[spin2][3].first[syms] <= s && s < v_psi[spin2][3].second[syms]))) {
+                ptr[gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
+                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            //2 (qp|rs)
+            if (((v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]) && (v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]))
+              && ((v_psi[spin2][2].first[symr] <= r && r < v_psi[spin2][2].second[symr]) && (v_psi[spin2][3].first[syms] <= s && s < v_psi[spin2][3].second[syms]))) {
+                ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
+                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            // 3 (pq|sr)
+            if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
+              && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
+                ptr[gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
+                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            // 4 (qp|sr)  
+            if (((v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]) && (v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]))
+              && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
+                ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
+                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                  = - fact*sqrt(s)*value;
+              }
             }
-          //2 (qp|rs)
-          if (((v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]) && (v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]))
-            && ((v_psi[spin2][2].first[symr] <= r && r < v_psi[spin2][2].second[symr]) && (v_psi[spin2][3].first[syms] <= s && s < v_psi[spin2][3].second[syms]))) {
-              ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
-                = - fact*sqrt(s)*value;
-            }
-          // 3 (pq|sr)
-          if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
-            && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
-              ptr[gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
-                = - fact*sqrt(s)*value;
-            }
-          // 4 (qp|sr)  
-          if (((v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]) && (v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]))
-            && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
-              ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
-                                  v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
-                = - fact*sqrt(s)*value;
-            }
-          }
-          if (block2) {
-          // 5 (rs|pq)
-          if (((v_psi[spin1][2].first[symp] <= p && p < v_psi[spin1][2].second[symp]) && (v_psi[spin1][3].first[symq] <= q && q < v_psi[spin1][3].second[symq]))
-            && ((v_psi[spin2][0].first[symr] <= r && r < v_psi[spin2][0].second[symr]) && (v_psi[spin2][1].first[syms] <= s && s < v_psi[spin2][1].second[syms]))) {
-              ptr[gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
-                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
-                = - fact*sqrt(s)*value;
-            }
-          // 6 (sr|pq)
-          if (((v_psi[spin1][2].first[symp] <= p && p < v_psi[spin1][2].second[symp]) && (v_psi[spin1][3].first[symq] <= q && q < v_psi[spin1][3].second[symq]))
-            && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
-              ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
-                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
-                = - fact*sqrt(s)*value;
-            }
-          // 7 (rs|qp)
-          if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
-            && ((v_psi[spin2][0].first[symr] <= r && r < v_psi[spin2][0].second[symr]) && (v_psi[spin2][1].first[syms] <= s && s < v_psi[spin2][1].second[syms]))) {
-              ptr[gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
-                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
-                = - fact*sqrt(s)*value;
-            }
-          // 8 (sr|qp)
-          if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
-            && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
-              ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
-                                  v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
-                = - fact*sqrt(s)*value;
+            if (block2) {
+            // 5 (rs|pq)
+            if (((v_psi[spin1][2].first[symp] <= p && p < v_psi[spin1][2].second[symp]) && (v_psi[spin1][3].first[symq] <= q && q < v_psi[spin1][3].second[symq]))
+              && ((v_psi[spin2][0].first[symr] <= r && r < v_psi[spin2][0].second[symr]) && (v_psi[spin2][1].first[syms] <= s && s < v_psi[spin2][1].second[syms]))) {
+                ptr[gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
+                                    v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            // 6 (sr|pq)
+            if (((v_psi[spin1][2].first[symp] <= p && p < v_psi[spin1][2].second[symp]) && (v_psi[spin1][3].first[symq] <= q && q < v_psi[spin1][3].second[symq]))
+              && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
+                ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
+                                    v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            // 7 (rs|qp)
+            if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
+              && ((v_psi[spin2][0].first[symr] <= r && r < v_psi[spin2][0].second[symr]) && (v_psi[spin2][1].first[syms] <= s && s < v_psi[spin2][1].second[syms]))) {
+                ptr[gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
+                                    v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            // 8 (sr|qp)
+            if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
+              && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
+                ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
+                                    v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                  = - fact*sqrt(s)*value;
+              }
             }
           }
         }
-      }
-    tc.ret_dataptr(ptr);
-    ctrl.ret_block(bidx);
+      tc.ret_dataptr(ptr);
+      ctrl.ret_block(bidx);
+    }
     #endif
     }
   }
