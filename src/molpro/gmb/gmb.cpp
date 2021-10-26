@@ -46,6 +46,8 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 
   std::vector<std::unique_ptr<polariton>> v_ppol(ncav);
   if (ncav > 0) {
+    auto self_energy = options.parameter("self_energy", true);
+    auto coupling = options.parameter("coupling", true);
     std::vector<int> v_option_polariton_nmax(ncav, 1);
     v_option_polariton_nmax =
         options.parameter("polariton_nmax", v_option_polariton_nmax);
@@ -58,7 +60,9 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     for (size_t i = 0; i < ncav; i++) {
       v_ppol[i] = std::make_unique<polariton>(v_option_polariton_nmax[i],
                                               v_option_polariton_gamma[i],
-                                              v_option_polariton_omega[i]);
+                                              v_option_polariton_omega[i],
+                                              self_energy,
+                                              coupling);
       v_ppol[i]->fname_dm = options.parameter(
           "dipole",
           std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".dm"));
@@ -101,9 +105,11 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
   #if 1 // self-energy
   for (size_t i = 0; i < ncav; i++) {
-    auto rnuc = get_integral(v_ppol[i]->fname_dm);
-    molpro::cout << " rnuc = " << rnuc << "\n";
-    hf_energy += v_ppol[i]->gamma*v_ppol[i]->gamma*v_ppol[i]->omega*rnuc*rnuc;
+    if (v_ppol[i]->self_energy) {
+      auto rnuc = get_integral(v_ppol[i]->fname_dm);
+      molpro::cout << " rnuc = " << rnuc << "\n";
+      hf_energy += v_ppol[i]->gamma*v_ppol[i]->gamma*v_ppol[i]->omega*rnuc*rnuc;
+    }
   }
   #endif
   molpro::cout << "\nHF energy: " << std::setprecision(12) << hf_energy << "\n\n";
