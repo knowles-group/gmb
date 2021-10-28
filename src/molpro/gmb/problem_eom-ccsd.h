@@ -190,6 +190,8 @@ public:
   void character(std::vector<container_t> &v_rampl) const override {
 
 
+    std::ostringstream ss;
+
     for (size_t ir = 0; ir < v_rampl.size(); ir++) {
       // normalise
       double norm = sqrt(v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1)) + 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2)));
@@ -198,7 +200,6 @@ public:
       double r12 = v_rampl[ir].m2get(r1).dot(v_rampl[ir].m2get(r1)) ;
       double r22 = 0.25*v_rampl[ir].m4get(r2).dot(v_rampl[ir].m4get(r2));
 
-      std::ostringstream ss;
 
       // print excited state number and energy
       ss << "\n\nExcited state #" << ir+1 
@@ -274,8 +275,6 @@ public:
           ctrl.ret_const_block(bidx);
         }
       }
-      ss << "\n\n";
-      molpro::cout << ss.str() << std::endl;
     }
   }
 

@@ -149,9 +149,9 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
       for (auto &i : energies) {
         all_energies.push_back(ccsd_energy+i);
         molpro::cout << std::setw(14) << std::setprecision(7) << i << "   "
-                  << std::setw(14) << i*inverse_electron_volt << "   "
-                  << std::setw(14) << ccsd_energy+i << "    "
-                  << std::setw(14) << (ccsd_energy+i)*inverse_electron_volt << " \n";
+                     << std::setw(14) << i*inverse_electron_volt << "   "
+                     << std::setw(14) << ccsd_energy+i << "    "
+                     << std::setw(14) << (ccsd_energy+i)*inverse_electron_volt << std::endl;
       }
     }
   #endif
