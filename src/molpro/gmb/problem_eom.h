@@ -23,7 +23,7 @@ public:
 
   virtual ~problem_eom() = default;
 
-  void set_e0(double e0) {m_e0 = e0;}
+  void set_e0(const double &e0) {m_e0 = e0;}
 
   void set_energy(std::vector<value_t> eigval) {m_energies = eigval;}
   std::vector<value_t> get_energy() const {return m_energies;}  

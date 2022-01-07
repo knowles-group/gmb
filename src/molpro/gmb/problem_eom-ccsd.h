@@ -205,7 +205,7 @@ public:
       ss << "\n\nExcited state #" << ir+1 
          << "\n\nTotal energy = " << std::setprecision(5) << std::fixed 
          << m_e0 + m_energies[ir] << " Ha = "
-         << m_e0 + m_energies[ir]*inverse_electron_volt << " eV"        
+         << (m_e0 + m_energies[ir])*inverse_electron_volt << " eV"        
          << "\nExcitation energy = " << std::setprecision(5) << std::fixed 
          << m_energies[ir] << " Ha = "
          << m_energies[ir]*inverse_electron_volt << " eV"
