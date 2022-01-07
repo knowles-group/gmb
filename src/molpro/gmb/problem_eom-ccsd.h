@@ -278,6 +278,7 @@ public:
           ctrl.ret_const_block(bidx);
         }
       }
+      ss << "\n";
     }
     molpro::cout << ss.str() << std::endl;
   }

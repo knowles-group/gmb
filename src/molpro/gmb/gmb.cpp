@@ -144,7 +144,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
       auto energies = problem_es->get_energy();
 
       // print results
-      molpro::cout << "\n\n          Excitation energy                   Total energy  \n";
+      molpro::cout << "\n          Excitation energy                   Total energy  \n";
       molpro::cout << "        (Ha)            (eV)              (Ha)            (eV)  \n";
       for (auto &i : energies) {
         all_energies.push_back(ccsd_energy+i);
