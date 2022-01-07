@@ -230,7 +230,7 @@ public:
           const libtensor::dimensions<N> &tdims = blk.get_dims();
           const value_t *ptr = tc.req_const_dataptr();
           for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-            if (std::abs(ptr[offset]) >  0.1) {
+            if (std::abs(ptr[offset]) >  0.1 || ( bidx[0] > 1 and std::abs(ptr[offset]) > 0.0001) ) {
               size_t i = 1+(offset/v_nv[bidx[1]]);
               size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
               ss << "\n" <<std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
