@@ -128,7 +128,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     double ccsd_energy = problem->get_energy() + hf_energy;
     all_energies.push_back(ccsd_energy);
     molpro::cout << *problem  << " total energy: " << std::setprecision(13)
-              << ccsd_energy << "\n";
+                 << ccsd_energy << "\n";
     for (int i=0; i<expected_results.size(); ++i)
       if (std::abs(problem->get_energy()+hf_energy-expected_results[i])<1e-10) found_expected_results[i]=true;
 
@@ -148,11 +148,13 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
       molpro::cout << "        (Ha)            (eV)              (Ha)            (eV)  \n";
       for (auto &i : energies) {
         all_energies.push_back(ccsd_energy+i);
-        molpro::cout << std::setw(14) << std::setprecision(7) << i << "   "
-                     << std::setw(14) << i*inverse_electron_volt << "   "
-                     << std::setw(14) << ccsd_energy+i << "    "
-                     << std::setw(14) << (ccsd_energy+i)*inverse_electron_volt << std::endl;
+        molpro::cout << std::fixed << std::setw(14) << std::setprecision(7) << i << "  "
+                     << std::fixed << std::setw(14) << std::setprecision(6) << i*inverse_electron_volt << "      "
+                     << std::fixed << std::setw(14) << std::setprecision(10) << ccsd_energy+i << "  "
+                     << std::fixed << std::setw(14) << std::setprecision(6) << (ccsd_energy+i)*inverse_electron_volt 
+                     << "\n";
       }
+      molpro::cout << std::endl;
     }
   #endif
   }

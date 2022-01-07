@@ -48,6 +48,9 @@ void run_eom(const hamiltonian<> &ham, const std::string &method, std::unique_pt
   
   // set EOM-CCSD amplitudes
   problem = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
+  auto pham = std::make_unique<hamiltonian<>>(ham);
+  
+  problem->set_e0(ccsd_energy(ptampl->m2get(t1), ptampl->m4get(t2), pham->m2get(f_ov), pham->m4get(i_oovv)));
 
   std::unique_ptr<amplitudes<>> prampl{std::make_unique<amplitudes<>>()};
   prampl->set(r1, container(ptampl->m2get(t1).get_space()));
