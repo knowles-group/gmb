@@ -49,7 +49,8 @@ void run_eom(const hamiltonian<> &ham,
              const std::unique_ptr<amplitudes<>> &ptampl, 
              const size_t &nroots, 
              const double& es_conv,
-             const double &ccsd_energy) {
+             const double &ccsd_energy,
+             std::vector<amplitudes<>> &v_rampl_saved) {
 
   molpro::cout << "\nRunning EOM-CCSD" << std::endl;
   
@@ -61,10 +62,18 @@ void run_eom(const hamiltonian<> &ham,
   std::unique_ptr<amplitudes<>> prampl{std::make_unique<amplitudes<>>()};
   prampl->set(r1, container(ptampl->m2get(t1).get_space()));
   prampl->set(r2, container(ptampl->m4get(t2).get_space()));
+
   std::vector<amplitudes<>> v_rampl(nroots, *prampl);
-  
   // set solver 
   auto solver = molpro::linalg::itsolv::create_LinearEigensystem<amplitudes<>>("Davidson");
+
+  bool gen_guess{true};
+  if (v_rampl_saved.size() > 0) {
+    v_rampl = v_rampl_saved;
+    gen_guess = false;
+    solver->set_max_iter(1);
+  }
+
   auto residuals_es = v_rampl;
   
   // set options
@@ -73,7 +82,7 @@ void run_eom(const hamiltonian<> &ham,
   solver->set_convergence_threshold(es_conv);
 
   // solve
-  solver->solve(v_rampl, residuals_es, *problem, true);
+  solver->solve(v_rampl, residuals_es, *problem, gen_guess);
   problem->set_energy(solver->eigenvalues());
   std::vector<int> v_nroots(nroots);
   for (size_t i = 0; i < nroots; i++)
@@ -83,6 +92,7 @@ void run_eom(const hamiltonian<> &ham,
 
   auto energies = problem->get_energy();
 
+  v_rampl_saved = v_rampl;
 }
 
 #include <molpro/linalg/itsolv/SolverFactory-implementation.h>
