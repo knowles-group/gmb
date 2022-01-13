@@ -30,7 +30,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 
   std::vector<double> all_energies;
   #if 1
-  std::string filename = options.parameter("dump", std::string{""});
+  auto filename = options.parameter("dump", std::string{""});
   auto expected_results = options.parameter("results", std::vector<double>{});
   std::vector<bool> found_expected_results(expected_results.size(), false);
 
@@ -125,7 +125,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     
     // print results
     molpro::cout << *problem << " correlation energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
-    double ccsd_energy = problem->get_energy() + hf_energy;
+    auto ccsd_energy = problem->get_energy() + hf_energy;
     all_energies.push_back(ccsd_energy);
     molpro::cout << *problem  << " total energy: " << std::setprecision(13)
               << ccsd_energy << "\n";
