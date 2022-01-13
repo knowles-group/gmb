@@ -31,7 +31,7 @@ namespace gmb {
 
     std::ostringstream ss;
     ss << "\nHartree-Fock Orbitals\n\n"
-       << "Orbital    Energy (Ha)\n\n";
+       << "  Orbital    Energy (Ha)\n\n";
 
     readf(ham.m2get(f_oo), ss, 'O');
     readf(ham.m2get(f_vv), ss, 'V');
@@ -95,8 +95,9 @@ namespace gmb {
           size_t i = 1+(offset/v_norb[bidx[1]]);
           size_t j = 1+offset-(offset/v_norb[bidx[1]])*v_norb[bidx[1]];
           if (i == j) {
-            ss << std::setw(3) << x << i << gmb::tospin(bidx[0]) << "        "
-               << std::setprecision(3) << std::setw(6) <<  ptr[offset] << "\n";
+            ss << std::setw(6)
+               << x << i << gmb::tospin(bidx[0])
+               << std::setprecision(3) << std::setw(12) <<  ptr[offset] << "\n";
           }
         }
       tc.ret_const_dataptr(ptr);
