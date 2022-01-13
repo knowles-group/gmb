@@ -8,7 +8,8 @@
 class problem_eom : public molpro::linalg::itsolv::Problem<amplitudes<>> {
 
 protected:
-  std::vector<value_t> m_energy; ///> energy
+  double m_e0{0.0};
+  std::vector<value_t> m_energies; ///> energy
   mutable hamiltonian<> m_ham;   ///> Hamiltonian
   mutable amplitudes<> m_tampl;  ///> T amplitudes
 
@@ -17,12 +18,15 @@ public:
   using Problem::value_t;
 
   problem_eom(const hamiltonian<> &ham, const amplitudes<> &tampl)
-  : m_ham{ham}, m_tampl{tampl} {}
+  : m_ham{ham}, m_tampl{tampl} {
+  }
 
   virtual ~problem_eom() = default;
 
-  void set_energy(std::vector<value_t> eigval) {m_energy = eigval;}
-  std::vector<value_t> get_energy() const {return m_energy;}  
+  void set_e0(const double &e0) {m_e0 = e0;}
+
+  void set_energy(std::vector<value_t> eigval) {m_energies = eigval;}
+  std::vector<value_t> get_energy() const {return m_energies;}  
 
   /**
    * @brief Give description of transitions in terms of orbitals

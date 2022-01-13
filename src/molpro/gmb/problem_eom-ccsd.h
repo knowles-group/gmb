@@ -203,10 +203,13 @@ public:
 
       // print excited state number and energy
       ss << "\n\nExcited state #" << ir+1 
-         << "\n\nExcitation energy = " << std::setprecision(5) << std::fixed 
-         << m_energy[ir] << " Ha = "
-         << m_energy[ir]*inverse_electron_volt << " eV"
-         << "\n\nr0 = "<< eom_ccsd_r0(m_energy[ir], v_rampl[ir].m2get(r1), v_rampl[ir].m4get(r2), m_int.m2get("if_ov"), m_ham.m4get(i_oovv)) 
+         << "\n\nTotal energy = " << std::setprecision(5) << std::fixed 
+         << m_e0 + m_energies[ir] << " Ha = "
+         << (m_e0 + m_energies[ir])*inverse_electron_volt << " eV"        
+         << "\nExcitation energy = " << std::setprecision(5) << std::fixed 
+         << m_energies[ir] << " Ha = "
+         << m_energies[ir]*inverse_electron_volt << " eV"
+         << "\n\nr0 = "<< eom_ccsd_r0(m_energies[ir], v_rampl[ir].m2get(r1), v_rampl[ir].m4get(r2), m_int.m2get("if_ov"), m_ham.m4get(i_oovv)) 
          << "    ||r1||² = " << r12 << "    ||r2||² = " << r22
          << "\n\nAmplitude    Transition\n";
  
@@ -227,7 +230,7 @@ public:
           const libtensor::dimensions<N> &tdims = blk.get_dims();
           const value_t *ptr = tc.req_const_dataptr();
           for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-            if (std::abs(ptr[offset]) >  0.1) {
+            if (std::abs(ptr[offset]) >  0.1 || ( bidx[0] > 1 and std::abs(ptr[offset]) > 0.0001) ) {
               size_t i = 1+(offset/v_nv[bidx[1]]);
               size_t a = 1+offset-(offset/v_nv[bidx[1]])*v_nv[bidx[1]];
               ss << "\n" <<std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
@@ -275,6 +278,7 @@ public:
           ctrl.ret_const_block(bidx);
         }
       }
+      ss << "\n";
     }
     molpro::cout << ss.str() << std::endl;
   }
