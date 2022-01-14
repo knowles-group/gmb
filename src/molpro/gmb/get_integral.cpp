@@ -22,7 +22,7 @@ double get_integral(const std::string &filename) {
   container<2,double> get_integral(const std::string &fname_integrals, const std::string &fname_header, 
     const std::vector<std::unique_ptr<polariton>> &v_ppol, const orb_type &o1, const orb_type &o2, bool add_ph) 
   {
-    std::vector<orb_type> v_orb_type = {o1,o2}; // vector containing orbital types
+    auto v_orb_type = {o1,o2}; // vector containing orbital types
 
     std::vector<spin> v_spin = {alpha, beta}; // vector containing possible spins
     if (!v_ppol.empty() ) 

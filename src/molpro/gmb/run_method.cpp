@@ -10,7 +10,10 @@
 
 #include <molpro/iostream.h>
 
-void run_gs(hamiltonian<> &ham, const std::string &method, std::unique_ptr<problem_gen> &problem, std::unique_ptr<amplitudes<>> &ptampl) {
+void run_gs(hamiltonian<> &ham, 
+            const std::string &method, 
+            std::unique_ptr<problem_gen> &problem, 
+            std::unique_ptr<amplitudes<>> &ptampl) {
 
   // set CCSD amplitudes
   if (method.find("ccs") != std::string::npos)

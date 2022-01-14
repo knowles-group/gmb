@@ -4,7 +4,10 @@
 
 namespace gmb {
 
-  void init(const std::string &filename, const std::string &method, hamiltonian<> &ham, const std::vector<std::unique_ptr<polariton>> &v_ppol) {
+  void init(const std::string &filename, 
+            const std::string &method, 
+            hamiltonian<> &ham, 
+            const std::vector<std::unique_ptr<polariton>> &v_ppol) {
 
     // Two-particle integrals <pq||rs> 
     auto int_oooo = get_i(filename,v_ppol, o, o, o, o);
@@ -62,7 +65,7 @@ namespace gmb {
       // get dimensions 
       libtensor::block_tensor_rd_i<2, double> &bt(f_xx);
       const libtensor::dimensions<2> &dims = bt.get_bis().get_dims();
-      auto norb = dims.get_dim(0);
+      const auto norb = dims.get_dim(0);
       const auto &bis = bt.get_bis();
 
       std::vector<size_t> v_norb;
@@ -92,8 +95,8 @@ namespace gmb {
       const libtensor::dimensions<N> &tdims = blk.get_dims();
       const double *ptr = tc.req_const_dataptr();
       for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-          size_t i = 1+(offset/v_norb[bidx[1]]);
-          size_t j = 1+offset-(offset/v_norb[bidx[1]])*v_norb[bidx[1]];
+          const size_t i = 1+(offset/v_norb[bidx[1]]);
+          const size_t j = 1+offset-(offset/v_norb[bidx[1]])*v_norb[bidx[1]];
           if (i == j) {
             ss << std::setw(6)
                << x << i << gmb::tospin(bidx[0])

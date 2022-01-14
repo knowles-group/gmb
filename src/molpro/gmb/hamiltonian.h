@@ -36,11 +36,11 @@ public:
     return str;
   }
 
-  void set(oe_part key, const container<2,T> &c2) { supercontainer<T>::set(str(key), c2); }
-  void set(te_part key, const container<4,T> &c4) { supercontainer<T>::set(str(key), c4); }
+  void set(const oe_part &key, const container<2,T> &c2) { supercontainer<T>::set(str(key), c2); }
+  void set(const te_part &key, const container<4,T> &c4) { supercontainer<T>::set(str(key), c4); }
 
-  container<2,T>& m2get(oe_part key) { return supercontainer<T>::m2get(str(key)); }
-  container<4,T>& m4get(te_part key) { return supercontainer<T>::m4get(str(key)); }
+  container<2,T>& m2get(const oe_part &key) { return supercontainer<T>::m2get(str(key)); }
+  container<4,T>& m4get(const te_part &key) { return supercontainer<T>::m4get(str(key)); }
 
 };
 

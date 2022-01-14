@@ -30,24 +30,23 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 
   std::vector<double> all_energies;
   #if 1
-  auto filename = options.parameter("dump", std::string{""});
-  auto expected_results = options.parameter("results", std::vector<double>{});
+  const auto filename = options.parameter("dump", std::string{""});
+  const auto expected_results = options.parameter("results", std::vector<double>{});
   std::vector<bool> found_expected_results(expected_results.size(), false);
 
   std::ios_base::sync_with_stdio(false);
-  auto start = std::chrono::system_clock::now();
+  const auto start = std::chrono::system_clock::now();
 
   // parse arguments
-  auto method = options.parameter("method", "eom-ccsd");
-  auto nroots = options.parameter("states", 3);
-  auto es_conv = options.parameter("es_conv", 1e-5);
-  // auto es_conv{1e-5};
-  auto ncav = options.parameter("polariton_modes", 0);
+  const auto method = options.parameter("method", "eom-ccsd");
+  const auto nroots = options.parameter("states", 3);
+  const auto es_conv = options.parameter("es_conv", 1e-5);
+  const auto ncav = options.parameter("polariton_modes", 0);
 
   std::vector<std::unique_ptr<polariton>> v_ppol(ncav);
   if (ncav > 0) {
-    auto self_energy = options.parameter("self_energy", true);
-    auto coupling = options.parameter("coupling", true);
+    const auto self_energy = options.parameter("self_energy", true);
+    const auto coupling = options.parameter("coupling", true);
     std::vector<int> v_option_polariton_nmax(ncav, 1);
     v_option_polariton_nmax =
         options.parameter("polariton_nmax", v_option_polariton_nmax);
@@ -95,18 +94,16 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     }
   }
 
-  // std::vector<double> all_energies;
-
   // initialise hamiltonian
   hamiltonian<> ham;
   init(filename, method, ham, v_ppol);
 
-  auto vnn = get_integral(filename);
+  const auto vnn = get_integral(filename);
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
   #if 1 // self-energy
   for (size_t i = 0; i < ncav; i++) {
     if (v_ppol[i]->self_energy) {
-      auto rnuc = get_integral(v_ppol[i]->fname_dm);
+      const auto rnuc = get_integral(v_ppol[i]->fname_dm);
       molpro::cout << " rnuc = " << rnuc << "\n";
       hf_energy += v_ppol[i]->gamma*v_ppol[i]->gamma*v_ppol[i]->omega*rnuc*rnuc;
     }
@@ -125,7 +122,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     
     // print results
     molpro::cout << *problem << " correlation energy: " << std::setprecision(12) << problem->get_energy()<< "\n";
-    auto ccsd_energy = problem->get_energy() + hf_energy;
+    const auto ccsd_energy = problem->get_energy() + hf_energy;
     all_energies.push_back(ccsd_energy);
     molpro::cout << *problem  << " total energy: " << std::setprecision(13)
                  << ccsd_energy << "\n";
@@ -160,7 +157,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   }
   #endif
 
-  auto end = std::chrono::system_clock::now();
+  const auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end - start;
   std::time_t end_time = std::chrono::system_clock::to_time_t(end);
   molpro::cout << "\nFinished computation at " << std::ctime(&end_time)

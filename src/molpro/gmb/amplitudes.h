@@ -114,10 +114,10 @@ public:
           const libtensor::dimensions<4> &tdims = blk.get_dims();
           double *ptr = tc.req_dataptr();
           for (size_t offset = 0; offset < tdims.get_size(); offset++) {
-            size_t i = offset / (v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]);
-            size_t j = (offset - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / (v_nv[bidx[2]]*v_nv[bidx[3]]);
-            size_t a = (offset - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / v_nv[bidx[3]];
-            size_t b = offset - a*v_nv[bidx[3]] - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]];
+            const size_t i = offset / (v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]);
+            const size_t j = (offset - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / (v_nv[bidx[2]]*v_nv[bidx[3]]);
+            const size_t a = (offset - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]]) / v_nv[bidx[3]];
+            const size_t b = offset - a*v_nv[bidx[3]] - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]];
             if (first) {
               if (count == imin.first) {
                 ptr[offset] = imin.second;
@@ -154,11 +154,11 @@ public:
     return *this;
   }
 
-  void set(ampl key, const container<2,T> &c2) { supercontainer<T>::set(str(key), c2); };
-  void set(ampl key, const container<4,T> &c4) { supercontainer<T>::set(str(key), c4); };
+  void set(const ampl &key, const container<2,T> &c2) { supercontainer<T>::set(str(key), c2); };
+  void set(const ampl &key, const container<4,T> &c4) { supercontainer<T>::set(str(key), c4); };
 
-  container<2,T>& m2get(ampl key) { return supercontainer<T>::m2get(str(key)); };
-  container<4,T>& m4get(ampl key) { return supercontainer<T>::m4get(str(key)); };
+  container<2,T>& m2get(const ampl &key) { return supercontainer<T>::m2get(str(key)); };
+  container<4,T>& m4get(const ampl &key) { return supercontainer<T>::m4get(str(key)); };
   
   /**
    * @brief Selects smallest n values of container. 
