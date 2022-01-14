@@ -40,8 +40,8 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   // parse arguments
   auto method = options.parameter("method", "eom-ccsd");
   auto nroots = options.parameter("states", 3);
-  // auto es_conv = options.parameter("es_conv", 1e-5);
-  double es_conv{1e-5};
+  auto es_conv = options.parameter("es_conv", 1e-5);
+  // auto es_conv{1e-5};
   auto ncav = options.parameter("polariton_modes", 0);
 
   std::vector<std::unique_ptr<polariton>> v_ppol(ncav);
