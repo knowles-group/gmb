@@ -9,10 +9,9 @@
 #include "molpro/FCIdump.h"
 
 #include "container.h"
+#include "boson.h"
 #include "libtensor_utils.h"
 
-using sym_t=unsigned int;
-using syms_t=std::vector<sym_t>; ///< position in orbital space for each symmetry
 
 // orbital types occupied, virtual & basis (
 enum orb_type{o, v, b};
@@ -22,24 +21,37 @@ enum spin{alpha=0, beta=1, photon=2};
 
 constexpr unsigned int nsym{8};
 
-struct polariton {
-  bool self_energy{true};
-  bool coupling{true};
-  sym_t nmax{0};
-  double gamma{0.0};
-  double omega{0.0};
-  double lambd{0.0};
-  std::string fname_dm;
-  std::string fname_sm;
+// struct polariton {
+//   bool self_energy{true};
+//   bool coupling{true};
+//   sym_t nmax{0};
+//   double gamma{0.0};
+//   double omega{0.0};
+//   double lambd{0.0};
+//   std::string fname_dm;
+//   std::string fname_sm;
 
-  polariton() = default;
-  polariton(sym_t nmax_, double gamma_, double omega_, bool self_energy_, bool coupling_) 
-  : nmax{nmax_}, gamma{gamma_}, omega{omega_}, self_energy{self_energy_}, coupling{coupling_} 
-  {
-    lambd = gamma*(sqrt(2*omega));
-  }
+//   polariton() = default;
+//   polariton(sym_t nmax_, double gamma_, double omega_, bool self_energy_, bool coupling_) 
+//   : nmax{nmax_}, gamma{gamma_}, omega{omega_}, self_energy{self_energy_}, coupling{coupling_} 
+//   {
+//     lambd = gamma*(sqrt(2*omega));
+//   }
 
-};
+// };
+
+// struct vibration {
+//   sym_t nmax{0};
+//   double omega{0.0};
+//   std::string fname_fock;
+//   // std::string fname_sm;
+
+//   vibration() = default;
+//   vibration(sym_t nmax_, double omega_) 
+//   : nmax{nmax_}, omega{omega_}
+//   {}
+
+// };
 
 // get nuclear energy
 double get_integral(const std::string &filename);

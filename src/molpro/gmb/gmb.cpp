@@ -42,6 +42,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   const auto nroots = options.parameter("states", 3);
   const auto es_conv = options.parameter("es_conv", 1e-5);
   const auto ncav = options.parameter("polariton_modes", 0);
+  const auto nvib = options.parameter("vibration_modes", 0);
 
   std::vector<std::unique_ptr<polariton>> v_ppol(ncav);
   if (ncav > 0) {
@@ -70,6 +71,27 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     }
   }
 
+  std::vector<std::unique_ptr<vibration>> v_pvib(nvib);
+  std::cout << "nvib = " << nvib << "\n";
+  if (nvib > 0) {
+    std::vector<int> v_option_vibration_nmax(nvib, 1);
+    v_option_vibration_nmax =
+        options.parameter("vibration_nmax", v_option_vibration_nmax);
+    std::vector<double> v_option_vibration_omega(nvib, 1.0);
+    v_option_vibration_omega =
+        options.parameter("vibration_omega", v_option_vibration_omega);
+    for (size_t i = 0; i < nvib; i++) {
+      v_pvib[i] = std::make_unique<vibration>(v_option_vibration_nmax[i],
+                                              v_option_vibration_omega[i]);
+      v_pvib[i]->fname_fock = options.parameter(
+          "fock",
+          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".fock"));
+      // v_pvib[i]->fname_sm =
+      //     std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".sm");
+      std::cout << "My fock file is : " << v_pvib[i]->fname_fock << "\n";
+    }
+  }
+  
   // print arguments
   molpro::cout << "\nRequired calculation: "
                << "\n\n";
@@ -77,6 +99,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   molpro::cout << " fcidump = " << filename << "\n";
   molpro::cout << " method = " << method << "\n";
   molpro::cout << " roots = " << nroots << "\n";
+
   if (!v_ppol.empty() ) {
     check_file(v_ppol[0]->fname_dm, "dipole");
     molpro::cout << " dipole file = " << v_ppol[0]->fname_dm << "\n";
@@ -91,6 +114,19 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
       molpro::cout << " nmax = " << v_ppol[i]->nmax << "\n";
       molpro::cout << " gamma = " << v_ppol[i]->gamma << "\n";
       molpro::cout << " omega = " << v_ppol[i]->omega << "\n\n";
+    }
+  }
+
+  if (!v_pvib.empty() ) {
+    check_file(v_pvib[0]->fname_fock, "fock");
+    molpro::cout << " dipole file = " << v_pvib[0]->fname_fock << "\n";
+
+    molpro::cout << "\Vibrational parameters: \n";
+    molpro::cout << "modes: " << ncav << "\n";
+    for (size_t i = 0; i < ncav; i++) {
+      molpro::cout << "\n mode " << i << "\n";
+      molpro::cout << " nmax = " << v_pvib[i]->nmax << "\n";
+      molpro::cout << " omega = " << v_pvib[i]->omega << "\n\n";
     }
   }
 
