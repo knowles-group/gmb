@@ -7,19 +7,21 @@ namespace gmb {
   void init(const std::string &filename, 
             const std::string &method, 
             hamiltonian<> &ham, 
-            const std::vector<std::unique_ptr<polariton>> &v_ppol) {
+            const std::vector<std::unique_ptr<polariton>> &v_ppol, 
+            const std::vector<std::unique_ptr<vibration>> &v_pvib) {
 
+#if 1
     // Two-particle integrals <pq||rs> 
-    auto int_oooo = get_i(filename,v_ppol, o, o, o, o);
-    auto int_oovv = get_i(filename,v_ppol, o, o, v, v);
-    auto int_ovov = get_i(filename,v_ppol, o, v, o, v);
+    auto int_oooo = get_i(filename,v_ppol,v_pvib, o, o, o, o);
+    auto int_oovv = get_i(filename,v_ppol,v_pvib, o, o, v, v);
+    auto int_ovov = get_i(filename,v_ppol,v_pvib, o, v, o, v);
     ham.set(i_oooo, int_oooo);
     ham.set(i_oovv, int_oovv);
     ham.set(i_ovov, int_ovov);
 
     // One-particle integrals
-    auto h1_oo = get_integral(filename,filename,v_ppol,o,o);
-    auto h1_vv = get_integral(filename,filename,v_ppol,v,v);
+    auto h1_oo = get_integral(filename,filename,v_ppol,v_pvib,o,o);
+    auto h1_vv = get_integral(filename,filename,v_ppol,v_pvib,v,v);
 
     // get fock matrix
     auto d_oo = diag_xx(h1_oo);
@@ -27,8 +29,8 @@ namespace gmb {
     ham.set(f_vv, fock_xx(d_oo, h1_vv, int_ovov));
 
     // for preconditioner
-    auto int_oooo_e = get_i(filename,v_ppol, o, o, o, o, false);
-    auto int_ovov_e = get_i(filename,v_ppol, o, v, o, v, false);
+    auto int_oooo_e = get_i(filename,v_ppol,v_pvib, o, o, o, o, false);
+    auto int_ovov_e = get_i(filename,v_ppol,v_pvib, o, v, o, v, false);
     ham.set(f_oo_e, fock_xx(d_oo, h1_oo, int_oooo_e));
     ham.set(f_vv_e, fock_xx(d_oo, h1_vv, int_ovov_e));
 
@@ -43,13 +45,13 @@ namespace gmb {
 
     if (method.find("cc") != std::string::npos) {
 
-      auto int_vvvv = get_i(filename, v_ppol, v, v, v, v);
+      auto int_vvvv = get_i(filename, v_ppol,v_pvib, v, v, v, v);
       ham.set(i_vvvv, int_vvvv);
 
       if (method.find("ccsd") != std::string::npos) {
-        auto h1_ov = get_integral(filename,filename,v_ppol,o,v);
-        auto int_ooov = get_i(filename, v_ppol, o, o, o, v);
-        auto int_ovvv = get_i(filename, v_ppol, o, v, v, v);
+        auto h1_ov = get_integral(filename,filename,v_ppol,v_pvib,o,v);
+        auto int_ooov = get_i(filename, v_ppol,v_pvib, o, o, o, v);
+        auto int_ovvv = get_i(filename, v_ppol,v_pvib, o, v, v, v);
 
         ham.set(i_vvvv, int_vvvv);
         ham.set(i_ooov, int_ooov);
@@ -58,6 +60,7 @@ namespace gmb {
         ham.set(f_ov, fock_xx(d_oo, h1_ov, int_ooov));
       }
     }
+  #endif
   }
 
   void readf(container<2> &f_xx, std::ostringstream &ss, const char &x) {

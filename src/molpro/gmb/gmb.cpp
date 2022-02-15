@@ -83,14 +83,16 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     for (size_t i = 0; i < nvib; i++) {
       v_pvib[i] = std::make_unique<vibration>(v_option_vibration_nmax[i],
                                               v_option_vibration_omega[i]);
-      v_pvib[i]->fname_fock = options.parameter(
+      v_pvib[i]->fname_coupling = options.parameter(
           "fock",
           std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".fock"));
       // v_pvib[i]->fname_sm =
       //     std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".sm");
-      std::cout << "My fock file is : " << v_pvib[i]->fname_fock << "\n";
+      std::cout << "My fock file is : " << v_pvib[i]->fname_coupling << "\n";
     }
   }
+
+  
   
   // print arguments
   molpro::cout << "\nRequired calculation: "
@@ -118,10 +120,10 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   }
 
   if (!v_pvib.empty() ) {
-    check_file(v_pvib[0]->fname_fock, "fock");
-    molpro::cout << " dipole file = " << v_pvib[0]->fname_fock << "\n";
+    check_file(v_pvib[0]->fname_coupling, "fock");
+    molpro::cout << " dipole file = " << v_pvib[0]->fname_coupling << "\n";
 
-    molpro::cout << "\Vibrational parameters: \n";
+    molpro::cout << "\nVibrational parameters: \n";
     molpro::cout << "modes: " << ncav << "\n";
     for (size_t i = 0; i < ncav; i++) {
       molpro::cout << "\n mode " << i << "\n";
@@ -132,7 +134,8 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 
   // initialise hamiltonian
   hamiltonian<> ham;
-  init(filename, method, ham, v_ppol);
+  init(filename, method, ham, v_ppol, v_pvib);
+#if 1 // GS
 
   const auto vnn = get_integral(filename);
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
@@ -148,7 +151,6 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   molpro::cout << "\nHF energy: " << std::setprecision(12) << hf_energy << "\n\n";
 
   
-#if 1 // GS
   if (!(method.find("hf") != std::string::npos)) {
 
     std::unique_ptr<problem_gen> problem;

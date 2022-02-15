@@ -7,6 +7,7 @@
 using sym_t=unsigned int;
 using syms_t=std::vector<sym_t>; ///< position in orbital space for each symmetry
 
+
 struct polariton {
   bool self_energy{true};
   bool coupling{true};
@@ -27,9 +28,10 @@ struct polariton {
 };
 
 struct vibration {
+  bool coupling{true};
   sym_t nmax{0};
   double omega{0.0};
-  std::string fname_fock;
+  std::string fname_coupling;
   // std::string fname_sm;
 
   vibration() = default;
@@ -38,5 +40,13 @@ struct vibration {
   {}
 
 };
+
+
+struct bosons {
+  std::vector<std::unique_ptr<polariton>> polaritons;
+  std::vector<std::unique_ptr<vibration>> vibrations;
+};
+
+
 
 #endif // BOSON_H

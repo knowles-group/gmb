@@ -20,7 +20,9 @@ double get_integral(const std::string &filename) {
 }
 
   container<2,double> get_integral(const std::string &fname_integrals, const std::string &fname_header, 
-    const std::vector<std::unique_ptr<polariton>> &v_ppol, const orb_type &o1, const orb_type &o2, bool add_ph) 
+    const std::vector<std::unique_ptr<polariton>> &v_ppol, 
+    const std::vector<std::unique_ptr<vibration>> &v_pvib, 
+    const orb_type &o1, const orb_type &o2, bool add_ph) 
   {
     std::vector<orb_type> v_orb_type = {o1,o2}; // vector containing orbital types
 
@@ -35,7 +37,7 @@ double get_integral(const std::string &filename) {
     std::vector<std::vector<bool>> v_exist(v_spin.size(), std::vector<bool> (v_orb_type.size(), true)); // vector containing if block exists or not
     bool uhf{false};
   
-    read_dump(fname_header, v_ppol, v_exist, v_norb, v_orb_type, v_psi,  v_shift, v_sp, v_spin, uhf);
+    read_dump(fname_header, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi,  v_shift, v_sp, v_spin, uhf);
     auto integral = set_space(v_orb_type, v_sp);
   
     get_one_electron_part(integral, fname_integrals, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
@@ -66,23 +68,26 @@ double get_integral(const std::string &filename) {
 
   container<4,double> get_i(const std::string &filename, 
                             const std::vector<std::unique_ptr<polariton>> &v_ppol,
+                            const std::vector<std::unique_ptr<vibration>> &v_pvib,
                             const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4, const bool &add_ph) {
   
   std::unique_ptr<container<4>> tmp_o1o2o3o4, h2_o1o3o2o4, h2_o1o4o2o3;
+#if 1
   
-  h2_o1o3o2o4 = std::make_unique<container<4>> (get_integral(filename, v_ppol, o1, o3, o2, o4)); 
-
+  h2_o1o3o2o4 = std::make_unique<container<4>> (get_integral(filename, v_ppol, v_pvib, o1, o3, o2, o4)); 
   if (o3 == o4) 
     h2_o1o4o2o3 = std::make_unique<container<4>>(*h2_o1o3o2o4);
   else 
-    h2_o1o4o2o3 = std::make_unique<container<4>> (get_integral(filename, v_ppol, o1, o4, o2, o3)); 
+    h2_o1o4o2o3 = std::make_unique<container<4>> (get_integral(filename, v_ppol, v_pvib, o1, o4, o2, o3)); 
   
   if (o2 == o4 && o2 == o3) 
     tmp_o1o2o3o4 = std::make_unique<container<4>>(*h2_o1o4o2o3);
   else 
-    tmp_o1o2o3o4 = std::make_unique<container<4>> (get_integral(filename, v_ppol, o1, o2, o3, o4)); 
+    tmp_o1o2o3o4 = std::make_unique<container<4>> (get_integral(filename, v_ppol, v_pvib, o1, o2, o3, o4)); 
 
+#endif
   container<4,double> h2_o1o2o3o4(tmp_o1o2o3o4->get_space());
+#if 1
 
   // set symmetry
   libtensor::block_tensor_wr_ctrl<4, double> ctrl(h2_o1o2o3o4);
@@ -106,7 +111,7 @@ double get_integral(const std::string &filename) {
   }
 
   anti(h2_o1o2o3o4, *h2_o1o3o2o4, *h2_o1o4o2o3);
-  
+  #endif
   #if 1 // add self-energy if needed
   if (add_ph) {
     for (size_t i = 0; i < v_ppol.size(); i++) {
@@ -116,18 +121,18 @@ double get_integral(const std::string &filename) {
         double fact = v_ppol[i]->omega*v_ppol[i]->gamma*v_ppol[i]->gamma;
 
         // add dipole integrals to two-electron part
-        pd_o1o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o3, false));
+        pd_o1o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, v_pvib, o1, o3, false));
         if (o1 == o2 && o3 == o4)
           pd_o2o4 = std::make_unique<container<2>> (*pd_o1o3);
         else 
-          pd_o2o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o4, false));
+          pd_o2o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, v_pvib, o2, o4, false));
 
         if (o1 == o2)
           pd_o2o3 = std::make_unique<container<2>> (*pd_o1o3);
         else if(o3 == o4)
           pd_o2o3 = std::make_unique<container<2>> (*pd_o2o4);
         else
-          pd_o2o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o2, o3, false));
+          pd_o2o3 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, v_pvib, o2, o3, false));
 
         if (o3 == o4)
           pd_o1o4 = std::make_unique<container<2>> (*pd_o1o3);
@@ -136,19 +141,19 @@ double get_integral(const std::string &filename) {
         else if (o1 == o2 && o3 == o4)
           pd_o1o4 = std::make_unique<container<2>> (*pd_o2o3);
         else
-          pd_o1o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, o1, o4, false));
+          pd_o1o4 = std::make_unique<container<2>> (get_integral(v_ppol[i]->fname_dm, filename, v_ppol, v_pvib, o1, o4, false));
 
         add_d2(fact, *pd_o1o3, *pd_o2o4, *pd_o2o3, *pd_o1o4, h2_o1o2o3o4);
       }
     }
   }
-    #endif
-  
+  #endif
   return h2_o1o2o3o4;
 }
 
   void read_dump(const std::string &filename, 
                const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::unique_ptr<vibration>> &v_pvib,
                std::vector<std::vector<bool>>& v_exist,
                std::vector<std::vector<size_t>>& v_norb,
                const std::vector<orb_type>& v_orb_type, 
@@ -163,6 +168,7 @@ double get_integral(const std::string &filename) {
   molpro::FCIdump dump{filename};
   unsigned int nb = dump.parameter("NORB")[0];
   std::vector<unsigned int> nphoton(v_ppol.size(), 1); // occupied is always 1 (vacuum orbital)
+  std::vector<unsigned int> nvib(v_pvib.size(), 1); // occupied is always 1 (vacuum orbital)
 
 
   std::vector<int> orbsym = dump.parameter("ORBSYM");
@@ -200,6 +206,18 @@ double get_integral(const std::string &filename) {
       nv.push_back(v_ppol[i]->nmax);
       occ.emplace_back(std::pair<syms_t,syms_t>({empty, fermi_ph}));
       vir.emplace_back(std::pair<syms_t,syms_t>({fermi_ph, full_ph}));
+    }
+  }
+
+  // vib space
+  if (!v_pvib.empty() ) {
+    for (size_t i = 0; i < v_pvib.size(); i++) {
+      syms_t fermi_vib = {nvib[i], 0, 0, 0, 0, 0, 0, 0};
+      syms_t full_vib = {nvib[i] + v_pvib[i]->nmax, 0, 0, 0, 0, 0, 0, 0};
+      no.push_back(nvib[i]);
+      nv.push_back(v_pvib[i]->nmax);
+      occ.emplace_back(std::pair<syms_t,syms_t>({empty, fermi_vib}));
+      vir.emplace_back(std::pair<syms_t,syms_t>({fermi_vib, full_vib}));
     }
   }
 
@@ -688,13 +706,166 @@ double get_integral(const std::string &filename) {
     }
   }
 
+  void get_electron_vibration_part(container<4,double> &integral, 
+               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::unique_ptr<vibration>> &v_pvib,
+               const std::vector<std::vector<bool>> &v_exist,
+               const std::vector<std::vector<size_t>>& v_norb,
+               const std::vector<orb_type> &v_orb_type, 
+               const std::vector<std::vector<std::pair<syms_t, syms_t>>>& v_psi,
+               const std::vector<std::vector<std::vector<int>>>& v_shift)
+  {
+    libtensor::block_tensor_wr_ctrl<4, double> ctrl(integral);
+    libtensor::orbit_list<4, double> ol(ctrl.req_const_symmetry());
+
+    for (libtensor::orbit_list<4, double>::iterator it = ol.begin(); it != ol.end(); it++) {
+      libtensor::index<4> bidx;
+      ol.get_index(it, bidx);
+      std::vector<size_t> bidx_cp(v_orb_type.size());
+      for (size_t i = 0; i < v_orb_type.size(); i++) {
+        bidx_cp[i] = bidx[i];
+        if (!v_exist[0][i]) ++bidx_cp[i]; // if alpha block doesn't exist
+        if (!v_exist[1][i]) ++bidx_cp[i]; // if beta block doesn't exist
+      }
+
+      size_t npol{0};
+      for (size_t i = 0; i < v_ppol.size(); i++) 
+        ++npol;
+      
+      
+      bool block1{true}, block2{true};
+      size_t spin1{alpha}, spin2{alpha}; 
+      if ((bidx_cp[0] < 2 && bidx_cp[1] < 2 && bidx_cp[2] < 2 && bidx_cp[3] < 2))
+        continue; 
+      else if (!((bidx_cp[0] == bidx_cp[1]) && (bidx_cp[2] == bidx_cp[3]))) {
+          ctrl.req_zero_block(bidx);
+          continue;
+      } else if ((bidx_cp[0] == alpha) && (bidx_cp[2] >= photon+npol)) { //aavv
+          spin1 = alpha;
+          spin2 = bidx_cp[2];
+          block2 = false;
+        } else if ((bidx_cp[0] >= photon+npol)  && (bidx_cp[2] == alpha)) {// vvaa
+          spin2 = bidx_cp[0];
+          spin1 = alpha;
+          block1 = false;
+        } else if ((bidx_cp[0] == beta) && (bidx_cp[2] >= photon+npol)) {// bbvv
+          spin1 = beta;
+          spin2 = bidx_cp[2];
+          block2 = false;
+        } else if ((bidx_cp[0] >= photon+npol) && (bidx_cp[2] == beta)) {// vvbb
+          spin2 = bidx_cp[0];
+          spin1 = beta;
+          block1 = false;
+        } else {
+          ctrl.req_zero_block(bidx);
+          continue;
+        }   
+
+
+      #if 1 // zero out coupling
+      if (v_pvib[spin2-2+npol]->coupling) {
+        libtensor::dense_tensor_wr_i<4, double> &blk = ctrl.req_block(bidx);
+        libtensor::dense_tensor_wr_ctrl<4, double> tc(blk);
+        const libtensor::dimensions<4> &tdims = blk.get_dims();
+        double *ptr = tc.req_dataptr();
+
+        // read coupling integrals - A matrix
+        std::string fname_coupling{v_pvib[0]->fname_coupling};
+
+        molpro::FCIdump dump{fname_coupling}; 
+        size_t p, q, r, s;
+        unsigned int symp, symq, symr, syms;
+        double value{0.0};
+        molpro::FCIdump::integralType type;
+        dump.rewind();
+        
+        double fact{sqrt(2*v_pvib[spin2-2+npol]->omega)};
+        while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
+          if (type != molpro::FCIdump::I0)
+          for (int r = 0; r < v_pvib[spin2-2+npol]->nmax + 1; r++) {
+            s = r+1;
+            symr = 0;
+            syms = 0;
+            // 1 (pq|rs)
+            if (block1) { // ppee
+            if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
+              && ((v_psi[spin2][2].first[symr] <= r && r < v_psi[spin2][2].second[symr]) && (v_psi[spin2][3].first[syms] <= s && s < v_psi[spin2][3].second[syms]))) {
+                ptr[gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
+                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            //2 (qp|rs)
+            if (((v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]) && (v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]))
+              && ((v_psi[spin2][2].first[symr] <= r && r < v_psi[spin2][2].second[symr]) && (v_psi[spin2][3].first[syms] <= s && s < v_psi[spin2][3].second[syms]))) {
+                ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
+                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            // 3 (pq|sr)
+            if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
+              && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
+                ptr[gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
+                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            // 4 (qp|sr)  
+            if (((v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]) && (v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]))
+              && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
+                ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
+                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            }
+            if (block2) {
+            // 5 (rs|pq)
+            if (((v_psi[spin1][2].first[symp] <= p && p < v_psi[spin1][2].second[symp]) && (v_psi[spin1][3].first[symq] <= q && q < v_psi[spin1][3].second[symq]))
+              && ((v_psi[spin2][0].first[symr] <= r && r < v_psi[spin2][0].second[symr]) && (v_psi[spin2][1].first[syms] <= s && s < v_psi[spin2][1].second[syms]))) {
+                ptr[gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
+                                    v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            // 6 (sr|pq)
+            if (((v_psi[spin1][2].first[symp] <= p && p < v_psi[spin1][2].second[symp]) && (v_psi[spin1][3].first[symq] <= q && q < v_psi[spin1][3].second[symq]))
+              && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
+                ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
+                                    v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            // 7 (rs|qp)
+            if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
+              && ((v_psi[spin2][0].first[symr] <= r && r < v_psi[spin2][0].second[symr]) && (v_psi[spin2][1].first[syms] <= s && s < v_psi[spin2][1].second[syms]))) {
+                ptr[gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
+                                    v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            // 8 (sr|qp)
+            if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
+              && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
+                ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
+                                    v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                  = - fact*sqrt(s)*value;
+              }
+            }
+          }
+        }
+      tc.ret_dataptr(ptr);
+      ctrl.ret_block(bidx);
+    }
+    #endif
+    }
+  }
+
+
   container<4,double> get_integral(const std::string &filename, 
     const std::vector<std::unique_ptr<polariton>> &v_ppol,
+    const std::vector<std::unique_ptr<vibration>> &v_pvib,
     const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4) {
                                  
   std::vector<spin> v_spin = {alpha, beta}; // possible spins
   for (size_t i = 0; i < v_ppol.size(); i++)
     v_spin.push_back(photon);
+  for (size_t i = 0; i < v_pvib.size(); i++)
+    v_spin.push_back(vib);
   std::vector<orb_type> v_orb_type = {o1,o2,o3,o4}; // orbital types
   std::vector<std::vector<std::pair<syms_t, syms_t>>> v_psi(v_spin.size(), std::vector<std::pair<syms_t, syms_t>> (v_orb_type.size())); // bra and ket
   std::vector<std::vector<size_t>> v_norb(v_spin.size(), std::vector<size_t> (v_orb_type.size())); // number of orbitals in each bra/ket
@@ -703,7 +874,7 @@ double get_integral(const std::string &filename) {
   std::vector<std::vector<bool>> v_exist(v_spin.size(), std::vector<bool> (v_orb_type.size(), true)); // if block exists or not
   bool uhf{false};
 
-  read_dump(filename, v_ppol, v_exist, v_norb, v_orb_type, v_psi,  v_shift, v_sp, v_spin, uhf);
+  read_dump(filename, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi,  v_shift, v_sp, v_spin, uhf);
 
   // set up integral symmetry
   std::unique_ptr<libtensor::bispace<4>> p_sp4; // pointer to 4D space
@@ -765,6 +936,8 @@ double get_integral(const std::string &filename) {
   get_two_electron_part(integral, filename, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
   if (!v_ppol.empty() )
     get_electron_photon_part(integral, v_ppol, v_exist, v_norb, v_orb_type, v_psi, v_shift);
+  if (!v_pvib.empty() )
+    get_electron_vibration_part(integral, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi, v_shift);
   return integral;
 }
 

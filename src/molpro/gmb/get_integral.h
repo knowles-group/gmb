@@ -17,41 +17,9 @@
 enum orb_type{o, v, b};
 
 // possible spins (
-enum spin{alpha=0, beta=1, photon=2};
+enum spin{alpha=0, beta=1, photon=2, vib=3};
 
 constexpr unsigned int nsym{8};
-
-// struct polariton {
-//   bool self_energy{true};
-//   bool coupling{true};
-//   sym_t nmax{0};
-//   double gamma{0.0};
-//   double omega{0.0};
-//   double lambd{0.0};
-//   std::string fname_dm;
-//   std::string fname_sm;
-
-//   polariton() = default;
-//   polariton(sym_t nmax_, double gamma_, double omega_, bool self_energy_, bool coupling_) 
-//   : nmax{nmax_}, gamma{gamma_}, omega{omega_}, self_energy{self_energy_}, coupling{coupling_} 
-//   {
-//     lambd = gamma*(sqrt(2*omega));
-//   }
-
-// };
-
-// struct vibration {
-//   sym_t nmax{0};
-//   double omega{0.0};
-//   std::string fname_fock;
-//   // std::string fname_sm;
-
-//   vibration() = default;
-//   vibration(sym_t nmax_, double omega_) 
-//   : nmax{nmax_}, omega{omega_}
-//   {}
-
-// };
 
 // get nuclear energy
 double get_integral(const std::string &filename);
@@ -72,6 +40,7 @@ double get_integral(const std::string &filename);
  */
 void read_dump(const std::string &filename, 
                const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::unique_ptr<vibration>> &v_pvib,
                std::vector<std::vector<bool>>& v_exist,
                std::vector<std::vector<size_t>>& v_norb,
                const std::vector<orb_type>& v_orb_type, 
@@ -83,10 +52,13 @@ void read_dump(const std::string &filename,
 
 
   container<2,double> get_integral(const std::string &fname_integrals, const std::string &fname_header, 
-    const std::vector<std::unique_ptr<polariton>> &v_ppol, const orb_type &o1, const orb_type &o2, bool add_ph = true);
+    const std::vector<std::unique_ptr<polariton>> &v_ppol, 
+    const std::vector<std::unique_ptr<vibration>> &v_pvib, 
+    const orb_type &o1, const orb_type &o2, bool add_ph = true);
   
   container<4,double> get_integral(const std::string &filename, 
     const std::vector<std::unique_ptr<polariton>> &v_ppol,
+    const std::vector<std::unique_ptr<vibration>> &v_pvib,
     const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4);
   
   /**
@@ -101,6 +73,7 @@ void read_dump(const std::string &filename,
    */
   container<4,double> get_i(const std::string &filename, 
                const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::unique_ptr<vibration>> &v_pvib,
                const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4, const bool &add_ph = true);
 
   void get_one_electron_part(container<2,double> &integral, 
@@ -134,7 +107,16 @@ void read_dump(const std::string &filename,
                const std::vector<std::vector<std::pair<syms_t, syms_t>>>& v_psi,
                const std::vector<std::vector<std::vector<int>>>& v_shift);
 
- 
+  void get_electron_vibration_part(container<4,double> &integral, 
+               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::unique_ptr<vibration>> &v_pvib,
+               const std::vector<std::vector<bool>> &v_exist,
+               const std::vector<std::vector<size_t>>& v_norb,
+               const std::vector<orb_type> &v_orb_type, 
+               const std::vector<std::vector<std::pair<syms_t, syms_t>>>& v_psi,
+               const std::vector<std::vector<std::vector<int>>>& v_shift);
+
+
   container<2,double> set_space(const std::vector<orb_type> &v_orb_type, const std::vector<libtensor::bispace<1>> &v_sp);
               
 
