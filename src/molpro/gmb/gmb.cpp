@@ -88,7 +88,11 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
           std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".a"));
       v_pvib[i]->integral_files[1] =
           std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".pi");
-      std::cout << "My fock file is : " << v_pvib[i]->integral_files[1] << "\n";
+      v_pvib[i]->integral_files[2] =
+          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".c");
+      std::cout << "My A matrix file is : " << v_pvib[i]->integral_files[0] << "\n";
+      std::cout << "My pi matrix file is : " << v_pvib[i]->integral_files[1] << "\n";
+      std::cout << "My c file is : " << v_pvib[i]->integral_files[2] << "\n";
     }
   }
 

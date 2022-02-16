@@ -420,6 +420,83 @@ double get_integral(const std::string &filename) {
     }
   }
 
+  void get_one_vibration_part(container<2,double> &integral, 
+               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::unique_ptr<vibration>> &v_pvib,
+               const std::vector<std::vector<bool>>& v_exist,
+               const std::vector<orb_type>& v_orb_type) 
+  {
+    libtensor::block_tensor_wr_ctrl<2, double> ctrl(integral);
+    libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
+    for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
+      
+      libtensor::index<2> bidx;
+      ol.get_index(it, bidx);
+
+      if (bidx[0] != bidx[1] || bidx[0] < photon+v_ppol.size()) 
+        continue;
+
+      libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
+      libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
+      const libtensor::dimensions<2> &tdims = blk.get_dims();
+      double *ptr = tc.req_dataptr();
+
+      auto nmax = v_pvib[bidx[0]-2-v_ppol.size()]->nmax;
+      auto omega = v_pvib[bidx[0]-2-v_ppol.size()]->omega;
+      auto c = get_integral(v_pvib[bidx[0]-2-v_ppol.size()]->integral_files[2]);
+      double fact{c};
+
+      if (v_orb_type[0] != v_orb_type[1]) { // ov block - only one element
+        #if 1 //coupling
+        if (v_pvib[bidx[0]-2-v_ppol.size()]->coupling) {
+          for (size_t i = 0; i < 1; i++) 
+             ptr[0] = fact;
+        }
+        #endif
+      } else {
+        switch (v_orb_type[0]) {
+          case (o): // oo block - only one diagonal element
+            for (size_t i = 0; i < 1; i++) 
+              ptr[gmb::get_offset(i,i,nmax)] = i*omega;          
+            break;
+          case (v): // vv block
+            for (int p = 1; p < nmax + 1; p++) {
+              auto q = p+1;
+              // index in block
+              auto ip = p-1; 
+              auto iq = q-1;
+              // diagonal elements 
+              ptr[gmb::get_offset(ip,ip,nmax)] = p*omega;        
+              // off-diagonal elements
+              #if 1 //coupling
+              if (v_pvib[bidx[0]-2-v_ppol.size()]->coupling) {
+                if (!(q > nmax)) {
+                  ptr[gmb::get_offset(ip,iq,nmax)] = fact*sqrt(q);
+                  ptr[gmb::get_offset(iq,ip,nmax)] = fact*sqrt(p+1);
+                }
+              }
+              #endif
+            }
+            break;
+          case (b):
+            for (int p = 0; p < nmax + 1; p++) {
+              auto q = p+1;
+              // diagonal 
+              ptr[p+p*nmax] = p*omega;        
+              // off-diagonal 
+              if (!(q > nmax)) {
+                ptr[gmb::get_offset(p,q,nmax)] = fact*sqrt(q);
+                ptr[gmb::get_offset(q,p,nmax)] = fact*sqrt(p+1);
+              }
+            }      
+          break;  
+        }
+      }
+      tc.ret_dataptr(ptr);
+      ctrl.ret_block(bidx);
+    }
+  }
+
 
  container<2,double> set_space(const std::vector<orb_type> &v_orb_type, const std::vector<libtensor::bispace<1>> &v_sp) 
   {
