@@ -15,6 +15,7 @@ namespace gmb {
     auto int_oooo = get_i(filename,v_ppol,v_pvib, o, o, o, o);
     auto int_oovv = get_i(filename,v_ppol,v_pvib, o, o, v, v);
     auto int_ovov = get_i(filename,v_ppol,v_pvib, o, v, o, v);
+    int_ovov.print();
     ham.set(i_oooo, int_oooo);
     ham.set(i_oovv, int_oovv);
     ham.set(i_ovov, int_ovov);
