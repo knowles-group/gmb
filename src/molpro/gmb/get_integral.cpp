@@ -61,6 +61,13 @@ double get_integral(const std::string &filename) {
         }
         #endif
       }
+      for (const auto &i_pvib : v_pvib) {
+        container<2> PI(integral.get_space()); // second moment of charges
+        get_one_vibration_part(integral, v_ppol, v_pvib, v_exist, v_orb_type);
+        std::cout << "i_pvib->integral_files[3] : " << i_pvib->integral_files[3] << "\n";
+        get_one_electron_part(PI, i_pvib->integral_files[3], v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
+        integral.axpy(0.5, PI);
+      }
     }
   
     return integral;
@@ -330,7 +337,7 @@ double get_integral(const std::string &filename) {
           if ((((i) >= v_psi[spin][0].first[symi] && (i) < v_psi[spin][0].second[symi]) 
             && ((j) >= v_psi[spin][1].first[symj] && (j) < v_psi[spin][1].second[symj]))) {
             ptr[gmb::get_offset(i+v_shift[spin][0][symi], j+v_shift[spin][1][symj], v_norb[spin][1])] 
-            = value;
+              = value;
           }
           if ((((i) >= v_psi[spin][1].first[symi] && (i) < v_psi[spin][1].second[symi])
             && ((j) >= v_psi[spin][0].first[symj] && (j) < v_psi[spin][0].second[symj]))) {
@@ -443,7 +450,7 @@ double get_integral(const std::string &filename) {
 
       auto nmax = v_pvib[bidx[0]-2-v_ppol.size()]->nmax;
       auto omega = v_pvib[bidx[0]-2-v_ppol.size()]->omega;
-      auto c = get_integral(v_pvib[bidx[0]-2-v_ppol.size()]->integral_files[2]);
+      auto c = get_integral(v_pvib[bidx[0]-2-v_ppol.size()]->integral_files[0]);
       double fact{c};
 
       if (v_orb_type[0] != v_orb_type[1]) { // ov block - only one element
@@ -1019,8 +1026,8 @@ double get_integral(const std::string &filename) {
   if (!v_ppol.empty() )
     get_electron_photon_part(integral, v_ppol, v_exist, v_norb, v_orb_type, v_psi, v_shift);
   if (!v_pvib.empty() ) {
-    get_electron_vibration_part(integral, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi, v_shift, 0);
-    get_electron_vibration_part(integral, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi, v_shift, 1);
+    get_electron_vibration_part(integral, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi, v_shift, 1); // A matrix
+    get_electron_vibration_part(integral, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi, v_shift, 2); // pi matrix
   }
   return integral;
 }

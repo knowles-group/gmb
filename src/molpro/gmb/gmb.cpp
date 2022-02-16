@@ -84,15 +84,18 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
       v_pvib[i] = std::make_unique<vibration>(v_option_vibration_nmax[i],
                                               v_option_vibration_omega[i]);
       v_pvib[i]->integral_files[0] = options.parameter(
-          "a",
-          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".a"));
+          "c",
+          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".c"));
       v_pvib[i]->integral_files[1] =
-          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".pi");
+          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".a");
       v_pvib[i]->integral_files[2] =
-          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".c");
-      std::cout << "My A matrix file is : " << v_pvib[i]->integral_files[0] << "\n";
-      std::cout << "My pi matrix file is : " << v_pvib[i]->integral_files[1] << "\n";
-      std::cout << "My c file is : " << v_pvib[i]->integral_files[2] << "\n";
+          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".pi");
+      v_pvib[i]->integral_files[3] =
+          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".PI");
+      std::cout << "My constant c file is : " << v_pvib[i]->integral_files[0] << "\n";
+      std::cout << "My A matrix file is : " << v_pvib[i]->integral_files[1] << "\n";
+      std::cout << "My pi matrix file is : " << v_pvib[i]->integral_files[2] << "\n";
+      std::cout << "My PI matrix file is : " << v_pvib[i]->integral_files[3] << "\n";
     }
   }
 
@@ -125,7 +128,6 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 
   if (!v_pvib.empty() ) {
     check_file(v_pvib[0]->integral_files[0], "a");
-    molpro::cout << " A matrix file = " << v_pvib[0]->integral_files[0] << "\n";
 
     molpro::cout << "\nVibrational parameters: \n";
     molpro::cout << "modes: " << ncav << "\n";

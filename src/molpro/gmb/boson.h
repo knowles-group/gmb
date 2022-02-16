@@ -37,7 +37,7 @@ struct vibration {
   vibration(sym_t nmax_, double omega_) 
   : nmax{nmax_}, omega{omega_}
   {
-    integral_files.resize(3);
+    integral_files.resize(4);
   }
 
 };

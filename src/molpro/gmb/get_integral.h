@@ -89,6 +89,13 @@ void read_dump(const std::string &filename,
                const std::vector<std::unique_ptr<polariton>> &v_ppol,
                const std::vector<std::vector<bool>>& v_exist,
                const std::vector<orb_type>& v_orb_type);
+
+  
+  void get_one_vibration_part(container<2,double> &integral, 
+               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::unique_ptr<vibration>> &v_pvib,
+               const std::vector<std::vector<bool>>& v_exist,
+               const std::vector<orb_type>& v_orb_type);             
   
   void get_two_electron_part(container<2,double> &integral, 
                const std::string &filename, 
@@ -117,14 +124,6 @@ void read_dump(const std::string &filename,
                const std::vector<std::vector<std::vector<int>>>& v_shift,
                const size_t &nfname);
 
-  void get_electron_vibration_pi_part(container<4,double> &integral, 
-               const std::vector<std::unique_ptr<polariton>> &v_ppol,
-               const std::vector<std::unique_ptr<vibration>> &v_pvib,
-               const std::vector<std::vector<bool>> &v_exist,
-               const std::vector<std::vector<size_t>>& v_norb,
-               const std::vector<orb_type> &v_orb_type, 
-               const std::vector<std::vector<std::pair<syms_t, syms_t>>>& v_psi,
-               const std::vector<std::vector<std::vector<int>>>& v_shift);
 
 
   container<2,double> set_space(const std::vector<orb_type> &v_orb_type, const std::vector<libtensor::bispace<1>> &v_sp);
