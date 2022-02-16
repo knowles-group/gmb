@@ -31,13 +31,14 @@ struct vibration {
   bool coupling{true};
   sym_t nmax{0};
   double omega{0.0};
-  std::string fname_coupling;
-  // std::string fname_sm;
+  std::vector<std::string> integral_files;
 
   vibration() = default;
   vibration(sym_t nmax_, double omega_) 
   : nmax{nmax_}, omega{omega_}
-  {}
+  {
+    integral_files.resize(3);
+  }
 
 };
 

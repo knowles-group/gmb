@@ -83,12 +83,12 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     for (size_t i = 0; i < nvib; i++) {
       v_pvib[i] = std::make_unique<vibration>(v_option_vibration_nmax[i],
                                               v_option_vibration_omega[i]);
-      v_pvib[i]->fname_coupling = options.parameter(
-          "fock",
-          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".fock"));
-      // v_pvib[i]->fname_sm =
-      //     std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".sm");
-      std::cout << "My fock file is : " << v_pvib[i]->fname_coupling << "\n";
+      v_pvib[i]->integral_files[0] = options.parameter(
+          "a",
+          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".a"));
+      v_pvib[i]->integral_files[1] =
+          std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".pi");
+      std::cout << "My fock file is : " << v_pvib[i]->integral_files[1] << "\n";
     }
   }
 
@@ -120,8 +120,8 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   }
 
   if (!v_pvib.empty() ) {
-    check_file(v_pvib[0]->fname_coupling, "fock");
-    molpro::cout << " dipole file = " << v_pvib[0]->fname_coupling << "\n";
+    check_file(v_pvib[0]->integral_files[0], "a");
+    molpro::cout << " A matrix file = " << v_pvib[0]->integral_files[0] << "\n";
 
     molpro::cout << "\nVibrational parameters: \n";
     molpro::cout << "modes: " << ncav << "\n";
@@ -135,8 +135,8 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   // initialise hamiltonian
   hamiltonian<> ham;
   init(filename, method, ham, v_ppol, v_pvib);
-#if 1 // GS
 
+#if 1 // GS
   const auto vnn = get_integral(filename);
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
   #if 1 // self-energy
