@@ -27,9 +27,10 @@ double get_integral(const std::string &filename) {
     std::vector<orb_type> v_orb_type = {o1,o2}; // vector containing orbital types
 
     std::vector<spin> v_spin = {alpha, beta}; // vector containing possible spins
-    if (!v_ppol.empty() ) 
-      for (size_t i = 0; i < v_ppol.size(); i++)
-        v_spin.push_back(photon);
+    for (size_t i = 0; i < v_ppol.size(); i++)
+      v_spin.push_back(photon);
+    for (size_t i = 0; i < v_pvib.size(); i++)
+      v_spin.push_back(vib);
     std::vector<std::vector<std::pair<syms_t, syms_t>>> v_psi(v_spin.size(), std::vector<std::pair<syms_t, syms_t>> (v_orb_type.size())); // vector containing bra and ket
     std::vector<std::vector<size_t>> v_norb(v_spin.size(), std::vector<size_t> (v_orb_type.size())); // vector containing number of orbitals in each bra/ket
     std::vector<std::vector<std::vector<int>>> v_shift(v_spin.size(), std::vector<std::vector<int>> (v_orb_type.size(), std::vector<int> (nsym,0))); // vector containing symmetry shift 
@@ -351,18 +352,23 @@ double get_integral(const std::string &filename) {
     libtensor::block_tensor_wr_ctrl<2, double> ctrl(integral);
     libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
     for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
+      
       libtensor::index<2> bidx;
       ol.get_index(it, bidx);
-      if (bidx[0] != bidx[1] || bidx[0] < photon) 
+
+      if (bidx[0] != bidx[1] || bidx[0] < photon || bidx[0] >= photon+v_ppol.size()) 
         continue;
+
       libtensor::dense_tensor_wr_i<2, double> &blk = ctrl.req_block(bidx);
       libtensor::dense_tensor_wr_ctrl<2, double> tc(blk);
       const libtensor::dimensions<2> &tdims = blk.get_dims();
       double *ptr = tc.req_dataptr();
+
       double fact{v_ppol[bidx[0]-2]->gamma*v_ppol[bidx[0]-2]->omega};
       auto nmax = v_ppol[bidx[0]-2]->nmax;
       auto omega = v_ppol[bidx[0]-2]->omega;
       auto rnuc = get_integral(v_ppol[bidx[0]-2]->fname_dm);
+
       if (v_orb_type[0] != v_orb_type[1]) { // ov block - only one element
         #if 1 //coupling
         if (v_ppol[bidx[0]-2]->coupling) {
@@ -594,19 +600,19 @@ double get_integral(const std::string &filename) {
       else if (!((bidx_cp[0] == bidx_cp[1]) && (bidx_cp[2] == bidx_cp[3]))) {
           ctrl.req_zero_block(bidx);
           continue;
-      } else if ((bidx_cp[0] == alpha) && (bidx_cp[2] >= photon)) { //aapp
+      } else if ((bidx_cp[0] == alpha) && (bidx_cp[2] >= photon) && (bidx_cp[2] < photon+v_ppol.size())) { //aapp
           spin1 = alpha;
           spin2 = bidx_cp[2];
           block2 = false;
-        } else if ((bidx_cp[0] >= photon)  && (bidx_cp[2] == alpha)) {// ppaa
+        } else if ((bidx_cp[0] >= photon) && (bidx_cp[0] < photon+v_ppol.size()) && (bidx_cp[2] == alpha)) {// ppaa
           spin2 = bidx_cp[0];
           spin1 = alpha;
           block1 = false;
-        } else if ((bidx_cp[0] == beta) && (bidx_cp[2] >= photon)) {// bbpp
+        } else if ((bidx_cp[0] == beta) && (bidx_cp[2] >= photon) && (bidx_cp[2] <photon+v_ppol.size())) {// bbpp
           spin1 = beta;
           spin2 = bidx_cp[2];
           block2 = false;
-        } else if ((bidx_cp[0] >= photon) && (bidx_cp[2] == beta)) {// ppbb
+        } else if ((bidx_cp[0] >= photon) && (bidx_cp[0] < photon+v_ppol.size()) && (bidx_cp[2] == beta)) {// ppbb
           spin2 = bidx_cp[0];
           spin1 = beta;
           block1 = false;
@@ -728,10 +734,6 @@ double get_integral(const std::string &filename) {
         if (!v_exist[1][i]) ++bidx_cp[i]; // if beta block doesn't exist
       }
 
-      size_t npol{0};
-      for (size_t i = 0; i < v_ppol.size(); i++) 
-        ++npol;
-      
       
       bool block1{true}, block2{true};
       size_t spin1{alpha}, spin2{alpha}; 
@@ -740,19 +742,19 @@ double get_integral(const std::string &filename) {
       else if (!((bidx_cp[0] == bidx_cp[1]) && (bidx_cp[2] == bidx_cp[3]))) {
           ctrl.req_zero_block(bidx);
           continue;
-      } else if ((bidx_cp[0] == alpha) && (bidx_cp[2] >= photon+npol)) { //aavv
+      } else if ((bidx_cp[0] == alpha) && (bidx_cp[2] >= photon+v_ppol.size())) { //aavv
           spin1 = alpha;
           spin2 = bidx_cp[2];
           block2 = false;
-        } else if ((bidx_cp[0] >= photon+npol)  && (bidx_cp[2] == alpha)) {// vvaa
+        } else if ((bidx_cp[0] >= photon+v_ppol.size())  && (bidx_cp[2] == alpha)) {// vvaa
           spin2 = bidx_cp[0];
           spin1 = alpha;
           block1 = false;
-        } else if ((bidx_cp[0] == beta) && (bidx_cp[2] >= photon+npol)) {// bbvv
+        } else if ((bidx_cp[0] == beta) && (bidx_cp[2] >= photon+v_ppol.size())) {// bbvv
           spin1 = beta;
           spin2 = bidx_cp[2];
           block2 = false;
-        } else if ((bidx_cp[0] >= photon+npol) && (bidx_cp[2] == beta)) {// vvbb
+        } else if ((bidx_cp[0] >= photon+v_ppol.size()) && (bidx_cp[2] == beta)) {// vvbb
           spin2 = bidx_cp[0];
           spin1 = beta;
           block1 = false;
@@ -763,7 +765,7 @@ double get_integral(const std::string &filename) {
 
 
       #if 1 // zero out coupling
-      if (v_pvib[spin2-2+npol]->coupling) {
+      if (v_pvib[spin2-2-v_ppol.size()]->coupling) {
         libtensor::dense_tensor_wr_i<4, double> &blk = ctrl.req_block(bidx);
         libtensor::dense_tensor_wr_ctrl<4, double> tc(blk);
         const libtensor::dimensions<4> &tdims = blk.get_dims();
@@ -779,10 +781,10 @@ double get_integral(const std::string &filename) {
         molpro::FCIdump::integralType type;
         dump.rewind();
         
-        double fact{sqrt(2*v_pvib[spin2-2+npol]->omega)};
+        double fact{sqrt(2*v_pvib[spin2-2-v_ppol.size()]->omega)};
         while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
           if (type != molpro::FCIdump::I0)
-          for (int r = 0; r < v_pvib[spin2-2+npol]->nmax + 1; r++) {
+          for (int r = 0; r < v_pvib[spin2-2-v_ppol.size()]->nmax + 1; r++) {
             s = r+1;
             symr = 0;
             syms = 0;
