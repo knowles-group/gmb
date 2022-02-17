@@ -42,7 +42,6 @@ namespace gmb {
     }
     if (spin < 2 + v_ppol.size())
       return "p"+std::to_string(spin-1);
-    std::cout << "spin: "<<spin<<"\n";
     return "v"+std::to_string(spin-1-v_ppol.size()); 
   }
 
