@@ -24,7 +24,7 @@ namespace gmb {
   void init(const std::string &filename, 
             const std::string &method, 
             hamiltonian<> &hamiltonian, 
-            const std::vector<std::unique_ptr<polariton>> &ppol, 
+            const std::vector<std::shared_ptr<polariton>> &ppol, 
             const std::vector<std::unique_ptr<vibration>> &pvib);
 
   /**
@@ -34,7 +34,8 @@ namespace gmb {
    * @param ss where to print
    * @param x O or V for Occupied/Virtual
    */
-  void readf(container<2> &f_xx, std::ostringstream &ss, const char &x); 
+  void readf(container<2> &f_xx, std::ostringstream &ss, const char &x, 
+            const std::vector<std::shared_ptr<polariton>> &v_ppol); 
 
 } // namespace gmb
 
