@@ -61,13 +61,15 @@ double get_integral(const std::string &filename) {
         }
         #endif
       }
-      for (const auto &i_pvib : v_pvib) {
-        get_one_vibration_part(integral, v_ppol, v_pvib, v_exist, v_orb_type);
-        container<2> PI(integral.get_space()); // PI integral
-        gmb::zero(PI);
-        get_one_electron_part(PI, i_pvib->integral_files[3], v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
-        integral.axpy(0.5, PI);
-      }
+    }
+    std::cout << "v_pvib.size(): " << v_pvib.size() << "\n";
+    for (const auto &i_pvib : v_pvib) {
+      std::cout << "Adding one vib part\n";
+      get_one_vibration_part(integral, v_ppol, v_pvib, v_exist, v_orb_type);
+      container<2> PI(integral.get_space()); // PI integral
+      gmb::zero(PI);
+      get_one_electron_part(PI, i_pvib->integral_files[3], v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
+      integral.axpy(0.5, PI);
     }
   
     return integral;
