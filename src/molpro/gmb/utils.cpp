@@ -35,12 +35,15 @@ namespace gmb {
     return offset;
   }
 
-  std::string tospin(size_t spin) {
+  std::string tospin(size_t spin, const std::vector<std::shared_ptr<polariton>> &v_ppol) {
     switch (spin) {
     case 0: return "a";
     case 1: return "b";
-    default: return &"p"[spin]-2;
     }
+    if (spin < 2 + v_ppol.size())
+      return "p"+std::to_string(spin-1);
+    std::cout << "spin: "<<spin<<"\n";
+    return "v"+std::to_string(spin-1-v_ppol.size()); 
   }
 
 

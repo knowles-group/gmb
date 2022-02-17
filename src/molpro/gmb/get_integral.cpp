@@ -20,7 +20,7 @@ double get_integral(const std::string &filename) {
 }
 
   container<2,double> get_integral(const std::string &fname_integrals, const std::string &fname_header, 
-    const std::vector<std::unique_ptr<polariton>> &v_ppol, 
+    const std::vector<std::shared_ptr<polariton>> &v_ppol, 
     const std::vector<std::unique_ptr<vibration>> &v_pvib, 
     const orb_type &o1, const orb_type &o2, bool add_ph) 
   {
@@ -40,7 +40,7 @@ double get_integral(const std::string &filename) {
   
     read_dump(fname_header, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi,  v_shift, v_sp, v_spin, uhf);
     auto integral = set_space(v_orb_type, v_sp);
-  
+    gmb::zero(integral);
     get_one_electron_part(integral, fname_integrals, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
     
     if (v_ppol.size() > 0 && add_ph) {
@@ -62,9 +62,9 @@ double get_integral(const std::string &filename) {
         #endif
       }
       for (const auto &i_pvib : v_pvib) {
-        container<2> PI(integral.get_space()); // second moment of charges
         get_one_vibration_part(integral, v_ppol, v_pvib, v_exist, v_orb_type);
-        std::cout << "i_pvib->integral_files[3] : " << i_pvib->integral_files[3] << "\n";
+        container<2> PI(integral.get_space()); // PI integral
+        gmb::zero(PI);
         get_one_electron_part(PI, i_pvib->integral_files[3], v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
         integral.axpy(0.5, PI);
       }
@@ -75,7 +75,7 @@ double get_integral(const std::string &filename) {
 
 
   container<4,double> get_i(const std::string &filename, 
-                            const std::vector<std::unique_ptr<polariton>> &v_ppol,
+                            const std::vector<std::shared_ptr<polariton>> &v_ppol,
                             const std::vector<std::unique_ptr<vibration>> &v_pvib,
                             const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4, const bool &add_ph) {
   
@@ -95,6 +95,7 @@ double get_integral(const std::string &filename) {
 
 #endif
   container<4,double> h2_o1o2o3o4(tmp_o1o2o3o4->get_space());
+  gmb::zero(h2_o1o2o3o4);
 #if 1
 
   // set symmetry
@@ -160,7 +161,7 @@ double get_integral(const std::string &filename) {
 }
 
   void read_dump(const std::string &filename, 
-               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::shared_ptr<polariton>> &v_ppol,
                const std::vector<std::unique_ptr<vibration>> &v_pvib,
                std::vector<std::vector<bool>>& v_exist,
                std::vector<std::vector<size_t>>& v_norb,
@@ -352,7 +353,7 @@ double get_integral(const std::string &filename) {
   }
 
   void get_one_photon_part(container<2,double> &integral, 
-               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::shared_ptr<polariton>> &v_ppol,
                const std::vector<std::vector<bool>>& v_exist,
                const std::vector<orb_type>& v_orb_type) 
   {
@@ -428,7 +429,7 @@ double get_integral(const std::string &filename) {
   }
 
   void get_one_vibration_part(container<2,double> &integral, 
-               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::shared_ptr<polariton>> &v_ppol,
                const std::vector<std::unique_ptr<vibration>> &v_pvib,
                const std::vector<std::vector<bool>>& v_exist,
                const std::vector<orb_type>& v_orb_type) 
@@ -659,7 +660,7 @@ double get_integral(const std::string &filename) {
   }
 
   void get_electron_photon_part(container<4,double> &integral, 
-               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::shared_ptr<polariton>> &v_ppol,
                const std::vector<std::vector<bool>> &v_exist,
                const std::vector<std::vector<size_t>>& v_norb,
                const std::vector<orb_type> &v_orb_type, 
@@ -704,7 +705,7 @@ double get_integral(const std::string &filename) {
           ctrl.req_zero_block(bidx);
           continue;
         }   
-      #if 1 // zero out coupling
+      #if 1 // coupling
       if (v_ppol[spin2-2]->coupling) {
         libtensor::dense_tensor_wr_i<4, double> &blk = ctrl.req_block(bidx);
         libtensor::dense_tensor_wr_ctrl<4, double> tc(blk);
@@ -797,7 +798,7 @@ double get_integral(const std::string &filename) {
   }
 
   void get_electron_vibration_part(container<4,double> &integral, 
-               const std::vector<std::unique_ptr<polariton>> &v_ppol,
+               const std::vector<std::shared_ptr<polariton>> &v_ppol,
                const std::vector<std::unique_ptr<vibration>> &v_pvib,
                const std::vector<std::vector<bool>> &v_exist,
                const std::vector<std::vector<size_t>>& v_norb,
@@ -867,7 +868,7 @@ double get_integral(const std::string &filename) {
         dump.rewind();
         
         double fact{sqrt(2*v_pvib[spin2-2-v_ppol.size()]->omega)};
-        if (nfname == 1) 
+        if (nfname == 2) 
           fact *= -1;
         while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
           if (type != molpro::FCIdump::I0)
@@ -880,7 +881,7 @@ double get_integral(const std::string &filename) {
             if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
               && ((v_psi[spin2][2].first[symr] <= r && r < v_psi[spin2][2].second[symr]) && (v_psi[spin2][3].first[syms] <= s && s < v_psi[spin2][3].second[syms]))) {
                 ptr[gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
-                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])]
                   += fact*sqrt(s)*value;
               }
             //2 (qp|rs)
@@ -946,7 +947,7 @@ double get_integral(const std::string &filename) {
 
 
   container<4,double> get_integral(const std::string &filename, 
-    const std::vector<std::unique_ptr<polariton>> &v_ppol,
+    const std::vector<std::shared_ptr<polariton>> &v_ppol,
     const std::vector<std::unique_ptr<vibration>> &v_pvib,
     const orb_type &o1, const orb_type &o2, const orb_type &o3, const orb_type &o4) {
                                  
@@ -1021,7 +1022,6 @@ double get_integral(const std::string &filename) {
     sym.insert(se_0213);
   }
   gmb::zero(integral);
-
   get_two_electron_part(integral, filename, v_exist, v_norb, v_orb_type, v_psi, v_shift, uhf);
   if (!v_ppol.empty() )
     get_electron_photon_part(integral, v_ppol, v_exist, v_norb, v_orb_type, v_psi, v_shift);

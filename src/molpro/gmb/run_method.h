@@ -25,6 +25,7 @@ void run_eom(const hamiltonian<> &ham,
              const std::unique_ptr<amplitudes<>> &ptampl, 
              const size_t &nroots, 
              const double& es_conv,
-             const double &ccsd_energy);
+             const double &ccsd_energy, 
+            const std::vector<std::shared_ptr<polariton>> &v_ppol);
 
 #endif // GMB_SRC_MOLPRO_GMB_RUN_METHOD_H

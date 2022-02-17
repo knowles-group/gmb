@@ -44,7 +44,7 @@ struct vibration {
 
 
 struct bosons {
-  std::vector<std::unique_ptr<polariton>> polaritons;
+  std::vector<std::shared_ptr<polariton>> polaritons;
   std::vector<std::unique_ptr<vibration>> vibrations;
 };
 

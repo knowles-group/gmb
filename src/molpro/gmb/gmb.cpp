@@ -44,7 +44,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   const auto ncav = options.parameter("polariton_modes", 0);
   const auto nvib = options.parameter("vibration_modes", 0);
 
-  std::vector<std::unique_ptr<polariton>> v_ppol(ncav);
+  std::vector<std::shared_ptr<polariton>> v_ppol(ncav);
   if (ncav > 0) {
     const auto self_energy = options.parameter("self_energy", true);
     const auto coupling = options.parameter("coupling", true);
@@ -54,11 +54,11 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     std::vector<double> v_option_polariton_gamma(ncav, 0.01);
     v_option_polariton_gamma =
         options.parameter("polariton_gamma", v_option_polariton_gamma);
-    std::vector<double> v_option_polariton_omega(ncav, 1.028);
+    std::vector<double> v_option_polariton_omega(ncav, 1.0);
     v_option_polariton_omega =
         options.parameter("polariton_omega", v_option_polariton_omega);
     for (size_t i = 0; i < ncav; i++) {
-      v_ppol[i] = std::make_unique<polariton>(v_option_polariton_nmax[i],
+      v_ppol[i] = std::make_shared<polariton>(v_option_polariton_nmax[i],
                                               v_option_polariton_gamma[i],
                                               v_option_polariton_omega[i],
                                               self_energy,
@@ -72,7 +72,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   }
 
   std::vector<std::unique_ptr<vibration>> v_pvib(nvib);
-  std::cout << "nvib = " << nvib << "\n";
+
   if (nvib > 0) {
     std::vector<int> v_option_vibration_nmax(nvib, 1);
     v_option_vibration_nmax =
@@ -92,10 +92,6 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
           std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".pi");
       v_pvib[i]->integral_files[3] =
           std::regex_replace(filename, std::regex{"\\.[_[:alnum:]]*$"}, ".PI");
-      std::cout << "My constant c file is : " << v_pvib[i]->integral_files[0] << "\n";
-      std::cout << "My A matrix file is : " << v_pvib[i]->integral_files[1] << "\n";
-      std::cout << "My pi matrix file is : " << v_pvib[i]->integral_files[2] << "\n";
-      std::cout << "My PI matrix file is : " << v_pvib[i]->integral_files[3] << "\n";
     }
   }
 
@@ -107,34 +103,46 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
   check_file(filename, "fcidump");
   molpro::cout << " fcidump = " << filename << "\n";
   molpro::cout << " method = " << method << "\n";
-  molpro::cout << " roots = " << nroots << "\n";
+  molpro::cout << " roots = " << nroots << "\n\n";
 
   if (!v_ppol.empty() ) {
+
+    molpro::cout << "\nPolariton parameters: \n";
+
     check_file(v_ppol[0]->fname_dm, "dipole");
     molpro::cout << " dipole file = " << v_ppol[0]->fname_dm << "\n";
     check_file(v_ppol[0]->fname_sm, "second moment of charges");
     molpro::cout << " second moment of charges file = " << v_ppol[0]->fname_sm
                  << "\n";
-
-    molpro::cout << "\nPolariton parameters: \n";
-    molpro::cout << "modes: " << ncav << "\n";
+    
+    molpro::cout << "nº modes: " << ncav << "\n";
     for (size_t i = 0; i < ncav; i++) {
-      molpro::cout << "\n mode " << i << "\n";
-      molpro::cout << " nmax = " << v_ppol[i]->nmax << "\n";
-      molpro::cout << " gamma = " << v_ppol[i]->gamma << "\n";
-      molpro::cout << " omega = " << v_ppol[i]->omega << "\n\n";
+      molpro::cout << "\n mode " << i+1 << "\n";
+      molpro::cout << "  nmax = " << v_ppol[i]->nmax << "\n";
+      molpro::cout << "  gamma = " << v_ppol[i]->gamma << "\n";
+      molpro::cout << "  omega = " << v_ppol[i]->omega << "\n\n";
     }
   }
 
   if (!v_pvib.empty() ) {
-    check_file(v_pvib[0]->integral_files[0], "a");
-
     molpro::cout << "\nVibrational parameters: \n";
-    molpro::cout << "modes: " << ncav << "\n";
-    for (size_t i = 0; i < ncav; i++) {
-      molpro::cout << "\n mode " << i << "\n";
-      molpro::cout << " nmax = " << v_pvib[i]->nmax << "\n";
-      molpro::cout << " omega = " << v_pvib[i]->omega << "\n\n";
+
+    check_file(v_pvib[0]->integral_files[0], "c");
+    check_file(v_pvib[0]->integral_files[1], "a");
+    check_file(v_pvib[0]->integral_files[2], "pi");
+    check_file(v_pvib[0]->integral_files[3], "PI");
+
+    molpro::cout << "\nIntegral files:\n"
+              << " constant c file is : " << v_pvib[0]->integral_files[0] << "\n"
+              << " A matrix file is : " << v_pvib[0]->integral_files[1] << "\n"
+              << " pi matrix file is : " << v_pvib[0]->integral_files[2] << "\n"
+              << " PI matrix file is : " << v_pvib[0]->integral_files[3] << "\n";
+
+    molpro::cout << "\nnº modes: " << nvib << "\n";
+    for (size_t i = 0; i < nvib; i++) {
+      molpro::cout << "\n mode " << i+1 << ":\n"
+                   << "  nmax = " << v_pvib[i]->nmax << "\n"
+                   << "  omega = " << v_pvib[i]->omega << "\n\n";
     }
   }
 
@@ -145,6 +153,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
 #if 1 // GS
   const auto vnn = get_integral(filename);
   auto hf_energy = vnn + energy_hf(ham.m2get(f_oo),ham.m4get(i_oooo));
+
   #if 1 // self-energy
   for (size_t i = 0; i < ncav; i++) {
     if (v_ppol[i]->self_energy) {
@@ -177,7 +186,8 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     if (method.find("eom") != std::string::npos) {
 
       std::unique_ptr<problem_eom> problem_es;
-      run_eom(ham, method, problem_es, ptampl, nroots, es_conv, ccsd_energy);
+      // problem_es = std::make_unique<problem_eom_ccsd>(ham, *ptampl, v_ppol);
+      run_eom(ham, method, problem_es, ptampl, nroots, es_conv, ccsd_energy, v_ppol);
 
       for (const auto& ev : problem_es->get_energy())
         for (int i=0; i<expected_results.size(); ++i)

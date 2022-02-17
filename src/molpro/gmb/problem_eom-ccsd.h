@@ -16,8 +16,8 @@ class problem_eom_ccsd : public problem_eom {
 private:
   mutable supercontainer<> m_int;       ///> intermediates
 public:
-  problem_eom_ccsd(const hamiltonian<> &ham, const amplitudes<> &ampl)
-  : problem_eom{ham, ampl} {
+  problem_eom_ccsd(const hamiltonian<> &ham, const amplitudes<> &ampl, const std::vector<std::shared_ptr<polariton>> &v_ppol)
+  : problem_eom{ham, ampl, v_ppol} {
     init();
   }
 
@@ -236,7 +236,7 @@ public:
               ss << "\n" <<std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
               ss << "O" << i;
               for (size_t in = 0; in < N; in++) {
-                ss << gmb::tospin(bidx[in]);
+                ss << gmb::tospin(bidx[in], m_vppol);
                 if (bidx[in] > beta)
                   ss << bidx[in]-beta;
                 if (in == 0)
@@ -270,8 +270,8 @@ public:
               size_t b = offset - a*v_nv[bidx[3]] - j*v_nv[bidx[2]]*v_nv[bidx[3]] - i*v_no[bidx[1]]*v_nv[bidx[2]]*v_nv[bidx[3]];
   
               ss << "\n" << std::setw(8) << std::setprecision(5) << std::fixed <<  ptr[offset] << "     ";
-              ss << "O" << 1+i << gmb::tospin(bidx[0]) << " -> V" << 1+a << gmb::tospin(bidx[2]);
-              ss << "    O" << 1+j << gmb::tospin(bidx[1]) << " -> V" << 1+b << gmb::tospin(bidx[3]);
+              ss << "O" << 1+i << gmb::tospin(bidx[0],m_vppol) << " -> V" << 1+a << gmb::tospin(bidx[2],m_vppol);
+              ss << "    O" << 1+j << gmb::tospin(bidx[1],m_vppol) << " -> V" << 1+b << gmb::tospin(bidx[3],m_vppol);
             }
           }
           tc.ret_const_dataptr(ptr);

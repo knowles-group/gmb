@@ -2,7 +2,7 @@
 #define GMB_SRC_MOLPRO_GMB_UTILS_H
 
 #include <libtensor/libtensor.h>
-
+#include "boson.h"
 // support libtensor functions 
 namespace gmb {
 
@@ -12,7 +12,7 @@ namespace gmb {
   size_t get_offset(size_t i, size_t j, size_t k, size_t l, size_t nj, size_t nk, size_t nl);
   size_t get_offset(size_t i, size_t j, size_t nj);
 
-  std::string tospin(size_t spin);
+  std::string tospin(size_t spin, const std::vector<std::shared_ptr<polariton>> &v_ppol);
     
 } // namespace gmb
 #endif // GMB_SRC_MOLPRO_GMB_UTILS_H

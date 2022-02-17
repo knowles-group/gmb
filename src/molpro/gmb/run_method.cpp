@@ -52,12 +52,13 @@ void run_eom(const hamiltonian<> &ham,
              const std::unique_ptr<amplitudes<>> &ptampl, 
              const size_t &nroots, 
              const double& es_conv,
-             const double &ccsd_energy) {
+             const double &ccsd_energy, 
+            const std::vector<std::shared_ptr<polariton>> &v_ppol) {
 
   molpro::cout << "\nRunning EOM-CCSD" << std::endl;
   
   // set EOM-CCSD amplitudes
-  problem = std::make_unique<problem_eom_ccsd>(ham, *ptampl);
+  problem = std::make_unique<problem_eom_ccsd>(ham, *ptampl, v_ppol);
   
   problem->set_e0(ccsd_energy);
 

@@ -12,13 +12,14 @@ protected:
   std::vector<value_t> m_energies; ///> energy
   mutable hamiltonian<> m_ham;   ///> Hamiltonian
   mutable amplitudes<> m_tampl;  ///> T amplitudes
+  std::vector<std::shared_ptr<polariton>> m_vppol;
 
 public:
   using Problem::container_t;
   using Problem::value_t;
 
-  problem_eom(const hamiltonian<> &ham, const amplitudes<> &tampl)
-  : m_ham{ham}, m_tampl{tampl} {
+  problem_eom(const hamiltonian<> &ham, const amplitudes<> &tampl, const std::vector<std::shared_ptr<polariton>> &v_ppol)
+  : m_ham{ham}, m_tampl{tampl}, m_vppol{v_ppol} {
   }
 
   virtual ~problem_eom() = default;
