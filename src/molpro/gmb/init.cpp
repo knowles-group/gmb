@@ -7,7 +7,7 @@ namespace gmb {
   void init(const std::string &filename, 
             const std::string &method, 
             hamiltonian<> &ham, 
-            const std::vector<std::unique_ptr<polariton>> &v_ppol, 
+            const std::vector<std::shared_ptr<polariton>> &v_ppol, 
             const std::vector<std::unique_ptr<vibration>> &v_pvib) {
 
 #if 1
@@ -38,8 +38,8 @@ namespace gmb {
     ss << "\nHartree-Fock Orbitals\n\n"
        << "  Orbital    Energy (Ha)\n\n";
 
-    readf(ham.m2get(f_oo), ss, 'O');
-    readf(ham.m2get(f_vv), ss, 'V');
+    readf(ham.m2get(f_oo), ss, 'O', v_ppol);
+    readf(ham.m2get(f_vv), ss, 'V', v_ppol);
     molpro::cout << ss.str();
 
 
@@ -63,7 +63,8 @@ namespace gmb {
   #endif
   }
 
-  void readf(container<2> &f_xx, std::ostringstream &ss, const char &x) {
+  void readf(container<2> &f_xx, std::ostringstream &ss, const char &x, 
+            const std::vector<std::shared_ptr<polariton>> &v_ppol) {
 
       // get dimensions 
       libtensor::block_tensor_rd_i<2, double> &bt(f_xx);
@@ -101,9 +102,9 @@ namespace gmb {
           const size_t i = 1+(offset/v_norb[bidx[1]]);
           const size_t j = 1+offset-(offset/v_norb[bidx[1]])*v_norb[bidx[1]];
           if (i == j) {
-            ss << std::setw(6)
-               << x << i << gmb::tospin(bidx[0])
-               << std::setprecision(3) << std::setw(12) <<  ptr[offset] << "\n";
+            ss << std::setw(6) 
+               << x << i << gmb::tospin(bidx[0], v_ppol)
+               << std::setprecision(4) << std::setw(12) << std::fixed <<  ptr[offset] << "\n";
           }
         }
       tc.ret_const_dataptr(ptr);
