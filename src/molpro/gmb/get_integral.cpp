@@ -122,7 +122,7 @@ double get_integral(const std::string &filename) {
   anti(h2_o1o2o3o4, *h2_o1o3o2o4, *h2_o1o4o2o3);
 
   #endif
-  #if 0 // add self-energy if needed
+  #if 1 // add self-energy if needed
   if (add_ph) {
     for (size_t i = 0; i < v_ppol.size(); i++) {
 
