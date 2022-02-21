@@ -237,8 +237,6 @@ public:
               ss << "O" << i;
               for (size_t in = 0; in < N; in++) {
                 ss << gmb::tospin(bidx[in], m_vppol);
-                if (bidx[in] > beta)
-                  ss << bidx[in]-beta;
                 if (in == 0)
                   ss << " -> V" << a;
               }
