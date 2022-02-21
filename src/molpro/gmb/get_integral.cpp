@@ -62,9 +62,7 @@ double get_integral(const std::string &filename) {
         #endif
       }
     }
-    std::cout << "v_pvib.size(): " << v_pvib.size() << "\n";
     for (const auto &i_pvib : v_pvib) {
-      std::cout << "Adding one vib part\n";
       get_one_vibration_part(integral, v_ppol, v_pvib, v_exist, v_orb_type);
       container<2> PI(integral.get_space()); // PI integral
       gmb::zero(PI);
@@ -122,8 +120,9 @@ double get_integral(const std::string &filename) {
   }
 
   anti(h2_o1o2o3o4, *h2_o1o3o2o4, *h2_o1o4o2o3);
+
   #endif
-  #if 1 // add self-energy if needed
+  #if 0 // add self-energy if needed
   if (add_ph) {
     for (size_t i = 0; i < v_ppol.size(); i++) {
 
@@ -436,6 +435,7 @@ double get_integral(const std::string &filename) {
                const std::vector<std::vector<bool>>& v_exist,
                const std::vector<orb_type>& v_orb_type) 
   {
+
     libtensor::block_tensor_wr_ctrl<2, double> ctrl(integral);
     libtensor::orbit_list<2, double> ol(ctrl.req_const_symmetry());
     for (libtensor::orbit_list<2, double>::iterator it = ol.begin(); it != ol.end(); it++) {
@@ -820,6 +820,8 @@ double get_integral(const std::string &filename) {
         bidx_cp[i] = bidx[i];
         if (!v_exist[0][i]) ++bidx_cp[i]; // if alpha block doesn't exist
         if (!v_exist[1][i]) ++bidx_cp[i]; // if beta block doesn't exist
+        if (!v_ppol.empty())
+          if (!v_exist[2][i]) ++bidx_cp[i]; // if pol block doesn't exist
       }
 
       
@@ -860,7 +862,7 @@ double get_integral(const std::string &filename) {
         double *ptr = tc.req_dataptr();
 
         // read coupling integrals - A matrix
-        std::string fname{v_pvib[0]->integral_files[nfname]};
+        std::string fname{v_pvib[spin2-2-v_ppol.size()]->integral_files[nfname]};
 
         molpro::FCIdump dump{fname}; 
         size_t p, q, r, s;
@@ -872,6 +874,12 @@ double get_integral(const std::string &filename) {
         double fact{sqrt(2*v_pvib[spin2-2-v_ppol.size()]->omega)};
         if (nfname == 2) 
           fact *= -1;
+
+        
+    for (size_t i = 0; i < tdims.get_size(); i++) {
+        ptr[i] = 0.0;
+    }
+        
         while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
           if (type != molpro::FCIdump::I0)
           for (int r = 0; r < v_pvib[spin2-2-v_ppol.size()]->nmax + 1; r++) {
@@ -1028,8 +1036,17 @@ double get_integral(const std::string &filename) {
   if (!v_ppol.empty() )
     get_electron_photon_part(integral, v_ppol, v_exist, v_norb, v_orb_type, v_psi, v_shift);
   if (!v_pvib.empty() ) {
-    get_electron_vibration_part(integral, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi, v_shift, 1); // A matrix
-    get_electron_vibration_part(integral, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi, v_shift, 2); // pi matrix
+    // get_electron_vibration_part(integral, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi, v_shift, 1); // A matrix
+    container<4> a_matrix(integral.get_space()); 
+    gmb::zero(a_matrix);
+    get_electron_vibration_part(a_matrix, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi, v_shift, 1); 
+    integral.axpy(1.0, a_matrix);
+
+    // get_electron_vibration_part(integral, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi, v_shift, 2); // pi matrix
+    container<4> pi_matrix(integral.get_space()); 
+    gmb::zero(pi_matrix);
+    get_electron_vibration_part(pi_matrix, v_ppol, v_pvib, v_exist, v_norb, v_orb_type, v_psi, v_shift, 2); 
+    integral.axpy(1.0, pi_matrix);
   }
   return integral;
 }
