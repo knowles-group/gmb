@@ -77,7 +77,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     std::vector<int> v_option_vibration_nmax(nvib, 1);
     v_option_vibration_nmax =
         options.parameter("vibration_nmax", v_option_vibration_nmax);
-    std::vector<double> v_option_vibration_omega(nvib, 1.0);
+    std::vector<double> v_option_vibration_omega(nvib, 0.01);
     v_option_vibration_omega =
         options.parameter("vibration_omega", v_option_vibration_omega);
     for (size_t i = 0; i < nvib; i++) {
