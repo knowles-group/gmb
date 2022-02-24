@@ -820,8 +820,6 @@ double get_integral(const std::string &filename) {
         bidx_cp[i] = bidx[i];
         if (!v_exist[0][i]) ++bidx_cp[i]; // if alpha block doesn't exist
         if (!v_exist[1][i]) ++bidx_cp[i]; // if beta block doesn't exist
-        if (!v_ppol.empty())
-          if (!v_exist[2][i]) ++bidx_cp[i]; // if pol block doesn't exist
       }
 
       
@@ -881,7 +879,6 @@ double get_integral(const std::string &filename) {
             s = r+1;
             symr = 0;
             syms = 0;
-
             // 1 (pq|rs)
             if (block1) { // ppee
             if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
