@@ -81,12 +81,12 @@ double get_integral(const std::string &filename) {
   
   std::unique_ptr<container<4>> tmp_o1o2o3o4, h2_o1o3o2o4, h2_o1o4o2o3;
   
+#if 1
   h2_o1o3o2o4 = std::make_unique<container<4>> (get_integral(filename, v_ppol, v_pvib, o1, o3, o2, o4)); 
   if (o3 == o4) 
     h2_o1o4o2o3 = std::make_unique<container<4>>(*h2_o1o3o2o4);
   else 
     h2_o1o4o2o3 = std::make_unique<container<4>> (get_integral(filename, v_ppol, v_pvib, o1, o4, o2, o3)); 
-#if 1
   
   if (o2 == o4 && o2 == o3) 
     tmp_o1o2o3o4 = std::make_unique<container<4>>(*h2_o1o4o2o3);
@@ -827,7 +827,7 @@ double get_integral(const std::string &filename) {
       
       bool block1{true}, block2{true};
       size_t spin1{alpha}, spin2{alpha}; 
-      if ((bidx_cp[0] <= photon+v_ppol.size() && bidx_cp[1] <= photon+v_ppol.size() && bidx_cp[2] <= photon+v_ppol.size() && bidx_cp[3] <= photon+v_ppol.size()))
+      if ((bidx_cp[0] < photon+v_ppol.size() && bidx_cp[1] < photon+v_ppol.size() && bidx_cp[2] < photon+v_ppol.size() && bidx_cp[3] < photon+v_ppol.size()))
         continue; 
       else if (!((bidx_cp[0] == bidx_cp[1]) && (bidx_cp[2] == bidx_cp[3]))) {
           ctrl.req_zero_block(bidx);
@@ -881,6 +881,7 @@ double get_integral(const std::string &filename) {
             s = r+1;
             symr = 0;
             syms = 0;
+
             // 1 (pq|rs)
             if (block1) { // ppee
             if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
