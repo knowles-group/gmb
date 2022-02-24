@@ -31,6 +31,7 @@ struct vibration {
   bool coupling{true};
   sym_t nmax{0};
   double omega{0.0};
+  double damping{0.0};
   std::vector<std::string> integral_files;
 
   vibration() = default;

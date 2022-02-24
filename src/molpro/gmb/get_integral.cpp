@@ -178,7 +178,7 @@ double get_integral(const std::string &filename) {
   molpro::FCIdump dump{filename};
   unsigned int nb = dump.parameter("NORB")[0];
   std::vector<unsigned int> nphoton(v_ppol.size(), 1); // occupied is always 1 (vacuum orbital)
-  std::vector<unsigned int> nvib(v_pvib.size(), 1); // occupied is always 1 (vacuum orbital)
+  std::vector<unsigned int> ivib(v_pvib.size(), 1); // occupied is always 1 (vacuum orbital)
 
 
   std::vector<int> orbsym = dump.parameter("ORBSYM");
@@ -222,9 +222,9 @@ double get_integral(const std::string &filename) {
   // vib space
   if (!v_pvib.empty() ) {
     for (size_t i = 0; i < v_pvib.size(); i++) {
-      syms_t fermi_vib = {nvib[i], 0, 0, 0, 0, 0, 0, 0};
-      syms_t full_vib = {nvib[i] + v_pvib[i]->nmax, 0, 0, 0, 0, 0, 0, 0};
-      no.push_back(nvib[i]);
+      syms_t fermi_vib = {ivib[i], 0, 0, 0, 0, 0, 0, 0};
+      syms_t full_vib = {ivib[i] + v_pvib[i]->nmax, 0, 0, 0, 0, 0, 0, 0};
+      no.push_back(ivib[i]);
       nv.push_back(v_pvib[i]->nmax);
       occ.emplace_back(std::pair<syms_t,syms_t>({empty, fermi_vib}));
       vir.emplace_back(std::pair<syms_t,syms_t>({fermi_vib, full_vib}));
@@ -851,16 +851,19 @@ double get_integral(const std::string &filename) {
           continue;
         }   
 
-
+      auto ivib = spin2-2-v_ppol.size();
+      auto omega = v_pvib[ivib]->omega;
+      auto damping = v_pvib[ivib]->damping;
       #if 1 // zero out coupling
-      if (v_pvib[spin2-2-v_ppol.size()]->coupling) {
+
+      if (v_pvib[ivib]->coupling) {
         libtensor::dense_tensor_wr_i<4, double> &blk = ctrl.req_block(bidx);
         libtensor::dense_tensor_wr_ctrl<4, double> tc(blk);
         const libtensor::dimensions<4> &tdims = blk.get_dims();
         double *ptr = tc.req_dataptr();
 
         // read coupling integrals - A matrix
-        std::string fname{v_pvib[spin2-2-v_ppol.size()]->integral_files[nfname]};
+        std::string fname{v_pvib[ivib]->integral_files[nfname]};
 
         molpro::FCIdump dump{fname}; 
         size_t p, q, r, s;
@@ -869,16 +872,27 @@ double get_integral(const std::string &filename) {
         molpro::FCIdump::integralType type;
         dump.rewind();
         
-        double fact{sqrt(2*v_pvib[spin2-2-v_ppol.size()]->omega)};
+        double fact{sqrt(2*omega)};
         if (nfname == 2) 
           fact *= -1;
         
         while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
           if (type != molpro::FCIdump::I0)
-          for (int r = 0; r < v_pvib[spin2-2-v_ppol.size()]->nmax + 1; r++) {
+          for (int r = 0; r < v_pvib[ivib]->nmax + 1; r++) {
             s = r+1;
             symr = 0;
             syms = 0;
+            if (s==0 && r==1)
+              fact = omega/(sqrt(2*s)*pow(omega+damping,1.5));
+            else if (s==1 && r==2)
+              fact = omega*(-damping+2*omega)/(2*sqrt(s)*pow(omega+damping,2.5));
+            else if (s==2 && r==3)
+              fact = sqrt(1.5)*omega*(pow(damping,2) + 2*damping*omega + pow(omega,2))/(2*sqrt(s)*pow(omega+damping,3.5));
+            else if (s==3 && r==4)
+              fact = omega*( -pow(damping,3) + 12*pow(damping,2)*omega -12*damping*pow(omega,2) + 8*pow(omega,3)) / (4*sqrt(2*s)*pow(omega+damping,4.5));
+            else if ( r > 4 && damping > 0)
+              molpro::cout << "damping not support for nmax = " << v_pvib[ivib]->nmax 
+                           << "\n";
             // 1 (pq|rs)
             if (block1) { // ppee
             if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
