@@ -882,17 +882,7 @@ double get_integral(const std::string &filename) {
             s = r+1;
             symr = 0;
             syms = 0;
-            if (s==0 && r==1)
-              fact = omega/(sqrt(2*s)*pow(omega+damping,1.5));
-            else if (s==1 && r==2)
-              fact = omega*(-damping+2*omega)/(2*sqrt(s)*pow(omega+damping,2.5));
-            else if (s==2 && r==3)
-              fact = sqrt(1.5)*omega*(pow(damping,2) + 2*damping*omega + pow(omega,2))/(2*sqrt(s)*pow(omega+damping,3.5));
-            else if (s==3 && r==4)
-              fact = omega*( -pow(damping,3) + 12*pow(damping,2)*omega -12*damping*pow(omega,2) + 8*pow(omega,3)) / (4*sqrt(2*s)*pow(omega+damping,4.5));
-            else if ( r > 4 && damping > 0)
-              molpro::cout << "damping not support for nmax = " << v_pvib[ivib]->nmax 
-                           << "\n";
+            
             // 1 (pq|rs)
             if (block1) { // ppee
             if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
