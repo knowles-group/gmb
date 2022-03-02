@@ -80,7 +80,7 @@ std::vector<double> molpro::gmb::gmb(const molpro::Options &options) {
     std::vector<double> v_option_vibration_omega(nvib, 0.01);
     v_option_vibration_omega =
         options.parameter("vibration_omega", v_option_vibration_omega);
-    std::vector<double> v_option_vibration_damping(nvib, 0.01);
+    std::vector<double> v_option_vibration_damping(nvib, 0.0);
     v_option_vibration_damping =
         options.parameter("vibration_damping", v_option_vibration_damping);
     for (size_t i = 0; i < nvib; i++) {

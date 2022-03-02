@@ -35,8 +35,8 @@ struct vibration {
   std::vector<std::string> integral_files;
 
   vibration() = default;
-  vibration(sym_t nmax_, double omega_) 
-  : nmax{nmax_}, omega{omega_}
+  vibration(sym_t nmax_, double omega_, double damping_) 
+  : nmax{nmax_}, omega{omega_}, damping{damping_}
   {
     integral_files.resize(4);
   }
