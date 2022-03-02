@@ -45,6 +45,13 @@ namespace gmb {
     return "v"+std::to_string(spin-1-v_ppol.size()); 
   }
 
+  size_t factorial(size_t n) {
+    if (n == 0) {
+      return 1;
+    } else {
+      return n*factorial(n-1);
+    }
+  }
 
 } // namespace gmb
 

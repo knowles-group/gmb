@@ -14,5 +14,6 @@ namespace gmb {
 
   std::string tospin(size_t spin, const std::vector<std::shared_ptr<polariton>> &v_ppol);
     
+  size_t factorial(size_t n);
 } // namespace gmb
 #endif // GMB_SRC_MOLPRO_GMB_UTILS_H
