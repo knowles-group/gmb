@@ -873,16 +873,65 @@ double get_integral(const std::string &filename) {
         dump.rewind();
         
         double fact{sqrt(2*omega)};
-        if (nfname == 2) 
-          fact *= -1;
         
+        double K = omega; // K = mw/hbar
+
         while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
-          if (type != molpro::FCIdump::I0)
-          for (int r = 0; r < v_pvib[ivib]->nmax + 1; r++) {
-            s = r+1;
+          if (type != molpro::FCIdump::I0) {
+          for (int r = 0; r < v_pvib[ivib]->nmax; r++) {
+
+            
+
+              for (int s = r+1; s < v_pvib[ivib]->nmax+1; s++) {
+                if ( (r+s) % 2 == 0)
+                  continue;
+                
+                  fact = 0;
+                if (nfname == 2) {
+                  if (s != r+1)
+                    continue;
+                  else
+                    fact *= -1;
+                } else {
+                  // std::cout << "damping = " << damping << "\n";
+                  if (damping > 0 ) {
+                    fact = 0;
+                // std::cout << "for r = " << r << " and s = " << s << "\n";
+                    for (size_t i = 0; i <= floor(r/2.0); i++) {
+                      for (size_t j = 0; j <= floor(s/2.0); j++) {
+                        if (s-2*j == r-2*i+1 ) {
+
+                        fact += 1 / sqrt( pow(2.0,r+s) * gmb::factorial(r) * gmb::factorial(s))
+                            * pow( K/(K+damping) , (2.0+r+s)/2.0-i-j )
+                            * pow( (K/(K+damping) -1 ), i+j)
+                            * gmb::factorial(r) / ( gmb::factorial(2*i)*gmb::factorial(r-2*i) )
+                            * gmb::factorial(s) / (gmb::factorial(2*j)*gmb::factorial(s-2*j))
+                            * gmb::factorial(2.0*i) / gmb::factorial(i)
+                            * gmb::factorial(2.0*j) / gmb::factorial(j)
+                            * sqrt( pow(2.0,(r-2*i+s-2*j)) * gmb::factorial(r-2.0*i)*gmb::factorial(s-2*j)) 
+                            * sqrt(1/ (2.0*omega))*(sqrt(s-2*j))
+                        ;
+                        } else  if (s-2*j == r-2*i-1) {
+                        fact += 1 / sqrt( pow(2.0,r+s) * gmb::factorial(r) * gmb::factorial(s))
+                            * pow( K/(K+damping) , (2.0+r+s)/2.0-i-j )
+                            * pow( (K/(K+damping) -1 ), i+j)
+                            * gmb::factorial(r) / ( gmb::factorial(2*i)*gmb::factorial(r-2*i) )
+                            * gmb::factorial(s) / (gmb::factorial(2*j)*gmb::factorial(s-2*j))
+                            * gmb::factorial(2.0*i) / gmb::factorial(i)
+                            * gmb::factorial(2.0*j) / gmb::factorial(j)
+                            * sqrt( pow(2.0,(r-2*i+s-2*j)) * gmb::factorial(r-2.0*i)*gmb::factorial(s-2*j)) 
+                            * sqrt(1/ (2.0*omega))*(sqrt(r-2*i))
+                        ;
+                        }
+                      }
+                    }
+                // std::cout << "fact = " << fact << "\n";
+                }
+            }
+
             symr = 0;
             syms = 0;
-            
+
             // 1 (pq|rs)
             if (block1) { // ppee
             if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
@@ -944,6 +993,8 @@ double get_integral(const std::string &filename) {
               }
             }
           }
+        }
+        }
         }
       tc.ret_dataptr(ptr);
       ctrl.ret_block(bidx);
