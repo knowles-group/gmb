@@ -187,6 +187,11 @@ public:
     }
   }
 
+  /**
+   * @brief Print character of excitation
+   * 
+   * @param v_rampl vector containing r amplitudes
+   */
   void character(std::vector<container_t> &v_rampl) const override {
 
 
