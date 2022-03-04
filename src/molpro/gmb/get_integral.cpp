@@ -872,7 +872,7 @@ double get_integral(const std::string &filename) {
         molpro::FCIdump::integralType type;
         dump.rewind();
         
-        double fact{sqrt(2*omega)};
+        double fact{1/sqrt(2*omega)};
         
         double K = omega; // K = mw/hbar
 
@@ -882,7 +882,6 @@ double get_integral(const std::string &filename) {
               for (int s = r+1; s < v_pvib[ivib]->nmax+1; s++) {
                 if ( (r+s) % 2 == 0)
                   continue;
-                  fact = 0;
                 if (nfname == 2) {
                   if (s != r+1)
                     continue;
