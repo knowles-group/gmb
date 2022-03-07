@@ -926,11 +926,11 @@ double get_integral(const std::string &filename) {
             symr = 0;
             syms = 0;
 
-            std::cout << "r = " << r << ", s = " << s << "\n";
-            std::cout << "fact = " << fact << "\n";
-            std::cout << "p = " << p << ", q = " << q << "\n";
-            std::cout << "value = " << value << "\n";
-            std::cout << "fact*value = " << fact*value << "\n";
+            // std::cout << "r = " << r << ", s = " << s << "\n";
+            // std::cout << "fact = " << fact << "\n";
+            // std::cout << "p = " << p << ", q = " << q << "\n";
+            // std::cout << "value = " << value << "\n";
+            // std::cout << "fact*value = " << fact*value << "\n";
             // 1 (pq|rs)
             if (block1) { // ppee
             if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
