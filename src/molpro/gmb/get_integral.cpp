@@ -454,7 +454,8 @@ double get_integral(const std::string &filename) {
       auto nmax = v_pvib[bidx[0]-2-v_ppol.size()]->nmax;
       auto omega = v_pvib[bidx[0]-2-v_ppol.size()]->omega;
       auto c = get_integral(v_pvib[bidx[0]-2-v_ppol.size()]->integral_files[0]);
-      double fact{c};
+      
+      double fact{c/sqrt(2*omega)};
 
       if (v_orb_type[0] != v_orb_type[1]) { // ov block - only one element
         #if 1 //coupling
@@ -862,7 +863,7 @@ double get_integral(const std::string &filename) {
         const libtensor::dimensions<4> &tdims = blk.get_dims();
         double *ptr = tc.req_dataptr();
 
-        // read coupling integrals - A matrix
+        // read coupling integrals - A & pi matrices 
         std::string fname{v_pvib[ivib]->integral_files[nfname]};
 
         molpro::FCIdump dump{fname}; 
@@ -872,9 +873,9 @@ double get_integral(const std::string &filename) {
         molpro::FCIdump::integralType type;
         dump.rewind();
         
-        double fact{1/sqrt(2*omega)};
         
         double K = omega; // K = mw/hbar
+        double fact{0.0};
 
         while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
           if (type != molpro::FCIdump::I0) {
@@ -886,7 +887,7 @@ double get_integral(const std::string &filename) {
                   if (s != r+1)
                     continue;
                   else
-                    fact *= -sqrt(s);
+                    fact = -1/sqrt(2*K)*sqrt(s);
                 } else {
                   if (damping > 0 ) {
                     fact = 0;
@@ -918,13 +919,18 @@ double get_integral(const std::string &filename) {
                       }
                     }
                 } else {
-                  fact *= sqrt(s);
+                  fact = 1/sqrt(2*K)*sqrt(s);
                 }
             }
 
             symr = 0;
             syms = 0;
 
+            std::cout << "r = " << r << ", s = " << s << "\n";
+            std::cout << "fact = " << fact << "\n";
+            std::cout << "p = " << p << ", q = " << q << "\n";
+            std::cout << "value = " << value << "\n";
+            std::cout << "fact*value = " << fact*value << "\n";
             // 1 (pq|rs)
             if (block1) { // ppee
             if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
@@ -934,26 +940,32 @@ double get_integral(const std::string &filename) {
                   += fact*value;
               }
             //2 (qp|rs)
-            if (((v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]) && (v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]))
-              && ((v_psi[spin2][2].first[symr] <= r && r < v_psi[spin2][2].second[symr]) && (v_psi[spin2][3].first[syms] <= s && s < v_psi[spin2][3].second[syms]))) {
-                ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
-                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
-                  += fact*value;
-              }
+            if (p != q) {
+              if (((v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]) && (v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]))
+                && ((v_psi[spin2][2].first[symr] <= r && r < v_psi[spin2][2].second[symr]) && (v_psi[spin2][3].first[syms] <= s && s < v_psi[spin2][3].second[syms]))) {
+                  ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], r+v_shift[spin2][2][symr], s+v_shift[spin2][3][syms],
+                                      v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                    += fact*value;
+                }
+            }
             // 3 (pq|sr)
-            if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
-              && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
-                ptr[gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
-                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
-                  += fact*value;
-              }
+            if (r != s) {
+              if (((v_psi[spin1][0].first[symp] <= p && p < v_psi[spin1][0].second[symp]) && (v_psi[spin1][1].first[symq] <= q && q < v_psi[spin1][1].second[symq]))
+                && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
+                  ptr[gmb::get_offset(p+v_shift[spin1][0][symp], q+v_shift[spin1][1][symq], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
+                                      v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                    += fact*value;
+                }
+            }
             // 4 (qp|sr)  
-            if (((v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]) && (v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]))
-              && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
-                ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
-                                    v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
-                  += fact*value;
-              }
+            if (p!=q && r!=s) {
+              if (((v_psi[spin1][1].first[symp] <= p && p < v_psi[spin1][1].second[symp]) && (v_psi[spin1][0].first[symq] <= q && q < v_psi[spin1][0].second[symq]))
+                && ((v_psi[spin2][3].first[symr] <= r && r < v_psi[spin2][3].second[symr]) && (v_psi[spin2][2].first[syms] <= s && s < v_psi[spin2][2].second[syms]))) {
+                  ptr[gmb::get_offset(q+v_shift[spin1][0][symq], p+v_shift[spin1][1][symp], s+v_shift[spin2][2][syms], r+v_shift[spin2][3][symr],
+                                      v_norb[spin1][1], v_norb[spin2][2], v_norb[spin2][3])] 
+                    += fact*value;
+                }
+            }
             }
             if (block2) {
             // 5 (rs|pq)
@@ -964,26 +976,32 @@ double get_integral(const std::string &filename) {
                   += fact*value;
               }
             // 6 (sr|pq)
-            if (((v_psi[spin1][2].first[symp] <= p && p < v_psi[spin1][2].second[symp]) && (v_psi[spin1][3].first[symq] <= q && q < v_psi[spin1][3].second[symq]))
-              && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
-                ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
-                                    v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
-                  += fact*value;
-              }
+            if (s != r) {
+              if (((v_psi[spin1][2].first[symp] <= p && p < v_psi[spin1][2].second[symp]) && (v_psi[spin1][3].first[symq] <= q && q < v_psi[spin1][3].second[symq]))
+                && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
+                  ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], p+v_shift[spin1][2][symp], q+v_shift[spin1][3][symq],
+                                      v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                    += fact*value;
+                }
+            }
             // 7 (rs|qp)
-            if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
-              && ((v_psi[spin2][0].first[symr] <= r && r < v_psi[spin2][0].second[symr]) && (v_psi[spin2][1].first[syms] <= s && s < v_psi[spin2][1].second[syms]))) {
-                ptr[gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
-                                    v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
-                  += fact*value;
-              }
+            if (p != q) {
+              if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
+                && ((v_psi[spin2][0].first[symr] <= r && r < v_psi[spin2][0].second[symr]) && (v_psi[spin2][1].first[syms] <= s && s < v_psi[spin2][1].second[syms]))) {
+                  ptr[gmb::get_offset(r+v_shift[spin2][0][symr], s+v_shift[spin2][1][syms], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
+                                      v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                    += fact*value;
+                }
+            }
             // 8 (sr|qp)
-            if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
-              && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
-                ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
-                                    v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
-                  += fact*value;
-              }
+            if (p!=q && r!=s) {
+              if (((v_psi[spin1][3].first[symp] <= p && p < v_psi[spin1][3].second[symp]) && (v_psi[spin1][2].first[symq] <= q && q < v_psi[spin1][2].second[symq]))
+                && ((v_psi[spin2][1].first[symr] <= r && r < v_psi[spin2][1].second[symr]) && (v_psi[spin2][0].first[syms] <= s && s < v_psi[spin2][0].second[syms]))) {
+                  ptr[gmb::get_offset(s+v_shift[spin2][0][syms], r+v_shift[spin2][1][symr], q+v_shift[spin1][2][symq], p+v_shift[spin1][3][symp],
+                                      v_norb[spin2][1], v_norb[spin1][2], v_norb[spin1][3])] 
+                    += fact*value;
+                }
+            }
             }
           }
         }
