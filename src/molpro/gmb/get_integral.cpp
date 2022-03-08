@@ -455,7 +455,8 @@ double get_integral(const std::string &filename) {
       auto omega = v_pvib[bidx[0]-2-v_ppol.size()]->omega;
       auto c = get_integral(v_pvib[bidx[0]-2-v_ppol.size()]->integral_files[0]);
       
-      double fact{c/sqrt(2*omega)};
+      double K{omega}; // K = mw/hbar
+      double fact{c/sqrt(2*K)};
 
       if (v_orb_type[0] != v_orb_type[1]) { // ov block - only one element
         #if 1 //coupling
@@ -887,7 +888,7 @@ double get_integral(const std::string &filename) {
                   if (s != r+1)
                     continue;
                   else
-                    fact = -1/sqrt(2*K)*sqrt(s);
+                    fact = -1/sqrt(2.0*K)*sqrt(s);
                 } else {
                   if (damping > 0 ) {
                     fact = 0;
@@ -919,7 +920,7 @@ double get_integral(const std::string &filename) {
                       }
                     }
                 } else {
-                  fact = 1/sqrt(2*K)*sqrt(s);
+                  fact = 1/sqrt(2.0*K)*sqrt(s);
                 }
             }
 
