@@ -875,7 +875,7 @@ double get_integral(const std::string &filename) {
         dump.rewind();
         
         
-        double K = omega; // K = mw/hbar
+        double K{omega}; // K = mw/hbar
         double fact{0.0};
 
         while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
@@ -888,7 +888,7 @@ double get_integral(const std::string &filename) {
                   if (s != r+1)
                     continue;
                   else
-                    fact = -1/sqrt(2.0*K)*sqrt(s);
+                    fact = -1.0/sqrt(2.0*K)*sqrt(s);
                 } else {
                   if (damping > 0 ) {
                     fact = 0;
@@ -903,7 +903,7 @@ double get_integral(const std::string &filename) {
                             * gmb::factorial(2.0*i) / gmb::factorial(i)
                             * gmb::factorial(2.0*j) / gmb::factorial(j)
                             * sqrt( pow(2.0,(r-2*i+s-2*j)) * gmb::factorial(r-2.0*i)*gmb::factorial(s-2*j)) 
-                            * sqrt(1/ (2.0*omega))*(sqrt(s-2*j))
+                            * sqrt(1.0/ (2.0*omega))*(sqrt(s-2*j))
                         ;
                         } else  if (s-2*j == r-2*i-1) {
                         fact += 1 / sqrt( pow(2.0,r+s) * gmb::factorial(r) * gmb::factorial(s))
@@ -914,13 +914,13 @@ double get_integral(const std::string &filename) {
                             * gmb::factorial(2.0*i) / gmb::factorial(i)
                             * gmb::factorial(2.0*j) / gmb::factorial(j)
                             * sqrt( pow(2.0,(r-2*i+s-2*j)) * gmb::factorial(r-2.0*i)*gmb::factorial(s-2*j)) 
-                            * sqrt(1/ (2.0*omega))*(sqrt(r-2*i))
+                            * sqrt(1.0/ (2.0*omega))*(sqrt(r-2*i))
                         ;
                         }
                       }
                     }
                 } else {
-                  fact = 1/sqrt(2.0*K)*sqrt(s);
+                  fact = 1.0/sqrt(2.0*K)*sqrt(s);
                 }
             }
 
