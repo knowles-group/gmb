@@ -455,7 +455,9 @@ double get_integral(const std::string &filename) {
       auto omega = v_pvib[bidx[0]-2-v_ppol.size()]->omega;
       auto c = get_integral(v_pvib[bidx[0]-2-v_ppol.size()]->integral_files[0]);
       
-      double K{omega}; // K = mw/hbar
+
+      double mu{2.0/3.0};
+      double K{mu*omega}; // K = mw/hbar
       double fact{c/sqrt(2*K)};
 
       if (v_orb_type[0] != v_orb_type[1]) { // ov block - only one element
@@ -874,8 +876,8 @@ double get_integral(const std::string &filename) {
         molpro::FCIdump::integralType type;
         dump.rewind();
         
-        
-        double K{omega}; // K = mw/hbar
+        double mu{2.0/3.0};
+        double K{mu*omega}; // K = mw/hbar
         double fact{0.0};
 
         while ((type = dump.nextIntegral(symp, p, symq, q, symr, r, syms, s, value)) != molpro::FCIdump::endOfFile) {
@@ -890,20 +892,20 @@ double get_integral(const std::string &filename) {
                   else
                     fact = -1.0/sqrt(2.0*K)*sqrt(s);
                 } else {
-                  if (damping > 0 ) {
+                  if (damping > 0.0 ) {
                     fact = 0;
                     for (size_t i = 0; i <= floor(r/2.0); i++) {
                       for (size_t j = 0; j <= floor(s/2.0); j++) {
                         if (s-2*j == r-2*i+1 ) {
                         fact += 1 / sqrt( pow(2.0,r+s) * gmb::factorial(r) * gmb::factorial(s))
                             * pow( K/(K+damping) , (2.0+r+s)/2.0-i-j )
-                            * pow( (K/(K+damping) -1 ), i+j)
+                            * pow( (K/(K+damping) -1.0 ), i+j)
                             * gmb::factorial(r) / ( gmb::factorial(2*i)*gmb::factorial(r-2*i) )
                             * gmb::factorial(s) / (gmb::factorial(2*j)*gmb::factorial(s-2*j))
                             * gmb::factorial(2.0*i) / gmb::factorial(i)
                             * gmb::factorial(2.0*j) / gmb::factorial(j)
                             * sqrt( pow(2.0,(r-2*i+s-2*j)) * gmb::factorial(r-2.0*i)*gmb::factorial(s-2*j)) 
-                            * sqrt(1.0/ (2.0*omega))*(sqrt(s-2*j))
+                            * sqrt(1.0/ (2.0*K))*(sqrt(s-2*j))
                         ;
                         } else  if (s-2*j == r-2*i-1) {
                         fact += 1 / sqrt( pow(2.0,r+s) * gmb::factorial(r) * gmb::factorial(s))
@@ -914,7 +916,7 @@ double get_integral(const std::string &filename) {
                             * gmb::factorial(2.0*i) / gmb::factorial(i)
                             * gmb::factorial(2.0*j) / gmb::factorial(j)
                             * sqrt( pow(2.0,(r-2*i+s-2*j)) * gmb::factorial(r-2.0*i)*gmb::factorial(s-2*j)) 
-                            * sqrt(1.0/ (2.0*omega))*(sqrt(r-2*i))
+                            * sqrt(1.0/ (2.0*K))*(sqrt(r-2*i))
                         ;
                         }
                       }
