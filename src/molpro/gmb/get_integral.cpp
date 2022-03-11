@@ -6,6 +6,9 @@
 #include <molpro/iostream.h>
 #include <numeric>
 
+// const double da2au = 1; 
+constexpr double da2au = 1.66053906660e-27/9.1093837015e-31; 
+
 double get_integral(const std::string &filename) {
   molpro::FCIdump dump(filename);
   int i, j, k, l;
@@ -456,7 +459,7 @@ double get_integral(const std::string &filename) {
       auto c = get_integral(v_pvib[bidx[0]-2-v_ppol.size()]->integral_files[0]);
       
 
-      double mu{2.0/3.0};
+      double mu{2.0/3.0*da2au};
       double K{mu*omega}; // K = mw/hbar
       double fact{c/sqrt(2*K)};
 
@@ -876,7 +879,8 @@ double get_integral(const std::string &filename) {
         molpro::FCIdump::integralType type;
         dump.rewind();
         
-        double mu{2.0/3.0};
+        double mu{2.0/3.0*da2au};
+        // std::cout << "mu = " << mu << ",  da2au = " << da2au << "\n";
         double K{mu*omega}; // K = mw/hbar
         double fact{0.0};
 
