@@ -39,7 +39,7 @@ void run_gs(hamiltonian<> &ham,
 
   // solver options
   solver->set_verbosity(molpro::linalg::itsolv::Verbosity::Iteration);
-  // solver->set_convergence_threshold(1.0e-14);
+  solver->set_convergence_threshold(1.0e-9);
 
   solver->solve(*ptampl, residual, *problem);
   solver->solution(*ptampl, residual);

@@ -7,10 +7,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(dependency_manager)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" PARENT_SCOPE)
 
-DependencyManager_Declare(FCIdump https://gitlab.com/molpro/fcidump.git)
-DependencyManager_Declare(Profiler https://gitlab.com/molpro/profiler.git)
-DependencyManager_Declare(utilities https://gitlab+deploy-token-181030:whWoM4qkenzjGjWsFTxj@gitlab.com/molpro/utilities.git)
-DependencyManager_Declare(LinearAlgebra https://gitlab.com/molpro/LinearAlgebra.git)
+DependencyManager_Declare(FCIdump https://github.com/molpro/fcidump.git)
+DependencyManager_Declare(Profiler https://github.com/molpro/profiler.git)
+DependencyManager_Declare(utilities https://github.com/molpro/utilities.git)
+DependencyManager_Declare(iterative-solver https://github.com/molpro/iterative-solver.git)
 
 if (NOT PPIDD AND (MPI AND LINEARALGEBRA_ARRAY_GA))
     set(GA_RUNTIME "MPI_RMA" CACHE STRING "overwriting default for GA runtime protocol")
